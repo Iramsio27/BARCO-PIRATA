@@ -1,0 +1,102 @@
+import type { PackageId, PaymentMethod, ReservationStatus } from '@constants/index'
+
+// Re-exports para que los consumidores solo importen desde @app-types/index
+export type { PackageId, PaymentMethod, ReservationStatus }
+
+// ─── Entidades de dominio ─────────────────────────────────────────────────
+
+export interface Reservation {
+  id: string
+  contactName: string
+  contactPhone: string
+  date: string           // ISO date string "YYYY-MM-DD"
+  time: string           // "HH:mm"
+  numberOfPeople: number
+  packageId: PackageId
+  serviceType: 'individual' | 'grupal'
+  subtotal: number
+  discount: number
+  total: number
+  status: ReservationStatus
+  paymentMethod: PaymentMethod | null
+  paymentId: string | null
+  notes: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Payment {
+  id: string
+  reservationId: string
+  method: PaymentMethod
+  amount: number
+  status: 'pendiente' | 'completado' | 'fallido' | 'reembolsado'
+  stripePaymentIntentId: string | null
+  receiptUrl: string | null
+  processedAt: string | null
+  createdAt: string
+}
+
+export interface User {
+  id: string
+  email: string
+  role: 'admin' | 'vendedor'
+  fullName: string
+  createdAt: string
+}
+
+// ─── DTOs / Forms ─────────────────────────────────────────────────────────
+
+export interface CreateReservationDto {
+  contactName: string
+  contactPhone: string
+  date: string
+  time: string
+  numberOfPeople: number
+  packageId: PackageId
+  serviceType: 'individual' | 'grupal'
+  notes?: string
+}
+
+export interface ProcessPaymentDto {
+  reservationId: string
+  method: PaymentMethod
+  /** Solo requerido cuando method === 'tarjeta' */
+  stripePaymentMethodId?: string
+}
+
+// ─── Respuestas API ───────────────────────────────────────────────────────
+
+export interface ApiResponse<T> {
+  data: T
+  message?: string
+}
+
+export interface PaginatedResponse<T> {
+  data: T[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+// ─── Reportes ─────────────────────────────────────────────────────────────
+
+export interface DailyReport {
+  date: string
+  totalReservations: number
+  totalPeople: number
+  totalRevenue: number
+  byPackage: Record<PackageId, { count: number; revenue: number }>
+  byPaymentMethod: Record<string, { count: number; revenue: number }>
+  reservations: Reservation[]
+}
+
+// ─── UI helpers ──────────────────────────────────────────────────────────
+
+export type Status = 'idle' | 'loading' | 'success' | 'error'
+
+export interface SelectOption<T = string> {
+  value: T
+  label: string
+  disabled?: boolean
+}

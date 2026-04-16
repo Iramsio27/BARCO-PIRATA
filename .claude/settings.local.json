@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/miram/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/baddf19e-5a9e-42cb-8a9c-1f5089eb1603/8babf94f-3cda-4a96-aea1-b4ca092f5132/skills/docx/**)",
+      "Bash(python scripts/office/unpack.py \"C:\\\\Users\\\\miram\\\\Downloads\\\\Caso práctico C3-ABD.docx\" unpacked_caso/)",
+      "Bash(pip install:*)",
+      "Bash(npm remove:*)",
+      "Bash(npm install:*)",
+      "Bash(npm view:*)",
+      "Bash(npx tsc:*)",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(npm run:*)",
+      "mcp__43eb085c-6315-4b0c-9bc1-0a50e27bb86d__list_organizations",
+      "mcp__43eb085c-6315-4b0c-9bc1-0a50e27bb86d__list_projects",
+      "mcp__43eb085c-6315-4b0c-9bc1-0a50e27bb86d__confirm_cost",
+      "mcp__43eb085c-6315-4b0c-9bc1-0a50e27bb86d__create_project",
+      "mcp__43eb085c-6315-4b0c-9bc1-0a50e27bb86d__apply_migration",
+      "mcp__43eb085c-6315-4b0c-9bc1-0a50e27bb86d__get_project_url",
+      "mcp__43eb085c-6315-4b0c-9bc1-0a50e27bb86d__get_publishable_keys",
+      "mcp__43eb085c-6315-4b0c-9bc1-0a50e27bb86d__list_tables",
+      "mcp__43eb085c-6315-4b0c-9bc1-0a50e27bb86d__execute_sql",
+      "mcp__43eb085c-6315-4b0c-9bc1-0a50e27bb86d__get_advisors",
+      "mcp__43eb085c-6315-4b0c-9bc1-0a50e27bb86d__deploy_edge_function",
+      "Bash(curl -s -X POST -H 'Content-Type: application/json' -H 'apikey: sb_publishable_jNidabP2eb6wH4-siaxNDw_5bn6Bivl' -d '{\"reservationId\":\"test-invalid\"}' https://foaimrzqvsgiffmvyebr.supabase.co/functions/v1/create-payment-intent)",
+      "mcp__43eb085c-6315-4b0c-9bc1-0a50e27bb86d__list_edge_functions",
+      "mcp__43eb085c-6315-4b0c-9bc1-0a50e27bb86d__list_migrations"
+    ]
+  }
+}
