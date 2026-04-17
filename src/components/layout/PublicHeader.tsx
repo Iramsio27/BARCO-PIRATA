@@ -1,15 +1,23 @@
 import { Link, NavLink } from 'react-router-dom'
-import { Anchor, Menu, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { format } from 'date-fns'
 import { COMPANY } from '@constants/index'
-
-const navLinks = [
-  { to: '/',        label: 'Inicio' },
-  { to: '/reservar', label: 'Reservar' },
-]
+import { LanguageSwitcher } from '@components/ui/LanguageSwitcher'
 
 export function PublicHeader() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const { t } = useTranslation()
+
+  // "Reservar Ahora" pre-rellena la fecha de hoy en el formulario.
+  const todayIso = format(new Date(), 'yyyy-MM-dd')
+  const reserveTodayHref = `/reservar?date=${todayIso}`
+
+  const navLinks = [
+    { to: '/',         label: t('header.home') },
+    { to: '/reservar', label: t('header.reserve') },
+  ]
 
   return (
     <header className="bg-navy-900 text-white shadow-card-lg sticky top-0 z-50">
@@ -18,10 +26,17 @@ export function PublicHeader() {
           {/* Logo */}
           <Link
             to="/"
-            className="flex items-center gap-2.5 font-display font-bold text-xl text-gold-400 hover:text-gold-300 transition-colors"
+            className="flex items-center gap-2 hover:opacity-90 transition-opacity"
+            aria-label={COMPANY.shortName}
           >
-            <Anchor className="w-6 h-6" />
-            <span className="hidden sm:block">{COMPANY.shortName}</span>
+            <img
+              src="/images/logo.png"
+              alt={COMPANY.shortName}
+              className="h-9 w-auto object-contain drop-shadow-[0_2px_8px_rgba(247,201,72,0.4)]"
+            />
+            <span className="hidden lg:block font-display font-bold text-gold-400 text-base tracking-wider uppercase leading-none">
+              {COMPANY.shortName}
+            </span>
           </Link>
 
           {/* Nav desktop */}
@@ -44,15 +59,16 @@ export function PublicHeader() {
             ))}
           </nav>
 
-          {/* CTA + hamburger */}
-          <div className="flex items-center gap-3">
-            <Link to="/reservar" className="hidden sm:inline-flex btn-accent text-sm py-2 px-4">
-              Reservar Ahora
+          {/* CTA + selector de idioma + hamburger */}
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher variant="header" />
+            <Link to={reserveTodayHref} className="hidden sm:inline-flex btn-accent text-sm py-2 px-4">
+              {t('header.reserveNow')}
             </Link>
             <button
               className="md:hidden p-2 rounded-lg text-navy-100 hover:text-white hover:bg-white/10 transition-colors"
               onClick={() => setMenuOpen(!menuOpen)}
-              aria-label="Menú"
+              aria-label={t('header.menu')}
             >
               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -80,11 +96,11 @@ export function PublicHeader() {
               </NavLink>
             ))}
             <Link
-              to="/reservar"
+              to={reserveTodayHref}
               onClick={() => setMenuOpen(false)}
               className="block btn-accent text-sm text-center mt-2"
             >
-              Reservar Ahora
+              {t('header.reserveNow')}
             </Link>
           </nav>
         )}

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&family=Pirata+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cinzel:wght@600;700;800;900&family=Cinzel+Decorative:wght@700;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -27,7 +27,8 @@
   }
 
   h1, h2, h3 {
-    @apply font-display tracking-tight;
+    /* Cinzel: letra romana espaciada — tracking-wide le sienta bien */
+    @apply font-display tracking-wide;
   }
 
   /* Selección con acento dorado sobre navy */
@@ -154,18 +155,24 @@
 
   /* Texto dorado con shimmer sutil (para títulos hero) */
   .text-gold-shimmer {
-    background: linear-gradient(90deg, #F7C948, #F0B429 50%, #F7C948);
-    background-size: 200% 100%;
+    background: linear-gradient(90deg, #CB6E17, #F7C948 30%, #fff8e0 50%, #F7C948 70%, #CB6E17);
+    background-size: 250% 100%;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    animation: shimmer 3s linear infinite;
+    animation: shimmer 3.5s linear infinite;
   }
 
   /* Separador decorativo con ornamento pirata */
   .rope-divider {
     @apply relative border-t-2 border-dashed border-navy-300;
   }
+}
+
+/* Animación barra progreso del carrusel */
+@keyframes carousel-progress {
+  from { transform: scaleX(0); transform-origin: left; }
+  to   { transform: scaleX(1); transform-origin: left; }
 }
 
 /* Scrollbar con tonos navy */

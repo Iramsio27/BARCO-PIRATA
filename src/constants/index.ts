@@ -29,6 +29,26 @@ export type PackageId = keyof typeof PACKAGES
 export const DISCOUNT_MIN_PEOPLE = 5
 export const DISCOUNT_RATE = 0.10  // 10%
 
+// ─── Capacidad del barco (debe coincidir con boat_capacity() en SQL) ─────
+export const BOAT_CAPACITY = 40
+
+// ─── Horarios disponibles (slots fijos, coinciden con valid_time_slots()) ─
+export const TIME_SLOTS = [
+  { time: '09:00', label: 'Mañana',       icon: '🌅', description: 'Temprano con aire fresco'    },
+  { time: '11:00', label: 'Media mañana', icon: '☀️', description: 'Ideal para familias'          },
+  { time: '13:00', label: 'Mediodía',     icon: '🌞', description: 'Sol pleno y mejor vista'       },
+  { time: '15:00', label: 'Tarde',        icon: '🌤️', description: 'Clásico de la tarde'         },
+  { time: '17:00', label: 'Atardecer',    icon: '🌇', description: 'Puesta de sol en el mar'     },
+] as const
+
+export type TimeSlotValue = typeof TIME_SLOTS[number]['time']
+
+// Días que se muestran de un vistazo en el selector de fecha
+export const DATE_PICKER_DAYS = 14
+
+// Días máximos de anticipación
+export const MAX_ADVANCE_DAYS = 90
+
 // ─── Tipos de pago ────────────────────────────────────────────────────────
 export const PAYMENT_METHODS = {
   EFECTIVO: 'efectivo',

@@ -1,103 +1,169 @@
-import { useForm } from 'react-hook-form'
+import { useState, useEffect, useMemo } from 'react'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate } from 'react-router-dom'
-import { reservationSchema, type ReservationFormValues } from '@utils/validators/reservation'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { AlertCircle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { format } from 'date-fns'
+import { getReservationSchema, type ReservationFormValues } from '@utils/validators/reservation'
 import { useCreateReservation } from '@features/reservations/hooks/useReservations'
 import { useReservationStore } from '@app/store/reservationStore'
 import { calculatePrice } from '@utils/pricing'
 import { formatCurrency } from '@utils/formatters'
-import { PACKAGES, DISCOUNT_MIN_PEOPLE } from '@constants/index'
+import { PACKAGES, DISCOUNT_MIN_PEOPLE, BOAT_CAPACITY, MAX_ADVANCE_DAYS } from '@constants/index'
+import type { PackageId } from '@constants/index'
 import { Button } from '@components/ui/Button'
 import { Input } from '@components/ui/Input'
 import { Card, CardHeader, CardTitle } from '@components/ui/Card'
-import type { PackageId } from '@constants/index'
+import { DateSlotPicker } from '@components/ui/DateSlotPicker'
+import { TimeSlotPicker } from '@components/ui/TimeSlotPicker'
 
 export default function ReservationPage() {
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { mutateAsync: createReservation, isPending } = useCreateReservation()
   const setPendingReservation = useReservationStore((s) => s.setPendingReservation)
+  const [serverError, setServerError] = useState<string | null>(null)
+
+  // Reconstruye el schema cuando cambia el idioma para que los mensajes
+  // de validación se traduzcan en vivo.
+  const schema = useMemo(() => getReservationSchema(), [i18n.language])
+
+  // Lee ?date=YYYY-MM-DD del query string. Si no es válido, default = hoy.
+  const initialDate = useMemo(() => {
+    const raw = searchParams.get('date')
+    const today = format(new Date(), 'yyyy-MM-dd')
+    const maxIso = format(new Date(Date.now() + MAX_ADVANCE_DAYS * 86400_000), 'yyyy-MM-dd')
+    // Valida formato y rango
+    if (raw && /^\d{4}-\d{2}-\d{2}$/.test(raw) && raw >= today && raw <= maxIso) {
+      return raw
+    }
+    return today
+  }, [searchParams])
 
   const {
     register,
     handleSubmit,
+    control,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<ReservationFormValues>({
-    resolver: zodResolver(reservationSchema),
-    defaultValues: { serviceType: 'individual', numberOfPeople: 1 },
+    resolver: zodResolver(schema),
+    defaultValues: {
+      serviceType:    'individual',
+      numberOfPeople: 1,
+      date:           initialDate,
+      // time se deja undefined — el usuario debe elegir
+    },
   })
 
-  const watchedPkg = watch('packageId') as PackageId | undefined
+  // Si el query param cambia (p. ej. el usuario navega de un CTA a otro), reflejarlo en el form.
+  useEffect(() => {
+    setValue('date', initialDate)
+  }, [initialDate, setValue])
+
+  const watchedPkg    = watch('packageId') as PackageId | undefined
   const watchedPeople = watch('numberOfPeople') ?? 1
-  const pricing = watchedPkg ? calculatePrice(watchedPkg, watchedPeople) : null
+  const watchedDate   = watch('date')
+  const watchedTime   = watch('time') ?? null
+  const pricing       = watchedPkg ? calculatePrice(watchedPkg, watchedPeople) : null
 
   const onSubmit = async (values: ReservationFormValues) => {
-    const reservation = await createReservation({
-      ...values,
-      serviceType: values.numberOfPeople >= DISCOUNT_MIN_PEOPLE ? 'grupal' : 'individual',
-    })
-    setPendingReservation(reservation)
-    navigate('/reservar/confirmacion')
+    setServerError(null)
+    try {
+      const reservation = await createReservation({
+        ...values,
+        serviceType: values.numberOfPeople >= DISCOUNT_MIN_PEOPLE ? 'grupal' : 'individual',
+      })
+      setPendingReservation(reservation)
+      navigate('/reservar/confirmacion')
+    } catch (err) {
+      // El servidor (trigger) pudo rechazar por capacidad
+      const msg = err instanceof Error ? err.message : t('reservation.errors.generic')
+      if (/capacidad excedida/i.test(msg)) {
+        setServerError(t('reservation.errors.capacity'))
+      } else if (/horario .* no disponible/i.test(msg)) {
+        setServerError(t('reservation.errors.invalidSlot'))
+      } else {
+        setServerError(msg)
+      }
+    }
   }
 
   return (
-    <div className="container-app py-12 max-w-2xl">
-      <h1 className="text-3xl font-display font-bold text-navy-900 mb-8 text-center">
-        Hacer una Reservación
-      </h1>
+    <div className="container-app py-12 max-w-3xl">
+      <div className="text-center mb-10">
+        <h1 className="text-3xl md:text-4xl font-display font-bold text-navy-900 tracking-wide uppercase">
+          {t('reservation.pageTitle')}
+        </h1>
+        <p className="text-navy-500 mt-2">
+          {t('reservation.pageSubtitle')}
+        </p>
+      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Datos de contacto */}
-        <Card>
-          <CardHeader><CardTitle>Datos de Contacto</CardTitle></CardHeader>
-          <div className="space-y-4">
-            <Input
-              label="Nombre completo"
-              required
-              placeholder="Ej. Juan Pérez"
-              {...register('contactName')}
-              error={errors.contactName?.message}
+
+        {/* ─── Paso 1: Fecha y horario ─────────────────────────────── */}
+        <Card className="border border-navy-100">
+          <CardHeader>
+            <CardTitle>
+              <span className="inline-flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-gold-400 text-navy-900 font-bold text-xs flex items-center justify-center">1</span>
+                {t('reservation.step1')}
+              </span>
+            </CardTitle>
+          </CardHeader>
+
+          <div className="space-y-5">
+            <Controller
+              name="date"
+              control={control}
+              render={({ field }) => (
+                <DateSlotPicker
+                  value={field.value || null}
+                  onChange={(iso) => {
+                    field.onChange(iso)
+                    // Reset del time al cambiar la fecha (puede tener diferente disponibilidad)
+                    setValue('time', '' as unknown as ReservationFormValues['time'])
+                  }}
+                  error={errors.date?.message}
+                />
+              )}
             />
-            <Input
-              label="Número de celular"
-              required
-              placeholder="638 123 4567"
-              {...register('contactPhone')}
-              error={errors.contactPhone?.message}
+
+            <Controller
+              name="time"
+              control={control}
+              render={({ field }) => (
+                <TimeSlotPicker
+                  date={watchedDate || null}
+                  value={watchedTime}
+                  onChange={field.onChange}
+                  numberOfPeople={watchedPeople}
+                  error={errors.time?.message}
+                />
+              )}
             />
           </div>
         </Card>
 
-        {/* Fecha y hora */}
-        <Card>
-          <CardHeader><CardTitle>Fecha y Hora del Paseo</CardTitle></CardHeader>
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Fecha"
-              type="date"
-              required
-              {...register('date')}
-              error={errors.date?.message}
-            />
-            <Input
-              label="Hora"
-              type="time"
-              required
-              min="09:00"
-              max="17:00"
-              {...register('time')}
-              error={errors.time?.message}
-            />
-          </div>
-        </Card>
+        {/* ─── Paso 2: Paquete y personas ──────────────────────────── */}
+        <Card className="border border-navy-100">
+          <CardHeader>
+            <CardTitle>
+              <span className="inline-flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-gold-400 text-navy-900 font-bold text-xs flex items-center justify-center">2</span>
+                {t('reservation.step2')}
+              </span>
+            </CardTitle>
+          </CardHeader>
 
-        {/* Paquete y personas */}
-        <Card>
-          <CardHeader><CardTitle>Paquete y Personas</CardTitle></CardHeader>
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
               <label className="label">
-                Paquete <span className="text-pirate-500">*</span>
+                {t('reservation.package')} <span className="text-pirate-500">*</span>
               </label>
               <div className="grid gap-3">
                 {Object.values(PACKAGES).map((pkg) => (
@@ -113,10 +179,10 @@ export default function ReservationPage() {
                     />
                     <span className="text-xl">{pkg.icon}</span>
                     <div className="flex-1">
-                      <p className="font-medium text-sm text-navy-900">{pkg.label}</p>
-                      <p className="text-xs text-navy-500">{pkg.description}</p>
+                      <p className="font-medium text-sm text-navy-900">{t(`packages.${pkg.id}.label`)}</p>
+                      <p className="text-xs text-navy-500">{t(`packages.${pkg.id}.description`)}</p>
                     </div>
-                    <span className="font-bold text-gold-700">{formatCurrency(pkg.pricePerPerson)}/persona</span>
+                    <span className="font-bold text-gold-700">{formatCurrency(pkg.pricePerPerson)}{t('reservation.perPerson')}</span>
                   </label>
                 ))}
               </div>
@@ -124,50 +190,90 @@ export default function ReservationPage() {
             </div>
 
             <Input
-              label="Número de personas"
+              label={t('reservation.numberOfPeople')}
               type="number"
               required
               min={1}
-              max={50}
-              hint={`Grupos de ${DISCOUNT_MIN_PEOPLE}+ personas obtienen 10% de descuento`}
+              max={BOAT_CAPACITY}
+              hint={t('reservation.peopleHint', { min: DISCOUNT_MIN_PEOPLE, capacity: BOAT_CAPACITY })}
               {...register('numberOfPeople', { valueAsNumber: true })}
               error={errors.numberOfPeople?.message}
             />
+          </div>
+        </Card>
 
+        {/* ─── Paso 3: Datos de contacto ───────────────────────────── */}
+        <Card className="border border-navy-100">
+          <CardHeader>
+            <CardTitle>
+              <span className="inline-flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-gold-400 text-navy-900 font-bold text-xs flex items-center justify-center">3</span>
+                {t('reservation.step3')}
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <div className="space-y-4">
             <Input
-              label="Notas adicionales"
-              placeholder="Alguna indicación especial..."
+              label={t('reservation.fullName')}
+              required
+              placeholder={t('reservation.fullNamePlaceholder')}
+              {...register('contactName')}
+              error={errors.contactName?.message}
+            />
+            <Input
+              label={t('reservation.phone')}
+              required
+              placeholder={t('reservation.phonePlaceholder')}
+              {...register('contactPhone')}
+              error={errors.contactPhone?.message}
+            />
+            <Input
+              label={t('reservation.notes')}
+              placeholder={t('reservation.notesPlaceholder')}
               {...register('notes')}
               error={errors.notes?.message}
             />
           </div>
         </Card>
 
-        {/* Resumen de precio */}
+        {/* ─── Resumen de precio ──────────────────────────────────── */}
         {pricing && (
           <Card className="panel-dark">
-            <h3 className="font-semibold mb-3 text-gold-400 font-display text-lg">Resumen</h3>
+            <h3 className="font-semibold mb-3 text-gold-400 font-display text-lg tracking-wide uppercase">
+              {t('reservation.summary')}
+            </h3>
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
-                <span className="text-navy-200">Subtotal</span>
+                <span className="text-navy-200">{t('reservation.subtotal')}</span>
                 <span>{formatCurrency(pricing.subtotal)}</span>
               </div>
               {pricing.hasGroupDiscount && (
                 <div className="flex justify-between text-gold-300">
-                  <span>Descuento grupal (10%)</span>
+                  <span>{t('reservation.groupDiscount')}</span>
                   <span>-{formatCurrency(pricing.discount)}</span>
                 </div>
               )}
               <div className="flex justify-between text-lg font-bold border-t border-white/20 pt-2 mt-2">
-                <span>Total</span>
+                <span>{t('reservation.total')}</span>
                 <span className="text-gold-400">{formatCurrency(pricing.total)}</span>
               </div>
             </div>
           </Card>
         )}
 
+        {/* ─── Error del servidor (overbooking, etc.) ─────────────── */}
+        {serverError && (
+          <div className="panel-danger flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold text-sm mb-1">{t('reservation.errors.title')}</p>
+              <p className="text-sm">{serverError}</p>
+            </div>
+          </div>
+        )}
+
         <Button type="submit" variant="accent" isLoading={isPending} className="w-full" size="lg">
-          Enviar Reservación
+          {t('reservation.submit')}
         </Button>
       </form>
     </div>

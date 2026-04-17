@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
-  Anchor, LayoutDashboard, CalendarCheck, BarChart3,
+  LayoutDashboard, CalendarCheck, BarChart3,
   LogOut, ChevronRight,
 } from 'lucide-react'
 import { useAuth } from '@app/providers'
@@ -26,9 +26,15 @@ export function AdminLayout() {
       {/* Sidebar */}
       <aside className="w-64 bg-navy-900 text-white flex flex-col fixed inset-y-0 left-0 z-40 shadow-card-lg">
         {/* Logo */}
-        <div className="flex items-center gap-2.5 px-6 h-16 border-b border-white/10">
-          <Anchor className="w-6 h-6 text-gold-400" />
-          <span className="font-display font-bold text-gold-400">{COMPANY.shortName}</span>
+        <div className="flex items-center gap-2.5 px-4 h-16 border-b border-white/10">
+          <img
+            src="/images/logo.png"
+            alt={COMPANY.shortName}
+            className="h-8 w-auto object-contain drop-shadow-[0_2px_8px_rgba(247,201,72,0.5)]"
+          />
+          <span className="font-display font-bold text-gold-400 text-xs tracking-wider uppercase leading-tight truncate">
+            {COMPANY.shortName}
+          </span>
         </div>
 
         {/* User info */}

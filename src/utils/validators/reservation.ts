@@ -1,42 +1,72 @@
 import { z } from 'zod'
 import { format, addDays } from 'date-fns'
+import i18n from '@lib/i18n'
+import { TIME_SLOTS, MAX_ADVANCE_DAYS } from '@constants/index'
 
-const todayStr = () => format(new Date(), 'yyyy-MM-dd')
-const maxDateStr = () => format(addDays(new Date(), 90), 'yyyy-MM-dd')
+const todayStr   = () => format(new Date(), 'yyyy-MM-dd')
+const maxDateStr = () => format(addDays(new Date(), MAX_ADVANCE_DAYS), 'yyyy-MM-dd')
 
-export const reservationSchema = z.object({
-  contactName: z
-    .string()
-    .min(3, 'El nombre debe tener al menos 3 caracteres')
-    .max(100, 'El nombre es demasiado largo')
-    .regex(/^[a-zA-ZÀ-ÿ\s]+$/, 'El nombre solo puede contener letras'),
+// Valores permitidos para la hora: únicamente los slots predefinidos
+const VALID_TIMES = TIME_SLOTS.map(s => s.time) as [string, ...string[]]
 
-  contactPhone: z
-    .string()
-    .regex(/^(\+52)?[\s-]?(\d{3})[\s-]?(\d{3})[\s-]?(\d{4})$/, 'Ingresa un número de celular válido (10 dígitos)'),
+// Helper: traduce con i18n. Se evalúa al construir el schema.
+const tt = (key: string, opts?: Record<string, unknown>) =>
+  i18n.t(key, opts as never) as unknown as string
 
-  date: z
-    .string()
-    .refine((d) => d >= todayStr(), { message: 'La fecha no puede ser anterior a hoy' })
-    .refine((d) => d <= maxDateStr(), { message: 'No se pueden hacer reservaciones con más de 90 días de anticipación' }),
+/**
+ * Construye el schema de reservación con los mensajes de validación
+ * en el idioma activo de i18n. Como puede cambiar el idioma en runtime,
+ * se invoca cada vez que el formulario se monta (vía `reservationSchema` getter).
+ */
+function buildReservationSchema() {
+  return z.object({
+    contactName: z
+      .string()
+      .min(3, tt('validation.nameMin'))
+      .max(100, tt('validation.nameMax'))
+      .regex(/^[a-zA-ZÀ-ÿ\s]+$/, tt('validation.nameLetters')),
 
-  time: z
-    .string()
-    .regex(/^([0-1]\d|2[0-3]):[0-5]\d$/, 'Formato de hora inválido'),
+    contactPhone: z
+      .string()
+      .regex(/^(\+52)?[\s-]?(\d{3})[\s-]?(\d{3})[\s-]?(\d{4})$/, tt('validation.phoneInvalid')),
 
-  numberOfPeople: z
-    .number({ invalid_type_error: 'Ingresa un número de personas' })
-    .int()
-    .min(1, 'Debe haber al menos 1 persona')
-    .max(50, 'Máximo 50 personas por reservación'),
+    date: z
+      .string({ required_error: tt('validation.dateRequired') })
+      .min(1, tt('validation.dateRequired'))
+      .refine((d) => d >= todayStr(),   { message: tt('validation.datePast') })
+      .refine((d) => d <= maxDateStr(), { message: tt('validation.dateFuture', { days: MAX_ADVANCE_DAYS }) }),
 
-  packageId: z.enum(['CON_COMIDA', 'SOLO_BEBIDAS', 'SOLO_PASEO'], {
-    required_error: 'Selecciona un paquete',
-  }),
+    // Solo aceptamos los horarios predefinidos (coinciden con valid_time_slots() en DB)
+    time: z
+      .enum(VALID_TIMES, {
+        required_error:     tt('validation.timeRequired'),
+        invalid_type_error: tt('validation.timeInvalid'),
+      }),
 
-  serviceType: z.enum(['individual', 'grupal']),
+    numberOfPeople: z
+      .number({ invalid_type_error: tt('validation.peopleNumber') })
+      .int()
+      .min(1,  tt('validation.peopleMin'))
+      .max(40, tt('validation.peopleMax', { max: 40 })),
 
-  notes: z.string().max(500, 'Las notas no pueden exceder 500 caracteres').optional(),
-})
+    packageId: z.enum(['CON_COMIDA', 'SOLO_BEBIDAS', 'SOLO_PASEO'], {
+      required_error: tt('validation.packageRequired'),
+    }),
 
-export type ReservationFormValues = z.infer<typeof reservationSchema>
+    serviceType: z.enum(['individual', 'grupal']),
+
+    notes: z.string().max(500, tt('validation.notesMax')).optional(),
+  })
+}
+
+/**
+ * Tipo derivado del schema. Usamos una instancia base solo para inferencia de tipos
+ * — los mensajes correctos vienen de `getReservationSchema()` que se llama en cada uso.
+ */
+export type ReservationFormValues = z.infer<ReturnType<typeof buildReservationSchema>>
+
+/** Devuelve un schema con los mensajes en el idioma activo. */
+export const getReservationSchema = () => buildReservationSchema()
+
+/** Schema por defecto (compatibilidad con imports existentes). */
+export const reservationSchema = buildReservationSchema()

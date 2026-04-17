@@ -1,0 +1,191 @@
+{
+  "header": {
+    "home": "Home",
+    "reserve": "Book",
+    "reserveNow": "Book Now",
+    "menu": "Menu",
+    "language": "Language"
+  },
+  "footer": {
+    "contact": "Contact",
+    "schedule": "Hours",
+    "tagline": "Live the sea experience in Puerto Peñasco. Unique boat tours for the whole family.",
+    "rights": "All rights reserved."
+  },
+  "home": {
+    "hero": {
+      "title": "Set sail with us!",
+      "subtitle": "The sea adventure awaits you in Puerto Peñasco. Unique pirate boat tours for the whole family.",
+      "ctaReserve": "Book my tour",
+      "ctaWatch": "Watch the boat"
+    },
+    "features": {
+      "experience": "+10 years of experience",
+      "safety": "Certified safety",
+      "groups": "Groups & families",
+      "securePayment": "Secure payment"
+    },
+    "packages": {
+      "title": "Our Packages",
+      "subtitle": "Choose the one that best fits your group",
+      "perPerson": "per person",
+      "reserve": "Book",
+      "discountTitle": "Group discount of {{rate}}%!",
+      "discountText": "Groups of {{min}} or more people automatically get a {{rate}}% discount on the package price."
+    },
+    "video": {
+      "title": "Watch the boat in",
+      "highlight": "action",
+      "subtitle": "Enjoy the experience that awaits you before you even arrive",
+      "cta": "I want to live this! Book now",
+      "fallback": "Your browser does not support HTML5 video."
+    },
+    "gallery": {
+      "title": "Experience gallery",
+      "subtitle": "Real moments from our passengers on board"
+    },
+    "finalCta": {
+      "title": "Ready to set sail?",
+      "subtitle": "Book your tour today and live the most exciting pirate adventure in Puerto Peñasco.",
+      "button": "Book my tour now"
+    }
+  },
+  "reservation": {
+    "pageTitle": "Make a Reservation",
+    "pageSubtitle": "Book in 3 simple steps. Availability is shown live.",
+    "step1": "When do you want to set sail?",
+    "step2": "Package and people",
+    "step3": "Your contact details",
+    "package": "Package",
+    "perPerson": "/person",
+    "numberOfPeople": "Number of people",
+    "peopleHint": "Groups of {{min}}+ get 10% off · Maximum capacity: {{capacity}}",
+    "fullName": "Full name",
+    "fullNamePlaceholder": "e.g. John Smith",
+    "phone": "Phone number",
+    "phonePlaceholder": "638 123 4567",
+    "notes": "Additional notes",
+    "notesPlaceholder": "Any special instructions...",
+    "summary": "Summary",
+    "subtotal": "Subtotal",
+    "groupDiscount": "Group discount (10%)",
+    "total": "Total",
+    "submit": "Submit Reservation",
+    "errors": {
+      "title": "Your reservation could not be completed",
+      "capacity": "Oops, while you were filling out the form someone else booked that time slot and there's no longer enough capacity. Choose another time or reduce the number of people.",
+      "invalidSlot": "The selected time is not available. Pick one of the 5 daily time slots.",
+      "generic": "Error creating the reservation"
+    }
+  },
+  "datePicker": {
+    "label": "Tour date",
+    "today": "TODAY",
+    "tomorrow": "TOMORROW",
+    "closed": "Closed",
+    "prev": "Previous dates",
+    "next": "Next dates",
+    "hint": "Bookings available up to 90 days in advance. Closed on Mondays."
+  },
+  "timePicker": {
+    "label": "Time",
+    "selectDateFirst": "👆 First select a date",
+    "loading": "Checking availability…",
+    "errorLoading": "Could not load availability. Try again.",
+    "loadingShort": "Loading…",
+    "noSeats": "Sold out",
+    "passed": "Already passed",
+    "onlyN": "Only {{count}} seat",
+    "onlyN_plural": "Only {{count}} seats",
+    "lastN": "Last {{count}} seats!",
+    "available": "{{count}} available",
+    "hint": "Availability refreshes every few seconds. Maximum capacity: {{capacity}} people per time slot.",
+    "slots": {
+      "morning": "Morning",
+      "midMorning": "Mid-morning",
+      "noon": "Noon",
+      "afternoon": "Afternoon",
+      "sunset": "Sunset"
+    },
+    "descriptions": {
+      "morning": "Early with fresh breeze",
+      "midMorning": "Ideal for families",
+      "noon": "Full sun and best view",
+      "afternoon": "Classic afternoon tour",
+      "sunset": "Sunset over the sea"
+    }
+  },
+  "packages": {
+    "con_comida": {
+      "label": "With Food Included",
+      "description": "Tour + seafood buffet on board"
+    },
+    "solo_bebidas": {
+      "label": "Drinks Only",
+      "description": "Tour + drinks bar on board"
+    },
+    "solo_paseo": {
+      "label": "Tour Only",
+      "description": "Scenic tour along the coastline"
+    }
+  },
+  "confirmation": {
+    "title": "Reservation Confirmed!",
+    "subtitle": "We've received your request. An advisor will validate it and contact you to complete payment.",
+    "noReservation": "No pending reservation.",
+    "makeReservation": "Make a reservation",
+    "detailTitle": "Reservation Details",
+    "fields": {
+      "name": "Name",
+      "phone": "Phone",
+      "date": "Date",
+      "time": "Time",
+      "people": "People",
+      "package": "Package"
+    },
+    "personCount": "{{count}} person",
+    "personCount_plural": "{{count}} people",
+    "subtotal": "Subtotal",
+    "groupDiscount": "Group discount",
+    "totalPay": "Total to pay",
+    "reservationId": "Reservation ID:",
+    "back": "Back to home",
+    "pay": "Go to Payment"
+  },
+  "payment": {
+    "title": "Complete Payment",
+    "totalPay": "Total to pay",
+    "paid": "Already paid!",
+    "paidSubtitle": "This reservation has already been processed.",
+    "notFound": "Reservation not found.",
+    "method": "Payment Method",
+    "cash": "Cash",
+    "card": "Card",
+    "cashInfo": "Payment will be made directly with the vendor. On confirmation, the sales receipt will be generated.",
+    "cashConfirm": "Confirm Cash Payment",
+    "cardInfo": "Process the payment securely with your credit or debit card.",
+    "cardContinue": "Continue with Card",
+    "payNow": "Pay now",
+    "paymentError": "Error processing payment"
+  },
+  "validation": {
+    "nameMin": "Name must be at least 3 characters",
+    "nameMax": "Name is too long",
+    "nameLetters": "Name can only contain letters",
+    "phoneInvalid": "Enter a valid phone number (10 digits)",
+    "dateRequired": "Select a date",
+    "datePast": "Date cannot be earlier than today",
+    "dateFuture": "Reservations cannot be made more than {{days}} days in advance",
+    "timeRequired": "Select a time slot",
+    "timeInvalid": "Time slot not available",
+    "peopleNumber": "Enter a number of people",
+    "peopleMin": "There must be at least 1 person",
+    "peopleMax": "Maximum {{max}} people (boat capacity)",
+    "packageRequired": "Select a package",
+    "notesMax": "Notes cannot exceed 500 characters"
+  },
+  "common": {
+    "required": "*",
+    "loading": "Loading…"
+  }
+}

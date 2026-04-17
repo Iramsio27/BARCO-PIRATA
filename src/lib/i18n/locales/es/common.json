@@ -1,0 +1,191 @@
+{
+  "header": {
+    "home": "Inicio",
+    "reserve": "Reservar",
+    "reserveNow": "Reservar Ahora",
+    "menu": "Menú",
+    "language": "Idioma"
+  },
+  "footer": {
+    "contact": "Contacto",
+    "schedule": "Horario",
+    "tagline": "Vive la experiencia del mar en Puerto Peñasco. Paseos en barco únicos para toda la familia.",
+    "rights": "Todos los derechos reservados."
+  },
+  "home": {
+    "hero": {
+      "title": "¡Zarpa con nosotros!",
+      "subtitle": "La aventura del mar te espera en Puerto Peñasco. Paseos únicos en barco pirata para toda la familia.",
+      "ctaReserve": "Reservar mi paseo",
+      "ctaWatch": "Ver el barco"
+    },
+    "features": {
+      "experience": "+10 años de experiencia",
+      "safety": "Seguridad certificada",
+      "groups": "Grupos y familias",
+      "securePayment": "Pago seguro"
+    },
+    "packages": {
+      "title": "Nuestros Paquetes",
+      "subtitle": "Elige el que mejor se adapte a tu grupo",
+      "perPerson": "por persona",
+      "reserve": "Reservar",
+      "discountTitle": "¡Descuento grupal del {{rate}}%!",
+      "discountText": "Grupos de {{min}} personas o más obtienen automáticamente un descuento del {{rate}}% sobre el costo del paquete."
+    },
+    "video": {
+      "title": "Mira el barco en",
+      "highlight": "acción",
+      "subtitle": "Disfruta desde antes de llegar la experiencia que te espera",
+      "cta": "¡Quiero vivir esto! Reservar ahora",
+      "fallback": "Tu navegador no soporta video HTML5."
+    },
+    "gallery": {
+      "title": "Galería de experiencias",
+      "subtitle": "Momentos reales de nuestros pasajeros a bordo"
+    },
+    "finalCta": {
+      "title": "¿Listo para zarpar?",
+      "subtitle": "Reserva tu paseo hoy y vive la aventura pirata más emocionante de Puerto Peñasco.",
+      "button": "Reservar mi paseo ahora"
+    }
+  },
+  "reservation": {
+    "pageTitle": "Hacer una Reservación",
+    "pageSubtitle": "Reserva en 3 pasos sencillos. La disponibilidad se muestra en vivo.",
+    "step1": "¿Cuándo quieres zarpar?",
+    "step2": "Paquete y personas",
+    "step3": "Tus datos de contacto",
+    "package": "Paquete",
+    "perPerson": "/persona",
+    "numberOfPeople": "Número de personas",
+    "peopleHint": "Grupos de {{min}}+ personas obtienen 10% de descuento · Capacidad máxima: {{capacity}}",
+    "fullName": "Nombre completo",
+    "fullNamePlaceholder": "Ej. Juan Pérez",
+    "phone": "Número de celular",
+    "phonePlaceholder": "638 123 4567",
+    "notes": "Notas adicionales",
+    "notesPlaceholder": "Alguna indicación especial...",
+    "summary": "Resumen",
+    "subtotal": "Subtotal",
+    "groupDiscount": "Descuento grupal (10%)",
+    "total": "Total",
+    "submit": "Enviar Reservación",
+    "errors": {
+      "title": "No se pudo completar tu reservación",
+      "capacity": "Ups, mientras llenabas el formulario otra persona reservó ese horario y ya no hay cupo suficiente. Elige otro horario o reduce el número de personas.",
+      "invalidSlot": "El horario elegido no está disponible. Selecciona uno de los 5 horarios del día.",
+      "generic": "Error al crear la reservación"
+    }
+  },
+  "datePicker": {
+    "label": "Fecha del paseo",
+    "today": "HOY",
+    "tomorrow": "MAÑANA",
+    "closed": "Cerrado",
+    "prev": "Fechas anteriores",
+    "next": "Siguientes fechas",
+    "hint": "Reservas disponibles hasta 90 días de anticipación. Los lunes no hay servicio."
+  },
+  "timePicker": {
+    "label": "Horario",
+    "selectDateFirst": "👆 Primero selecciona una fecha",
+    "loading": "Consultando disponibilidad…",
+    "errorLoading": "No se pudo consultar la disponibilidad. Intenta de nuevo.",
+    "loadingShort": "Cargando…",
+    "noSeats": "Sin cupo",
+    "passed": "Ya pasó",
+    "onlyN": "Solo {{count}} lugar",
+    "onlyN_plural": "Solo {{count}} lugares",
+    "lastN": "¡Últimos {{count}} lugares!",
+    "available": "{{count}} disponibles",
+    "hint": "La disponibilidad se actualiza cada pocos segundos. Capacidad máxima: {{capacity}} personas por horario.",
+    "slots": {
+      "morning": "Mañana",
+      "midMorning": "Media mañana",
+      "noon": "Mediodía",
+      "afternoon": "Tarde",
+      "sunset": "Atardecer"
+    },
+    "descriptions": {
+      "morning": "Temprano con aire fresco",
+      "midMorning": "Ideal para familias",
+      "noon": "Sol pleno y mejor vista",
+      "afternoon": "Clásico de la tarde",
+      "sunset": "Puesta de sol en el mar"
+    }
+  },
+  "packages": {
+    "con_comida": {
+      "label": "Con Comida Incluida",
+      "description": "Paseo + buffet de mariscos a bordo"
+    },
+    "solo_bebidas": {
+      "label": "Solo Bebidas",
+      "description": "Paseo + barra de bebidas a bordo"
+    },
+    "solo_paseo": {
+      "label": "Solo Paseo",
+      "description": "Recorrido panorámico por el litoral"
+    }
+  },
+  "confirmation": {
+    "title": "¡Reservación Confirmada!",
+    "subtitle": "Hemos recibido tu solicitud. Un asesor la validará y te contactará para completar el pago.",
+    "noReservation": "No hay reservación pendiente.",
+    "makeReservation": "Hacer una reservación",
+    "detailTitle": "Detalle de tu Reservación",
+    "fields": {
+      "name": "Nombre",
+      "phone": "Celular",
+      "date": "Fecha",
+      "time": "Hora",
+      "people": "Personas",
+      "package": "Paquete"
+    },
+    "personCount": "{{count}} persona",
+    "personCount_plural": "{{count}} personas",
+    "subtotal": "Subtotal",
+    "groupDiscount": "Descuento grupal",
+    "totalPay": "Total a pagar",
+    "reservationId": "ID de reservación:",
+    "back": "Volver al inicio",
+    "pay": "Ir a Pagar"
+  },
+  "payment": {
+    "title": "Completar Pago",
+    "totalPay": "Total a pagar",
+    "paid": "¡Ya está pagada!",
+    "paidSubtitle": "Esta reservación ya fue procesada.",
+    "notFound": "Reservación no encontrada.",
+    "method": "Método de Pago",
+    "cash": "Efectivo",
+    "card": "Tarjeta",
+    "cashInfo": "El pago se realizará directamente con el vendedor. Al confirmar, se generará el comprobante de venta.",
+    "cashConfirm": "Confirmar Pago en Efectivo",
+    "cardInfo": "Procesa el pago de forma segura con tu tarjeta de crédito o débito.",
+    "cardContinue": "Continuar con Tarjeta",
+    "payNow": "Pagar ahora",
+    "paymentError": "Error al procesar el pago"
+  },
+  "validation": {
+    "nameMin": "El nombre debe tener al menos 3 caracteres",
+    "nameMax": "El nombre es demasiado largo",
+    "nameLetters": "El nombre solo puede contener letras",
+    "phoneInvalid": "Ingresa un número de celular válido (10 dígitos)",
+    "dateRequired": "Selecciona una fecha",
+    "datePast": "La fecha no puede ser anterior a hoy",
+    "dateFuture": "No se pueden hacer reservaciones con más de {{days}} días de anticipación",
+    "timeRequired": "Selecciona un horario",
+    "timeInvalid": "Horario no disponible",
+    "peopleNumber": "Ingresa un número de personas",
+    "peopleMin": "Debe haber al menos 1 persona",
+    "peopleMax": "Máximo {{max}} personas (capacidad del barco)",
+    "packageRequired": "Selecciona un paquete",
+    "notesMax": "Las notas no pueden exceder 500 caracteres"
+  },
+  "common": {
+    "required": "*",
+    "loading": "Cargando…"
+  }
+}

@@ -93,9 +93,12 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['"Pirata One"', 'Playfair Display', 'Georgia', 'serif'],
-        serif: ['Playfair Display', 'Georgia', 'serif'],
+        sans:    ['Inter', 'system-ui', 'sans-serif'],
+        // Cinzel: romana clásica — elegante, náutica, sin caricatura
+        display: ['Cinzel', 'Georgia', 'serif'],
+        // Cinzel Decorative para títulos muy grandes (hero, CTA final)
+        'display-deco': ['"Cinzel Decorative"', 'Cinzel', 'Georgia', 'serif'],
+        serif:   ['Cinzel', 'Georgia', 'serif'],
       },
       borderRadius: {
         lg: '0.625rem',
@@ -120,6 +123,7 @@ const config: Config = {
         'slide-up': 'slideUp 0.3s ease-out',
         wave:       'wave 3s ease-in-out infinite',
         shimmer:    'shimmer 2.4s linear infinite',
+        'carousel-progress': 'carouselProgress var(--carousel-duration, 4500ms) linear forwards',
       },
       keyframes: {
         fadeIn:  { from: { opacity: '0' }, to: { opacity: '1' } },
@@ -134,6 +138,10 @@ const config: Config = {
         shimmer: {
           '0%':   { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
+        },
+        carouselProgress: {
+          '0%':   { transform: 'scaleX(0)' },
+          '100%': { transform: 'scaleX(1)' },
         },
       },
     },

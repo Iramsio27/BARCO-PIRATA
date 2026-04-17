@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 import { AppProviders } from '@app/providers'
 import { router } from '@app/router'
+import '@lib/i18n' // Inicializa i18next (debe ir antes que cualquier componente que lo use)
 import './styles/globals.css'
 
 const rootEl = document.getElementById('root')

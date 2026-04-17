@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Anchor, Lock } from 'lucide-react'
+import { Lock } from 'lucide-react'
 import { useAuth } from '@app/providers'
 import { Button } from '@components/ui/Button'
 import { Input } from '@components/ui/Input'
@@ -48,11 +48,13 @@ export default function LoginPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-3">
-            <div className="bg-gold-400/10 border border-gold-400/30 p-4 rounded-2xl">
-              <Anchor className="w-10 h-10 text-gold-400" />
-            </div>
+            <img
+              src="/images/logo.png"
+              alt={COMPANY.shortName}
+              className="h-24 w-auto object-contain drop-shadow-[0_4px_20px_rgba(247,201,72,0.6)]"
+            />
           </div>
-          <h1 className="text-2xl font-display font-bold text-gold-shimmer">{COMPANY.shortName}</h1>
+          <h1 className="text-xl font-display font-bold text-gold-shimmer tracking-widest uppercase">{COMPANY.shortName}</h1>
           <p className="text-navy-200 mt-1 text-sm">Panel de Administración</p>
         </div>
 
