@@ -29,7 +29,9 @@
       "Bash(python \"C:/Users/miram/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/baddf19e-5a9e-42cb-8a9c-1f5089eb1603/8babf94f-3cda-4a96-aea1-b4ca092f5132/skills/docx/scripts/office/validate.py\" \"C:/Users/miram/BARCO-PIRATA/entregables/CASO_PRACTICO_Barco_Pirata.docx\")",
       "Bash(python validate.py /c/Users/miram/BARCO-PIRATA/entregables/CASO_PRACTICO_Barco_Pirata.docx)",
       "Bash(python -c \"import zipfile; z = zipfile.ZipFile\\('CASO_PRACTICO_Barco_Pirata.docx'\\); print\\('Archivos:', len\\(z.namelist\\(\\)\\)\\); print\\('Estructura OK:', '[Content_Types].xml' in z.namelist\\(\\) and 'word/document.xml' in z.namelist\\(\\)\\); z.close\\(\\)\")",
-      "Bash(ls -lh *.docx)"
+      "Bash(ls -lh *.docx)",
+      "Bash(npm ls:*)",
+      "Bash(ls tailwind*)"
     ]
   }
 }

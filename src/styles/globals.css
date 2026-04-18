@@ -175,6 +175,126 @@
   to   { transform: scaleX(1); transform-origin: left; }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   Tema oscuro — solo aplica al panel admin (vía data-admin-theme="dark")
+   Las rutas públicas nunca tocan este atributo.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html[data-admin-theme="dark"] .admin-scope {
+  @apply bg-navy-950 text-navy-100;
+  color-scheme: dark;
+}
+
+html[data-admin-theme="dark"] .admin-surface {
+  @apply bg-navy-900 border-white/10;
+}
+html[data-admin-theme="dark"] .admin-surface-alt {
+  @apply bg-navy-800 border-white/10;
+}
+html[data-admin-theme="dark"] .admin-text-title    { @apply text-white; }
+html[data-admin-theme="dark"] .admin-text-body     { @apply text-navy-100; }
+html[data-admin-theme="dark"] .admin-text-muted    { @apply text-navy-300; }
+html[data-admin-theme="dark"] .admin-text-subtle   { @apply text-navy-400; }
+html[data-admin-theme="dark"] .admin-border        { @apply border-white/10; }
+html[data-admin-theme="dark"] .admin-divide > *+*  { @apply border-white/10; }
+html[data-admin-theme="dark"] .admin-input {
+  @apply bg-navy-800 border-white/10 text-white placeholder-navy-400;
+}
+html[data-admin-theme="dark"] .admin-row-hover:hover { @apply bg-white/5; }
+html[data-admin-theme="dark"] .admin-stripe         { @apply bg-white/5; }
+
+/* ─── Override blanket para páginas admin que usan utilities navy/ hardcoded ───
+   Usamos atributo [class~="..."] para no redefinir las utilities de Tailwind
+   (si lo hiciéramos, Tailwind detecta dependencia circular con @apply).       */
+html[data-admin-theme="dark"] .admin-scope [class~="bg-white"]        { background-color: #0D2040 !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="bg-navy-50"]      { background-color: rgba(255,255,255,0.05) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="bg-navy-100"]     { background-color: rgba(255,255,255,0.10) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="border-navy-100"] { border-color: rgba(255,255,255,0.10) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="border-navy-200"] { border-color: rgba(255,255,255,0.10) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="divide-navy-100"] > * + * { border-color: rgba(255,255,255,0.10) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="text-navy-900"]   { color: #ffffff !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="text-navy-800"]   { color: #e2e8f0 !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="text-navy-700"]   { color: #cbd5e1 !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="text-navy-600"]   { color: #94a3b8 !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="text-navy-500"]   { color: #94a3b8 !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="text-navy-400"]   { color: #94a3b8 !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="hover:bg-navy-50"]:hover  { background-color: rgba(255,255,255,0.05) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="hover:bg-navy-100"]:hover { background-color: rgba(255,255,255,0.08) !important; }
+
+/* input-field dentro del admin oscuro */
+html[data-admin-theme="dark"] .admin-scope .input-field {
+  background-color: #1e293b;
+  border-color: rgba(255,255,255,0.10);
+  color: #ffffff;
+}
+html[data-admin-theme="dark"] .admin-scope .input-field::placeholder { color: #94a3b8; }
+
+/* Button outline (Tailwind CVA) dentro del admin oscuro — el border-navy-900 se pierde */
+html[data-admin-theme="dark"] .admin-scope button[class~="border-navy-900"] {
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  color: #ffffff !important;
+}
+html[data-admin-theme="dark"] .admin-scope button[class~="border-navy-900"]:hover {
+  background-color: #ffffff !important;
+  color: #0D2040 !important;
+}
+
+/* Tema claro — defaults (para que los mismos componentes funcionen sin data attr) */
+html:not([data-admin-theme="dark"]) .admin-scope         { @apply bg-navy-50 text-navy-900; }
+html:not([data-admin-theme="dark"]) .admin-surface       { @apply bg-white border-navy-100; }
+html:not([data-admin-theme="dark"]) .admin-surface-alt   { @apply bg-navy-50 border-navy-100; }
+html:not([data-admin-theme="dark"]) .admin-text-title    { @apply text-navy-900; }
+html:not([data-admin-theme="dark"]) .admin-text-body     { @apply text-navy-700; }
+html:not([data-admin-theme="dark"]) .admin-text-muted    { @apply text-navy-500; }
+html:not([data-admin-theme="dark"]) .admin-text-subtle   { @apply text-navy-400; }
+html:not([data-admin-theme="dark"]) .admin-border        { @apply border-navy-100; }
+html:not([data-admin-theme="dark"]) .admin-divide > *+*  { @apply border-navy-100; }
+html:not([data-admin-theme="dark"]) .admin-input {
+  @apply bg-white border-navy-200 text-navy-900 placeholder-navy-400;
+}
+html:not([data-admin-theme="dark"]) .admin-row-hover:hover { @apply bg-navy-50; }
+html:not([data-admin-theme="dark"]) .admin-stripe         { @apply bg-navy-50; }
+
+/* ─── Color de acento del admin (data-admin-accent) ────────────────────── */
+html[data-admin-accent="gold"],
+html:not([data-admin-accent]) {
+  --admin-accent:       #F0B429;   /* gold-500 */
+  --admin-accent-hover: #DE911D;   /* gold-600 */
+  --admin-accent-fg:    #0D2040;   /* navy-900 */
+  --admin-accent-soft:  rgba(240, 180, 41, 0.15);
+}
+html[data-admin-accent="navy"] {
+  --admin-accent:       #0D2040;
+  --admin-accent-hover: #1F3A6F;
+  --admin-accent-fg:    #FFFFFF;
+  --admin-accent-soft:  rgba(13, 32, 64, 0.15);
+}
+html[data-admin-accent="pirate"] {
+  --admin-accent:       #DC2626;
+  --admin-accent-hover: #B91C1C;
+  --admin-accent-fg:    #FFFFFF;
+  --admin-accent-soft:  rgba(220, 38, 38, 0.15);
+}
+
+/* Utilidades del acento */
+.admin-accent-bg         { background-color: var(--admin-accent); color: var(--admin-accent-fg); }
+.admin-accent-bg:hover   { background-color: var(--admin-accent-hover); }
+.admin-accent-text       { color: var(--admin-accent); }
+.admin-accent-border     { border-color: var(--admin-accent); }
+.admin-accent-soft-bg    { background-color: var(--admin-accent-soft); }
+.admin-accent-ring:focus { --tw-ring-color: var(--admin-accent); }
+
+/* Densidad — spacing global */
+html[data-admin-density="compact"]     .admin-scope main { @apply p-4; }
+html[data-admin-density="normal"]      .admin-scope main { @apply p-8; }
+html[data-admin-density="comfortable"] .admin-scope main { @apply p-12; }
+
+/* Animaciones (pueden deshabilitarse desde Ajustes) */
+html[data-admin-animations="off"] .admin-scope * {
+  animation: none !important;
+  transition: none !important;
+}
+
 /* Scrollbar con tonos navy */
 ::-webkit-scrollbar {
   width: 8px;

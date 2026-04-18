@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, CalendarCheck, BarChart3,
+  LayoutDashboard, CalendarCheck, BarChart3, Settings,
   LogOut, ChevronRight,
 } from 'lucide-react'
 import { useAuth } from '@app/providers'
@@ -10,6 +10,7 @@ const navItems = [
   { to: '/admin',                icon: LayoutDashboard, label: 'Dashboard',      end: true  },
   { to: '/admin/reservaciones',  icon: CalendarCheck,   label: 'Reservaciones',  end: false },
   { to: '/admin/reportes',       icon: BarChart3,       label: 'Reportes',       end: false },
+  { to: '/admin/ajustes',        icon: Settings,        label: 'Ajustes',        end: false },
 ]
 
 export function AdminLayout() {
@@ -22,7 +23,7 @@ export function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen flex bg-navy-50">
+    <div className="admin-scope min-h-screen flex">
       {/* Sidebar */}
       <aside className="w-64 bg-navy-900 text-white flex flex-col fixed inset-y-0 left-0 z-40 shadow-card-lg">
         {/* Logo */}
@@ -44,7 +45,7 @@ export function AdminLayout() {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-4 py-4 space-y-1">
+        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
           {navItems.map(({ to, icon: Icon, label, end }) => (
             <NavLink
               key={to}
@@ -53,7 +54,7 @@ export function AdminLayout() {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors group ${
                   isActive
-                    ? 'bg-gold-400 text-navy-900'
+                    ? 'admin-accent-bg'
                     : 'text-navy-200 hover:text-white hover:bg-white/10'
                 }`
               }
@@ -83,10 +84,10 @@ export function AdminLayout() {
 
       {/* Main content */}
       <div className="flex-1 ml-64 flex flex-col min-h-screen">
-        <header className="bg-white border-b border-navy-100 h-16 flex items-center px-8 sticky top-0 z-30">
-          <h1 className="text-lg font-semibold text-navy-900">Panel de Administración</h1>
+        <header className="admin-surface border-b admin-border h-16 flex items-center px-8 sticky top-0 z-30">
+          <h1 className="text-lg font-semibold admin-text-title">Panel de Administración</h1>
         </header>
-        <main className="flex-1 p-8">
+        <main className="flex-1">
           <Outlet />
         </main>
       </div>

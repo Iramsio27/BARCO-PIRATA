@@ -4,6 +4,7 @@ import { PublicLayout } from '@components/layout/PublicLayout'
 import { AdminLayout } from '@components/layout/AdminLayout'
 import { ProtectedRoute } from '@components/common/ProtectedRoute'
 import { LoadingSpinner } from '@components/ui/LoadingSpinner'
+import { AdminThemeProvider } from '@app/providers/AdminThemeProvider'
 
 // Lazy-loading de páginas para mejor performance (code splitting)
 const HomePage           = lazy(() => import('@pages/public/HomePage'))
@@ -16,6 +17,7 @@ const DashboardPage      = lazy(() => import('@pages/admin/DashboardPage'))
 const ReservationsPage   = lazy(() => import('@pages/admin/ReservationsPage'))
 const SalePage           = lazy(() => import('@pages/admin/SalePage'))
 const ReportsPage        = lazy(() => import('@pages/admin/ReportsPage'))
+const AdminSettingsPage  = lazy(() => import('@pages/admin/AdminSettingsPage'))
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -49,7 +51,9 @@ export const router = createBrowserRouter([
   {
     element: (
       <ProtectedRoute>
-        <AdminLayout />
+        <AdminThemeProvider>
+          <AdminLayout />
+        </AdminThemeProvider>
       </ProtectedRoute>
     ),
     children: [
@@ -57,6 +61,7 @@ export const router = createBrowserRouter([
       { path: '/admin/reservaciones',            element: withSuspense(<ReservationsPage />) },
       { path: '/admin/venta/:reservationId',     element: withSuspense(<SalePage />) },
       { path: '/admin/reportes',                 element: withSuspense(<ReportsPage />) },
+      { path: '/admin/ajustes',                  element: withSuspense(<AdminSettingsPage />) },
     ],
   },
 
