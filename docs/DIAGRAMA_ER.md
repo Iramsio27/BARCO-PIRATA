@@ -37,6 +37,7 @@ erDiagram
         uuid id PK
         text contact_name
         text contact_phone
+        text contact_email "nullable, CHECK regex RFC"
         date date
         time time
         int number_of_people "CHECK 1-50"
@@ -60,7 +61,7 @@ erDiagram
         payment_method method
         numeric amount "≥ 0"
         payment_status status "pendiente|completado|fallido|reembolsado"
-        text stripe_payment_intent_id "nullable"
+        text external_payment_id "nullable (ID del proveedor externo)"
         text receipt_url "nullable"
         timestamptz processed_at
         uuid processed_by FK
@@ -140,9 +141,10 @@ erDiagram
 
 ```sql
 -- reservations
-idx_reservations_date    ON (date)
-idx_reservations_status  ON (status)
-idx_reservations_phone   ON (contact_phone)
+idx_reservations_date           ON (date)
+idx_reservations_status         ON (status)
+idx_reservations_phone          ON (contact_phone)
+idx_reservations_contact_email  ON (contact_email)
 
 -- payments
 idx_payments_reservation ON (reservation_id)
@@ -185,6 +187,7 @@ package_id         = ('CON_COMIDA', 'SOLO_BEBIDAS', 'SOLO_PASEO')
 | reservations | `number_of_people` | `BETWEEN 1 AND 50` |
 | reservations | `service_type` | `IN ('individual','grupal')` |
 | reservations | `subtotal`, `discount`, `total` | `>= 0` |
+| reservations | `contact_email` | `NULL OR regex RFC` |
 | payments | `amount` | `>= 0` |
 
 ---
@@ -212,6 +215,7 @@ Para cuando Mermaid no esté disponible (ej. impresiones a papel):
 │  id                  UUID PK                                      │
 │  contact_name        text NOT NULL                                │
 │  contact_phone       text NOT NULL                                │
+│  contact_email       text NULLABLE · CHECK regex RFC              │
 │  date · time         DATE · TIME                                  │
 │  number_of_people    INT CHECK 1-50                               │
 │  package_id          ENUM package_id                              │
@@ -235,7 +239,7 @@ Para cuando Mermaid no esté disponible (ej. impresiones a papel):
 │  method                 ENUM payment_method                       │
 │  amount                 NUMERIC(10,2) CHECK ≥ 0                   │
 │  status                 ENUM payment_status                       │
-│  stripe_payment_intent_id  text nullable                          │
+│  external_payment_id    text nullable (ID proveedor)              │
 │  receipt_url            text nullable                             │
 │  processed_at           timestamptz nullable                      │
 │  processed_by           UUID FK → auth.users                      │
@@ -276,9 +280,9 @@ Para cuando Mermaid no esté disponible (ej. impresiones a papel):
 | Triggers | 5 (2 updated_at + 2 audit + base) |
 | Funciones PL/pgSQL | 5 (`set_updated_at`, `audit_trigger`, `daily_report`, `is_staff`, `is_admin`) |
 | Políticas RLS | 13 |
-| Índices secundarios | 8 |
-| CHECK constraints | 6 |
+| Índices secundarios | 9 |
+| CHECK constraints | 7 |
 
 ---
 
-*Fuente: migraciones 00001 a 00004. Última actualización: abril 2026.*
+*Fuente: migraciones 00001 a 00006. Última actualización: abril 2026.*

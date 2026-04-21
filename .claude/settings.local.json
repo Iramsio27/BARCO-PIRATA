@@ -31,7 +31,15 @@
       "Bash(python -c \"import zipfile; z = zipfile.ZipFile\\('CASO_PRACTICO_Barco_Pirata.docx'\\); print\\('Archivos:', len\\(z.namelist\\(\\)\\)\\); print\\('Estructura OK:', '[Content_Types].xml' in z.namelist\\(\\) and 'word/document.xml' in z.namelist\\(\\)\\); z.close\\(\\)\")",
       "Bash(ls -lh *.docx)",
       "Bash(npm ls:*)",
-      "Bash(ls tailwind*)"
+      "Bash(ls tailwind*)",
+      "Bash(ls -la .env*)",
+      "Bash(ls supabase/)",
+      "Bash(python -c \"from docx import Document; d = Document\\('Caso práctico C3-ABD.docx'\\); [print\\(p.text\\) for p in d.paragraphs]\")",
+      "Bash(cd /tmp)",
+      "Bash(cp \"C:\\\\Users\\\\miram\\\\Downloads\\\\Caso práctico C3-ABD.docx\" ./caso.docx)",
+      "Bash(unzip -o caso.docx -d caso_extracted)",
+      "Bash(node entregables/generate-docx.cjs)",
+      "Bash(node entregables/generate-annexes.cjs)"
     ]
   }
 }

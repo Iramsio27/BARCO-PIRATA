@@ -166,7 +166,51 @@
     "cardInfo": "Process the payment securely with your credit or debit card.",
     "cardContinue": "Continue with Card",
     "payNow": "Pay now",
-    "paymentError": "Error processing payment"
+    "paymentError": "Error processing payment",
+    "viewReceipt": "View receipt",
+    "email": {
+      "title": "Email for your receipt",
+      "description": "We'll send the receipt with your reservation folio to this address. It's required to continue with payment.",
+      "placeholder": "you@example.com",
+      "errRequired": "Enter your email to receive the receipt.",
+      "errInvalid": "Enter a valid email (e.g. name@domain.com)."
+    },
+    "card_form": {
+      "number": "Card number",
+      "holder": "Cardholder name",
+      "holderPlaceholder": "Name as it appears on the card",
+      "holderShort": "Holder",
+      "expiry": "Expiry",
+      "expShort": "Exp.",
+      "cvc": "CVC",
+      "chip": "chip",
+      "payAmount": "Pay {{amount}}",
+      "processing": "Processing payment…",
+      "securityNote": "Payment processed securely · SSL-encrypted data",
+      "errNumber": "Enter a valid card number.",
+      "errHolder": "Enter the cardholder's name.",
+      "errExpiry": "Invalid expiration date.",
+      "errExpired": "The card has expired.",
+      "errCvc": "CVC must be 3 or 4 digits."
+    }
+  },
+  "receipt": {
+    "title": "Payment successful!",
+    "titlePending": "Reservation confirmed",
+    "subtitle": "Keep this receipt as proof of your reservation.",
+    "subtitlePending": "Present this receipt on the day of the tour.",
+    "document": "Reservation receipt",
+    "statusPaid": "Paid",
+    "statusPending": "Payment pending",
+    "paymentMethod": "Payment",
+    "totalPaid": "Total paid",
+    "folio": "Folio",
+    "thanks": "Thanks for sailing with us! ⚓",
+    "notFound": "Receipt not found.",
+    "backHome": "Back to home",
+    "print": "Print",
+    "emailSent": "We sent a copy of your receipt to {{email}}.",
+    "emailSimulated": "Demo mode: delivery to {{email}} was simulated (no mail provider configured)."
   },
   "validation": {
     "nameMin": "Name must be at least 3 characters",

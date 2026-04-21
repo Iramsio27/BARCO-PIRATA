@@ -11,6 +11,7 @@ const HomePage           = lazy(() => import('@pages/public/HomePage'))
 const ReservationPage    = lazy(() => import('@pages/public/ReservationPage'))
 const ConfirmationPage   = lazy(() => import('@pages/public/ConfirmationPage'))
 const PaymentPage        = lazy(() => import('@pages/public/PaymentPage'))
+const ReceiptPage        = lazy(() => import('@pages/public/ReceiptPage'))
 
 const LoginPage          = lazy(() => import('@pages/admin/LoginPage'))
 const DashboardPage      = lazy(() => import('@pages/admin/DashboardPage'))
@@ -38,6 +39,7 @@ export const router = createBrowserRouter([
       { path: '/reservar',              element: withSuspense(<ReservationPage />) },
       { path: '/reservar/confirmacion', element: withSuspense(<ConfirmationPage />) },
       { path: '/pago/:reservationId',   element: withSuspense(<PaymentPage />) },
+      { path: '/recibo/:reservationId', element: withSuspense(<ReceiptPage />) },
     ],
   },
 

@@ -63,6 +63,7 @@ function rowToReservation(r: Record<string, unknown>): Reservation {
     id: r.id as string,
     contactName: r.contact_name as string,
     contactPhone: r.contact_phone as string,
+    contactEmail: (r.contact_email as string | null) ?? null,
     date: r.date as string,
     time: r.time as string,
     numberOfPeople: r.number_of_people as number,

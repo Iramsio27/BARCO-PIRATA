@@ -9,6 +9,7 @@ const mapRow = (row: Record<string, unknown>): Reservation => ({
   id: row.id as string,
   contactName: row.contact_name as string,
   contactPhone: row.contact_phone as string,
+  contactEmail: (row.contact_email as string | null) ?? null,
   date: row.date as string,
   time: row.time as string,
   numberOfPeople: row.number_of_people as number,
@@ -82,6 +83,19 @@ export const reservationService = {
       page,
       pageSize,
     }
+  },
+
+  /** Guarda el correo del cliente en la reservación (se captura al pagar). */
+  async updateEmail(id: string, email: string): Promise<Reservation> {
+    const { data, error } = await supabase
+      .from('reservations')
+      .update({ contact_email: email.trim().toLowerCase() })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw new Error(error.message)
+    return mapRow(data as Record<string, unknown>)
   },
 
   async updateStatus(

@@ -1,0 +1,217 @@
+// ════════════════════════════════════════════════════════════════════════
+//   Edge Function: send-receipt
+//
+//   Envía por correo el comprobante de pago / reservación de un cliente.
+//
+//   Variables de entorno requeridas (en el proyecto Supabase):
+//     SUPABASE_URL              — provista automáticamente
+//     SUPABASE_ANON_KEY         — provista automáticamente
+//     RESEND_API_KEY            — clave API de https://resend.com
+//     RECEIPT_FROM              — "Barco Pirata <noreply@tu-dominio.com>"
+//                                 (si usas resend.dev en dev: "onboarding@resend.dev")
+//
+//   Si RESEND_API_KEY no está configurada, la función responde con
+//   { sent: false, simulated: true } — útil para que el front muestre el
+//   flujo completo mientras se termina de configurar el proveedor real.
+//
+//   Deploy:
+//     supabase functions deploy send-receipt --no-verify-jwt
+// ════════════════════════════════════════════════════════════════════════
+
+import { serve } from 'https://deno.land/std@0.203.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+}
+
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  })
+}
+
+const PACKAGE_LABELS: Record<string, string> = {
+  CON_COMIDA:   'Con Comida Incluida',
+  SOLO_BEBIDAS: 'Solo Bebidas',
+  SOLO_PASEO:   'Solo Paseo',
+}
+
+function formatCurrency(n: number): string {
+  return new Intl.NumberFormat('es-MX', {
+    style: 'currency', currency: 'MXN', minimumFractionDigits: 2,
+  }).format(n)
+}
+function formatDate(iso: string): string {
+  const d = new Date(`${iso}T00:00:00`)
+  return d.toLocaleDateString('es-MX', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  })
+}
+
+function buildHtml(r: Record<string, unknown>): string {
+  const total     = Number(r.total ?? 0)
+  const subtotal  = Number(r.subtotal ?? 0)
+  const discount  = Number(r.discount ?? 0)
+  const pkgLabel  = PACKAGE_LABELS[r.package_id as string] ?? (r.package_id as string)
+  const isPaid    = r.status === 'pagada'
+  const methodLbl = r.payment_method === 'tarjeta' ? 'Tarjeta'
+                  : r.payment_method === 'efectivo' ? 'Efectivo'
+                  : 'Pendiente'
+
+  return `<!doctype html>
+<html><head><meta charset="utf-8" />
+<title>Recibo Barco Pirata</title></head>
+<body style="margin:0;padding:0;background:#f0f4fa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f0f4fa;padding:32px 12px;">
+    <tr><td align="center">
+      <table role="presentation" width="560" cellpadding="0" cellspacing="0"
+        style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 18px rgba(13,32,64,0.08);">
+
+        <!-- Header -->
+        <tr><td style="background:linear-gradient(135deg,#0D2040 0%,#0a1a36 100%);padding:28px 32px;text-align:center;color:#F0B429;">
+          <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px;">Barco Pirata</div>
+          <div style="font-size:22px;font-weight:800;color:#F0B429;font-family:Georgia,'Times New Roman',serif;">
+            ${isPaid ? '¡Pago exitoso!' : 'Reservación confirmada'}
+          </div>
+          <div style="font-size:13px;color:#cbd5e1;margin-top:6px;">
+            ${isPaid ? 'Guarda este comprobante como respaldo de tu reservación.'
+                     : 'Presenta este comprobante el día del paseo.'}
+          </div>
+        </td></tr>
+
+        <!-- Badge -->
+        <tr><td style="padding:20px 32px 0 32px;text-align:center;">
+          <span style="display:inline-block;padding:6px 14px;border-radius:999px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;
+            ${isPaid
+              ? 'background:#dcfce7;color:#166534;border:1px solid #86efac;'
+              : 'background:#fef3c7;color:#92400e;border:1px solid #fcd34d;'}">
+            ${isPaid ? '✓ Pagado (' + methodLbl + ')' : 'Pendiente de pago'}
+          </span>
+        </td></tr>
+
+        <!-- Detalles -->
+        <tr><td style="padding:24px 32px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;color:#0D2040;">
+            ${row('Cliente',    r.contact_name)}
+            ${row('Teléfono',   r.contact_phone)}
+            ${row('Correo',     r.contact_email ?? '—')}
+            ${row('Fecha',      formatDate(String(r.date)))}
+            ${row('Hora',       String(r.time).slice(0,5))}
+            ${row('Personas',   String(r.number_of_people))}
+            ${row('Paquete',    pkgLabel)}
+          </table>
+        </td></tr>
+
+        <!-- Totales -->
+        <tr><td style="padding:0 32px 24px 32px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+            style="border-top:2px dashed #cbd5e1;padding-top:16px;font-size:14px;color:#0D2040;">
+            <tr><td style="color:#64748b;">Subtotal</td>
+                <td align="right">${formatCurrency(subtotal)}</td></tr>
+            ${discount > 0 ? `
+            <tr><td style="color:#b45309;font-weight:600;">Descuento de grupo</td>
+                <td align="right" style="color:#b45309;font-weight:600;">-${formatCurrency(discount)}</td></tr>` : ''}
+            <tr><td style="font-weight:800;font-size:16px;padding-top:10px;">${isPaid ? 'Total pagado' : 'Total a pagar'}</td>
+                <td align="right" style="font-weight:800;font-size:18px;color:#b45309;padding-top:10px;">
+                  ${formatCurrency(total)}
+                </td></tr>
+          </table>
+        </td></tr>
+
+        <!-- Folio -->
+        <tr><td style="background:#f8fafc;padding:18px 32px;text-align:center;border-top:1px solid #e2e8f0;">
+          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#94a3b8;margin-bottom:4px;">Folio</div>
+          <div style="font-family:'Courier New',monospace;font-size:12px;color:#334155;word-break:break-all;">${r.id}</div>
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="padding:18px 32px 24px 32px;text-align:center;font-size:12px;color:#94a3b8;">
+          ¡Gracias por navegar con nosotros! ⚓<br/>
+          Recinto Portuario, Puerto Peñasco, Sonora.
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body></html>`
+}
+
+function row(label: string, value: unknown): string {
+  return `<tr>
+    <td style="padding:6px 0;color:#64748b;width:35%;">${label}</td>
+    <td style="padding:6px 0;font-weight:600;color:#0D2040;" align="right">${String(value ?? '')}</td>
+  </tr>`
+}
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
+  try {
+    const { reservationId, email } = await req.json()
+    if (!reservationId || typeof reservationId !== 'string') {
+      return json({ error: 'reservationId es requerido' }, 400)
+    }
+    if (!email || typeof email !== 'string' ||
+        !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      return json({ error: 'email inválido' }, 400)
+    }
+
+    // Cliente de servicio para leer la reserva saltando RLS
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY')!,
+    )
+
+    const { data: reservation, error } = await supabase
+      .from('reservations')
+      .select('*')
+      .eq('id', reservationId)
+      .single()
+
+    if (error || !reservation) {
+      return json({ error: 'Reservación no encontrada' }, 404)
+    }
+
+    const html    = buildHtml(reservation)
+    const subject = reservation.status === 'pagada'
+      ? `Recibo Barco Pirata · ${formatDate(reservation.date)}`
+      : `Tu reservación Barco Pirata · ${formatDate(reservation.date)}`
+
+    const apiKey = Deno.env.get('RESEND_API_KEY')
+    const from   = Deno.env.get('RECEIPT_FROM') ?? 'Barco Pirata <onboarding@resend.dev>'
+
+    // Modo simulado (sin proveedor configurado): útil para demos.
+    if (!apiKey) {
+      console.log('[send-receipt] RESEND_API_KEY no configurada — simulando envío a', email)
+      return json({ sent: false, simulated: true, to: email })
+    }
+
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type':  'application/json',
+      },
+      body: JSON.stringify({
+        from, to: email, subject, html,
+      }),
+    })
+
+    if (!res.ok) {
+      const txt = await res.text()
+      console.error('[send-receipt] Resend error:', res.status, txt)
+      return json({ sent: false, error: `Resend ${res.status}: ${txt}` }, 502)
+    }
+
+    const body = await res.json()
+    return json({ sent: true, id: body.id ?? null, to: email })
+  } catch (err) {
+    console.error('[send-receipt] error:', err)
+    const msg = err instanceof Error ? err.message : String(err)
+    return json({ error: msg }, 500)
+  }
+})

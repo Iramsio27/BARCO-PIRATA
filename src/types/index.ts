@@ -9,6 +9,7 @@ export interface Reservation {
   id: string
   contactName: string
   contactPhone: string
+  contactEmail: string | null
   date: string           // ISO date string "YYYY-MM-DD"
   time: string           // "HH:mm"
   numberOfPeople: number

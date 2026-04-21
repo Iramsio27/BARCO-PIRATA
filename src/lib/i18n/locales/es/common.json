@@ -166,7 +166,51 @@
     "cardInfo": "Procesa el pago de forma segura con tu tarjeta de crédito o débito.",
     "cardContinue": "Continuar con Tarjeta",
     "payNow": "Pagar ahora",
-    "paymentError": "Error al procesar el pago"
+    "paymentError": "Error al procesar el pago",
+    "viewReceipt": "Ver recibo",
+    "email": {
+      "title": "Correo para tu comprobante",
+      "description": "Te enviaremos el recibo con el folio de tu reservación a este correo. Es obligatorio para continuar con el pago.",
+      "placeholder": "tucorreo@ejemplo.com",
+      "errRequired": "Ingresa tu correo para recibir el comprobante.",
+      "errInvalid": "Ingresa un correo válido (ej. nombre@dominio.com)."
+    },
+    "card_form": {
+      "number": "Número de tarjeta",
+      "holder": "Titular de la tarjeta",
+      "holderPlaceholder": "Nombre como aparece en la tarjeta",
+      "holderShort": "Titular",
+      "expiry": "Vencimiento",
+      "expShort": "Vence",
+      "cvc": "CVC",
+      "chip": "chip",
+      "payAmount": "Pagar {{amount}}",
+      "processing": "Procesando pago…",
+      "securityNote": "Pago procesado de forma segura · Datos encriptados SSL",
+      "errNumber": "Ingresa un número de tarjeta válido.",
+      "errHolder": "Ingresa el nombre del titular.",
+      "errExpiry": "Fecha de vencimiento inválida.",
+      "errExpired": "La tarjeta está vencida.",
+      "errCvc": "El CVC debe tener 3 o 4 dígitos."
+    }
+  },
+  "receipt": {
+    "title": "¡Pago exitoso!",
+    "titlePending": "Reservación confirmada",
+    "subtitle": "Guarda este comprobante como respaldo de tu reservación.",
+    "subtitlePending": "Presenta este comprobante el día del paseo.",
+    "document": "Comprobante de reservación",
+    "statusPaid": "Pagado",
+    "statusPending": "Pendiente de pago",
+    "paymentMethod": "Pago",
+    "totalPaid": "Total pagado",
+    "folio": "Folio",
+    "thanks": "¡Gracias por navegar con nosotros! ⚓",
+    "notFound": "Recibo no encontrado.",
+    "backHome": "Volver al inicio",
+    "print": "Imprimir",
+    "emailSent": "Enviamos una copia de tu comprobante a {{email}}.",
+    "emailSimulated": "Modo demo: el envío a {{email}} fue simulado (no se configuró el proveedor de correo)."
   },
   "validation": {
     "nameMin": "El nombre debe tener al menos 3 caracteres",
