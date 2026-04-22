@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { CalendarDays } from 'lucide-react'
 import { useReservationStore } from '@app/store/reservationStore'
 import { useReservationsByDate } from '@features/reservations/hooks/useReservations'
 import { formatCurrency } from '@utils/formatters'
@@ -8,9 +10,13 @@ import { Button } from '@components/ui/Button'
 import { Link } from 'react-router-dom'
 import { PACKAGES } from '@constants/index'
 import type { PackageId } from '@constants/index'
+import { CalendarPicker } from '@components/ui/CalendarPicker'
+import { format, parse } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 export default function ReservationsPage() {
   const { selectedDate, setSelectedDate } = useReservationStore()
+  const [calOpen, setCalOpen] = useState(false)
   const { data, isLoading } = useReservationsByDate(selectedDate)
   const reservations = data?.data ?? []
 
@@ -18,11 +24,22 @@ export default function ReservationsPage() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <h1 className="text-2xl font-display font-bold text-navy-900">Reservaciones</h1>
-        <input
-          type="date"
+        <button
+          type="button"
+          onClick={() => setCalOpen(true)}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-navy-200 bg-white text-navy-700 text-sm font-medium hover:border-navy-400 hover:bg-navy-50 transition-colors shadow-sm"
+        >
+          <CalendarDays className="w-4 h-4 text-navy-400" />
+          <span className="capitalize">
+            {format(parse(selectedDate, 'yyyy-MM-dd', new Date()), "d 'de' MMMM yyyy", { locale: es })}
+          </span>
+        </button>
+        <CalendarPicker
           value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          className="input-field w-auto"
+          onChange={setSelectedDate}
+          isOpen={calOpen}
+          onClose={() => setCalOpen(false)}
+          adminMode
         />
       </div>
 

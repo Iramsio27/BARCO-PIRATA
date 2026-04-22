@@ -16,6 +16,7 @@ interface CalendarPickerProps {
   closedWeekday?: number        // 0=dom … 6=sáb
   isOpen: boolean
   onClose: () => void
+  adminMode?: boolean           // sin restricciones de fecha
 }
 
 export function CalendarPicker({
@@ -24,6 +25,7 @@ export function CalendarPicker({
   closedWeekday = 1,
   isOpen,
   onClose,
+  adminMode = false,
 }: CalendarPickerProps) {
   const { i18n } = useTranslation()
   const dfLocale  = i18n.resolvedLanguage === 'en' ? enUS : es
@@ -69,14 +71,9 @@ export function CalendarPicker({
   let cur = gridStart
   while (cur <= gridEnd) { cells.push(cur); cur = addDays(cur, 1) }
 
-  const canPrev = isBefore(today, monthStart) || isSameDay(today, monthStart)
-    ? false
-    : true
-  // Solo permite retroceder si el mes anterior aún tiene días futuros
   const prevMonth = subMonths(viewMonth, 1)
-  const prevOk    = endOfMonth(prevMonth) >= today
-
-  const nextOk    = startOfMonth(addMonths(viewMonth, 1)) <= maxDate
+  const prevOk    = adminMode ? true : endOfMonth(prevMonth) >= today
+  const nextOk    = adminMode ? true : startOfMonth(addMonths(viewMonth, 1)) <= maxDate
 
   const weekdays = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
 
@@ -86,32 +83,30 @@ export function CalendarPicker({
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-navy-900/30 backdrop-blur-sm" />
 
       {/* ── Panel del calendario ── */}
       <div
         className="relative z-10 w-full max-w-sm animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Borde dorado sutil */}
-        <div className="rounded-2xl bg-gradient-to-br from-gold-400/60 to-gold-600/30 p-[1.5px] shadow-modal">
-          <div className="rounded-2xl bg-[#fdf8f0] overflow-hidden">
+        <div className="cal-border-wrap rounded-2xl bg-gradient-to-br from-navy-200/80 to-navy-100/50 p-[1.5px] shadow-card-lg">
+          <div className="cal-panel rounded-2xl bg-white overflow-hidden">
 
             {/* ── Cabecera ── */}
-            <div className="bg-[#f5ead8] border-b border-[#e8d5b0]/60 px-5 pt-5 pb-4">
+            <div className="cal-header bg-navy-50 border-b border-navy-100 px-5 pt-5 pb-4">
               {/* Título + cierre */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <CalendarDays className="w-5 h-5 text-gold-600" />
-                  <span className="font-display text-gold-700 text-sm font-bold tracking-widest uppercase">
+                  <CalendarDays className="w-5 h-5 text-navy-400" />
+                  <span className="font-display text-navy-600 text-sm font-bold tracking-widest uppercase">
                     Seleccionar Fecha
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="p-1.5 rounded-lg text-stone-400 hover:text-gold-600 hover:bg-black/5 transition-colors"
+                  className="p-1.5 rounded-lg text-navy-300 hover:text-navy-600 hover:bg-navy-100 transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -123,12 +118,12 @@ export function CalendarPicker({
                   type="button"
                   onClick={() => prevOk && setViewMonth(subMonths(viewMonth, 1))}
                   disabled={!prevOk}
-                  className="p-2 rounded-xl border border-[#d4b88a]/50 text-stone-500 hover:border-gold-500 hover:text-gold-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="p-2 rounded-xl border border-navy-200 text-navy-400 hover:border-navy-400 hover:text-navy-600 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
 
-                <span className="font-display font-bold text-stone-800 tracking-wider capitalize">
+                <span className="font-display font-bold text-navy-700 tracking-wider capitalize">
                   {format(viewMonth, 'MMMM yyyy', { locale: dfLocale })}
                 </span>
 
@@ -136,7 +131,7 @@ export function CalendarPicker({
                   type="button"
                   onClick={() => nextOk && setViewMonth(addMonths(viewMonth, 1))}
                   disabled={!nextOk}
-                  className="p-2 rounded-xl border border-[#d4b88a]/50 text-stone-500 hover:border-gold-500 hover:text-gold-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="p-2 rounded-xl border border-navy-200 text-navy-400 hover:border-navy-400 hover:text-navy-600 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -144,14 +139,14 @@ export function CalendarPicker({
             </div>
 
             {/* ── Cuerpo del calendario ── */}
-            <div className="px-4 pb-5 pt-3 bg-[#fdf8f0]">
+            <div className="cal-body px-4 pb-5 pt-3 bg-white">
 
               {/* Nombres de día */}
               <div className="grid grid-cols-7 mb-1">
                 {weekdays.map((d) => (
                   <div
                     key={d}
-                    className="text-center text-[10px] font-bold text-gold-600/70 tracking-widest py-1"
+                    className="text-center text-[10px] font-bold text-navy-400 tracking-widest py-1"
                   >
                     {d}
                   </div>
@@ -166,7 +161,7 @@ export function CalendarPicker({
                   const isPast      = isBefore(d, today)
                   const isOverMax   = d > maxDate
                   const isClosed    = d.getDay() === closedWeekday
-                  const isDisabled  = isPast || isOverMax || isClosed || !inMonth
+                  const isDisabled  = adminMode ? !inMonth : (isPast || isOverMax || isClosed || !inMonth)
                   const isSelected  = value === iso
                   const isToday     = isSameDay(d, today)
 
@@ -180,28 +175,27 @@ export function CalendarPicker({
                         'relative mx-auto flex h-9 w-9 items-center justify-center rounded-xl text-sm font-semibold transition-all',
                         // Seleccionado
                         isSelected && inMonth &&
-                          'bg-gradient-to-br from-gold-500 to-gold-600 text-white shadow-gold scale-110 font-bold',
+                          'cal-day-sel bg-navy-500 text-white shadow-card scale-110 font-bold',
                         // Hoy (no seleccionado)
                         isToday && !isSelected &&
-                          'border border-gold-500/70 text-gold-600 bg-gold-50/60',
+                          'border border-navy-300 text-navy-500 bg-navy-50',
                         // Disponible normal
                         !isSelected && !isDisabled &&
-                          'text-stone-700 hover:bg-[#f0e0c0]/60 hover:text-stone-900',
+                          'text-navy-700 hover:bg-navy-50 hover:text-navy-900',
                         // Fuera del mes
                         !inMonth &&
                           'opacity-0 pointer-events-none',
                         // Deshabilitado (pasado / cerrado / fuera de rango)
                         isDisabled && inMonth &&
-                          'text-stone-300 cursor-not-allowed',
+                          'text-navy-200 cursor-not-allowed',
                         // Cerrado (lunes) con tachado
                         isClosed && inMonth &&
-                          'line-through text-pirate-400',
+                          'line-through text-pirate-300',
                       )}
                     >
                       {format(d, 'd')}
-                      {/* Punto indicador "hoy" */}
                       {isToday && !isSelected && (
-                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-gold-500" />
+                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-navy-400" />
                       )}
                     </button>
                   )
@@ -209,18 +203,18 @@ export function CalendarPicker({
               </div>
 
               {/* Leyenda */}
-              <div className="flex items-center gap-4 mt-3 pt-3 border-t border-[#e8d5b0]/60">
+              <div className="flex items-center gap-4 mt-3 pt-3 border-t border-navy-100">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full border border-gold-500/70 bg-gold-50/60" />
-                  <span className="text-[10px] text-stone-400">Hoy</span>
+                  <span className="w-2.5 h-2.5 rounded-full border border-navy-300 bg-navy-50" />
+                  <span className="text-[10px] text-navy-400">Hoy</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-lg bg-gradient-to-br from-gold-500 to-gold-600" />
-                  <span className="text-[10px] text-stone-400">Seleccionado</span>
+                  <span className="w-2.5 h-2.5 rounded-lg bg-navy-500" />
+                  <span className="text-[10px] text-navy-400">Seleccionado</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-pirate-400 line-through font-semibold">L</span>
-                  <span className="text-[10px] text-stone-400">Cerrado</span>
+                  <span className="text-[10px] text-pirate-300 line-through font-semibold">L</span>
+                  <span className="text-[10px] text-navy-400">Cerrado</span>
                 </div>
               </div>
             </div>

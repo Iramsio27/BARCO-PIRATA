@@ -284,6 +284,25 @@ html[data-admin-accent="pirate"] {
 .admin-accent-soft-bg    { background-color: var(--admin-accent-soft); }
 .admin-accent-ring:focus { --tw-ring-color: var(--admin-accent); }
 
+/* ─── CalendarPicker en modo oscuro ────────────────────────────────────── */
+html[data-admin-theme="dark"] .admin-scope .cal-border-wrap {
+  background: linear-gradient(to bottom right, rgba(255,255,255,0.12), rgba(255,255,255,0.05)) !important;
+}
+html[data-admin-theme="dark"] .admin-scope .cal-panel {
+  background-color: #1a2844 !important;
+}
+html[data-admin-theme="dark"] .admin-scope .cal-header {
+  background-color: #0f1e38 !important;
+  border-bottom-color: rgba(255,255,255,0.08) !important;
+}
+html[data-admin-theme="dark"] .admin-scope .cal-body {
+  background-color: #1a2844 !important;
+}
+html[data-admin-theme="dark"] .admin-scope .cal-day-sel {
+  background-color: #F0B429 !important;
+  color: #0D2040 !important;
+}
+
 /* Densidad — spacing global */
 html[data-admin-density="compact"]     .admin-scope main { @apply p-4; }
 html[data-admin-density="normal"]      .admin-scope main { @apply p-8; }
