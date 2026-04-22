@@ -88,9 +88,10 @@ export function TimeSlotPicker({
           const slotKey   = SLOT_KEYS[slot.time] ?? 'morning'
           const available = availableInSlot(availability, slot.time)
           const isPast    = isToday && slot.time <= nowHHMM
-          const isFull    = !isPast && available <= 0
-          const notEnough = !isPast && !isFull && available < numberOfPeople
-          const fewLeft   = !isPast && !isFull && !notEnough && available <= 5
+          // Solo marcar como lleno si la consulta fue exitosa (no en caso de error)
+          const isFull    = !isPast && !isError && !!availability && available <= 0
+          const notEnough = !isPast && !isFull && !isError && !!availability && available < numberOfPeople
+          const fewLeft   = !isPast && !isFull && !notEnough && !isError && !!availability && available <= 5
           const isSelected = value === slot.time
           const disabled  = isPast || isFull || notEnough || isLoading
 

@@ -1,10 +1,11 @@
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { addDays, format, isToday, isTomorrow, startOfDay } from 'date-fns'
 import { es, enUS } from 'date-fns/locale'
 import { clsx } from 'clsx'
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { DATE_PICKER_DAYS } from '@constants/index'
+import { CalendarPicker } from './CalendarPicker'
 
 interface DateSlotPickerProps {
   value: string | null       // 'yyyy-MM-dd'
@@ -33,6 +34,7 @@ export function DateSlotPicker({
   const { t, i18n } = useTranslation()
   const today = useMemo(() => startOfDay(new Date()), [])
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [calOpen, setCalOpen] = useState(false)
 
   // date-fns locale según el idioma activo de i18n
   const dfLocale = i18n.resolvedLanguage === 'en' ? enUS : es
@@ -51,15 +53,26 @@ export function DateSlotPicker({
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <label className="label flex items-center gap-2 mb-0">
-          <Calendar className="w-4 h-4 text-gold-600" />
+          <CalendarDays className="w-4 h-4 text-gold-600" />
           {t('datePicker.label')} <span className="text-pirate-500">*</span>
         </label>
-        <div className="hidden md:flex gap-1">
+        <div className="flex gap-1">
+          {/* Botón calendario completo */}
+          <button
+            type="button"
+            onClick={() => setCalOpen(true)}
+            title="Abrir calendario"
+            className="p-1.5 rounded-lg border border-gold-400 bg-gold-50 text-gold-700 hover:bg-gold-400 hover:text-navy-900 transition-colors shadow-gold"
+          >
+            <CalendarDays className="w-4 h-4" />
+          </button>
+
+          {/* Flechas scroll (solo desktop) */}
           <button
             type="button"
             onClick={() => scroll('left')}
             aria-label={t('datePicker.prev')}
-            className="p-1.5 rounded-lg border border-navy-200 text-navy-600 hover:bg-navy-50 hover:border-navy-400 transition-colors"
+            className="hidden md:flex p-1.5 rounded-lg border border-navy-200 text-navy-600 hover:bg-navy-50 hover:border-navy-400 transition-colors items-center"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -67,12 +80,21 @@ export function DateSlotPicker({
             type="button"
             onClick={() => scroll('right')}
             aria-label={t('datePicker.next')}
-            className="p-1.5 rounded-lg border border-navy-200 text-navy-600 hover:bg-navy-50 hover:border-navy-400 transition-colors"
+            className="hidden md:flex p-1.5 rounded-lg border border-navy-200 text-navy-600 hover:bg-navy-50 hover:border-navy-400 transition-colors items-center"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
+
+      {/* Modal calendario completo */}
+      <CalendarPicker
+        value={value}
+        onChange={onChange}
+        closedWeekday={closedWeekday}
+        isOpen={calOpen}
+        onClose={() => setCalOpen(false)}
+      />
 
       <div
         ref={scrollRef}
