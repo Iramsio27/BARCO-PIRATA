@@ -1,4 +1,5 @@
 import { Users, CalendarCheck, DollarSign, TrendingUp } from 'lucide-react'
+import { ClimaMarino } from '@components/ClimaMarino'
 import { useReservationStore } from '@app/store/reservationStore'
 import { useReservationsByDate } from '@features/reservations/hooks/useReservations'
 import { formatCurrency, formatDate } from '@utils/formatters'
@@ -58,6 +59,11 @@ export default function DashboardPage() {
             </div>
           </Card>
         ))}
+      </div>
+
+      {/* Clima marino */}
+      <div className="mb-8">
+        <ClimaMarino />
       </div>
 
       {/* Tabla de reservaciones */}

@@ -17,6 +17,7 @@ export function PublicHeader() {
   const navLinks = [
     { to: '/',         label: t('header.home') },
     { to: '/reservar', label: t('header.reserve') },
+    { to: '/clima',    label: t('header.weather') },
   ]
 
   return (

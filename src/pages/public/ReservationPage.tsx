@@ -19,6 +19,7 @@ import { Input } from '@components/ui/Input'
 import { Card, CardHeader, CardTitle } from '@components/ui/Card'
 import { DateSlotPicker } from '@components/ui/DateSlotPicker'
 import { TimeSlotPicker } from '@components/ui/TimeSlotPicker'
+import { ClimaResumen } from '@components/ClimaResumen'
 
 export default function ReservationPage() {
   const { t, i18n } = useTranslation()
@@ -108,6 +109,9 @@ export default function ReservationPage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
+        {/* ─── Clima del día seleccionado ──────────────────────────── */}
+        <ClimaResumen fecha={watchedDate || null} />
 
         {/* ─── Paso 1: Fecha y horario ─────────────────────────────── */}
         <Card className="border border-navy-100">

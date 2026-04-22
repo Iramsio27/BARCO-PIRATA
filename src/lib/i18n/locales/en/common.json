@@ -2,6 +2,7 @@
   "header": {
     "home": "Home",
     "reserve": "Book",
+    "weather": "Weather",
     "reserveNow": "Book Now",
     "menu": "Menu",
     "language": "Language"
