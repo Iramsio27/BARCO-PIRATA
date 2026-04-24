@@ -22,13 +22,10 @@ export function useProcessPayment() {
   return useMutation({
     mutationFn: async (dto: ProcessPaymentDto) => {
       const payment = await paymentService.recordPayment(dto)
-      // Actualiza el estado de la reservación a "pagada"
-      await reservationService.updateStatus(
-        dto.reservationId,
-        'pagada',
-        dto.method,
-        payment.id
-      )
+      const nextStatus = dto.method === 'efectivo' && !dto.adminConfirm
+        ? 'confirmada'
+        : 'pagada'
+      await reservationService.updateStatus(dto.reservationId, nextStatus, dto.method, payment.id)
       return payment
     },
     onSuccess: (_payment, dto) => {

@@ -72,6 +72,8 @@ export interface ProcessPaymentDto {
   method: PaymentMethod
   /** Solo requerido cuando method === 'tarjeta' */
   stripePaymentMethodId?: string
+  /** Indica que el admin está confirmando la recepción física del efectivo */
+  adminConfirm?: boolean
 }
 
 // ─── Respuestas API ───────────────────────────────────────────────────────

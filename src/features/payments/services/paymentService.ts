@@ -34,7 +34,7 @@ export const paymentService = {
         reservation_id: dto.reservationId,
         method: dto.method,
         amount: 0, // Se actualiza desde el backend con el monto real
-        status: dto.method === 'efectivo' ? 'completado' : 'pendiente',
+        status: dto.method === 'efectivo' && dto.adminConfirm ? 'completado' : 'pendiente',
         stripe_payment_intent_id: dto.stripePaymentMethodId ?? null,
       })
       .select()

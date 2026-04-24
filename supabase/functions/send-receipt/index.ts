@@ -57,10 +57,11 @@ function buildHtml(r: Record<string, unknown>): string {
   const subtotal  = Number(r.subtotal ?? 0)
   const discount  = Number(r.discount ?? 0)
   const pkgLabel  = PACKAGE_LABELS[r.package_id as string] ?? (r.package_id as string)
-  const isPaid    = r.status === 'pagada'
-  const methodLbl = r.payment_method === 'tarjeta' ? 'Tarjeta'
-                  : r.payment_method === 'efectivo' ? 'Efectivo'
-                  : 'Pendiente'
+  const isPaid        = r.status === 'pagada'
+  const isCashPending = !isPaid && r.payment_method === 'efectivo'
+  const methodLbl     = r.payment_method === 'tarjeta' ? 'Tarjeta'
+                      : r.payment_method === 'efectivo' ? 'Efectivo'
+                      : 'Pendiente'
 
   return `<!doctype html>
 <html><head><meta charset="utf-8" />
@@ -88,8 +89,10 @@ function buildHtml(r: Record<string, unknown>): string {
           <span style="display:inline-block;padding:6px 14px;border-radius:999px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;
             ${isPaid
               ? 'background:#dcfce7;color:#166534;border:1px solid #86efac;'
-              : 'background:#fef3c7;color:#92400e;border:1px solid #fcd34d;'}">
-            ${isPaid ? '✓ Pagado (' + methodLbl + ')' : 'Pendiente de pago'}
+              : isCashPending
+                ? 'background:#fef3c7;color:#92400e;border:1px solid #fcd34d;'
+                : 'background:#e0f2fe;color:#075985;border:1px solid #7dd3fc;'}">
+            ${isPaid ? '✓ Pagado (' + methodLbl + ')' : isCashPending ? '💵 Por pagar en el lugar' : 'Pendiente de pago'}
           </span>
         </td></tr>
 

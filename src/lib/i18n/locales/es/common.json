@@ -203,6 +203,7 @@
     "document": "Comprobante de reservación",
     "statusPaid": "Pagado",
     "statusPending": "Pendiente de pago",
+    "statusCashPending": "Por pagar en el lugar",
     "paymentMethod": "Pago",
     "totalPaid": "Total pagado",
     "folio": "Folio",

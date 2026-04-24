@@ -40,6 +40,7 @@ export default function ReceiptPage() {
 
   const pkg = PACKAGES[reservation.packageId as PackageId]
   const isPaid = reservation.status === 'pagada'
+  const isCashPending = !isPaid && reservation.paymentMethod === 'efectivo'
 
   return (
     <div className="container-app py-12 max-w-lg print:py-4">
@@ -86,12 +87,16 @@ export default function ReceiptPage() {
               'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider',
               isPaid
                 ? 'bg-green-100 text-green-800 border border-green-300'
-                : 'bg-gold-100 text-gold-800 border border-gold-300',
+                : isCashPending
+                  ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                  : 'bg-gold-100 text-gold-800 border border-gold-300',
             ].join(' ')}
           >
             {isPaid
               ? <>{reservation.paymentMethod === 'tarjeta' ? <CreditCard className="w-3.5 h-3.5" /> : <Banknote className="w-3.5 h-3.5" />} {t('receipt.statusPaid')}</>
-              : <>{t('receipt.statusPending')}</>}
+              : isCashPending
+                ? <><Banknote className="w-3.5 h-3.5" /> {t('receipt.statusCashPending')}</>
+                : <>{t('receipt.statusPending')}</>}
           </span>
         </div>
 
@@ -127,7 +132,7 @@ export default function ReceiptPage() {
             label={t('confirmation.fields.package')}
             value={`${pkg?.icon ?? ''} ${pkg ? t(`packages.${pkg.id}.label`) : ''}`}
           />
-          {isPaid && (
+          {(isPaid || isCashPending) && (
             <InfoRow
               icon={reservation.paymentMethod === 'tarjeta'
                 ? <CreditCard className="w-4 h-4" />

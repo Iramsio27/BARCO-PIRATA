@@ -26,7 +26,7 @@ export default function SalePage() {
   const isPagada = reservation.status === 'pagada' || paid
 
   const handleConfirmCash = async () => {
-    await processPayment({ reservationId: reservation.id, method: 'efectivo' })
+    await processPayment({ reservationId: reservation.id, method: 'efectivo', adminConfirm: true })
     setPaid(true)
   }
 

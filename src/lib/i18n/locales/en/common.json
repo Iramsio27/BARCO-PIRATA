@@ -203,6 +203,7 @@
     "document": "Reservation receipt",
     "statusPaid": "Paid",
     "statusPending": "Payment pending",
+    "statusCashPending": "Pay on arrival",
     "paymentMethod": "Payment",
     "totalPaid": "Total paid",
     "folio": "Folio",
