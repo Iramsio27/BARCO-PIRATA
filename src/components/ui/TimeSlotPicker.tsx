@@ -23,6 +23,16 @@ const SLOT_KEYS: Record<string, string> = {
   '17:00': 'sunset',
 }
 
+// Metadatos de los slots predefinidos para lookup rápido
+const KNOWN_SLOTS = Object.fromEntries(TIME_SLOTS.map(s => [s.time, s]))
+
+function customSlotMeta(time: string) {
+  const h = parseInt(time.split(':')[0], 10)
+  const label = h < 11 ? 'Mañana' : h < 14 ? 'Mediodía' : h < 18 ? 'Tarde' : 'Atardecer'
+  const icon  = h < 11 ? '🌅'     : h < 14 ? '🌞'       : h < 18 ? '🌤️'    : '🌇'
+  return { time, label, icon, description: '' }
+}
+
 /**
  * Muestra los 5 horarios disponibles como tarjetas, consultando en vivo
  * el cupo restante en Supabase vía `useAvailability`.
@@ -45,9 +55,8 @@ export function TimeSlotPicker({
   const { t } = useTranslation()
   const { data: availability, isLoading, isError } = useAvailability(date)
 
-  const visibleSlots = activeTimeSlots
-    ? TIME_SLOTS.filter(s => activeTimeSlots.includes(s.time))
-    : TIME_SLOTS
+  const visibleSlots = (activeTimeSlots ? [...activeTimeSlots].sort() : TIME_SLOTS.map(s => s.time))
+    .map(time => KNOWN_SLOTS[time] ?? customSlotMeta(time))
 
   // Detecta si la fecha seleccionada es HOY para saber qué slots ya pasaron.
   const todayIso = format(new Date(), 'yyyy-MM-dd')
@@ -91,7 +100,7 @@ export function TimeSlotPicker({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {visibleSlots.map((slot) => {
-          const slotKey   = SLOT_KEYS[slot.time] ?? 'morning'
+          const slotKey   = SLOT_KEYS[slot.time] ?? null
           const available = availableInSlot(availability, slot.time)
           const isPast    = isToday && slot.time <= nowHHMM
           // Solo marcar como lleno si la consulta fue exitosa (no en caso de error)
@@ -139,7 +148,7 @@ export function TimeSlotPicker({
                     'text-[11px] font-bold tracking-wider uppercase mt-1',
                     isSelected ? 'text-gold-400' : isPast ? 'text-navy-300' : 'text-gold-600',
                   )}>
-                    {t(`timePicker.slots.${slotKey}`)}
+                    {slotKey ? t(`timePicker.slots.${slotKey}`) : slot.label}
                   </div>
                 </div>
                 <span className="text-2xl" aria-hidden>{slot.icon}</span>
@@ -150,7 +159,7 @@ export function TimeSlotPicker({
                 'text-xs mb-3',
                 isSelected ? 'text-navy-200' : isPast ? 'text-navy-300' : 'text-navy-500',
               )}>
-                {t(`timePicker.descriptions.${slotKey}`)}
+                {slotKey ? t(`timePicker.descriptions.${slotKey}`) : slot.description}
               </p>
 
               {/* Estado dinámico */}

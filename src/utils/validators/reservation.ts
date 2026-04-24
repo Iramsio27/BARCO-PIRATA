@@ -1,13 +1,10 @@
 import { z } from 'zod'
 import { format, addDays } from 'date-fns'
 import i18n from '@lib/i18n'
-import { TIME_SLOTS, MAX_ADVANCE_DAYS } from '@constants/index'
+import { MAX_ADVANCE_DAYS } from '@constants/index'
 
 const todayStr   = () => format(new Date(), 'yyyy-MM-dd')
 const maxDateStr = () => format(addDays(new Date(), MAX_ADVANCE_DAYS), 'yyyy-MM-dd')
-
-// Valores permitidos para la hora: únicamente los slots predefinidos
-const VALID_TIMES = TIME_SLOTS.map(s => s.time) as [string, ...string[]]
 
 // Helper: traduce con i18n. Se evalúa al construir el schema.
 const tt = (key: string, opts?: Record<string, unknown>) =>
@@ -36,12 +33,9 @@ function buildReservationSchema() {
       .refine((d) => d >= todayStr(),   { message: tt('validation.datePast') })
       .refine((d) => d <= maxDateStr(), { message: tt('validation.dateFuture', { days: MAX_ADVANCE_DAYS }) }),
 
-    // Solo aceptamos los horarios predefinidos (coinciden con valid_time_slots() en DB)
     time: z
-      .enum(VALID_TIMES, {
-        required_error:     tt('validation.timeRequired'),
-        invalid_type_error: tt('validation.timeInvalid'),
-      }),
+      .string({ required_error: tt('validation.timeRequired') })
+      .regex(/^([01]\d|2[0-3]):[0-5]\d$/, tt('validation.timeInvalid')),
 
     numberOfPeople: z
       .number({ invalid_type_error: tt('validation.peopleNumber') })

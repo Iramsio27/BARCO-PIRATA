@@ -4,6 +4,7 @@ import { clsx } from 'clsx'
 import { format, parse } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useBusinessSettings, useUpdateBusinessSettings } from '@features/settings/hooks/useBusinessSettings'
+import { useAdminHeaderSlot } from '@lib/AdminHeaderSlot'
 import { fetchPronostico14Dias } from '@services/weatherService'
 import { TIME_SLOTS } from '@constants/index'
 import { Button } from '@components/ui/Button'
@@ -29,16 +30,17 @@ interface DiaPronostico {
 }
 
 function Section({
-  icon: Icon, title, description, children,
+  icon: Icon, title, description, children, className = '',
 }: {
   icon: React.ComponentType<{ className?: string }>
   title: string
   description?: string
   children: React.ReactNode
+  className?: string
 }) {
   return (
     <section
-      className="rounded-xl p-6"
+      className={clsx('rounded-xl p-6', className)}
       style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}
     >
       <header className="flex items-start gap-3 mb-5">
@@ -174,6 +176,7 @@ function ClimaDesfavorable({
 export default function SchedulePage() {
   const { data: settings, isLoading } = useBusinessSettings()
   const { mutateAsync: save, isPending: saving } = useUpdateBusinessSettings()
+  const { setSlot } = useAdminHeaderSlot()
   const [saved, setSaved] = useState(false)
 
   const [closedWeekday, setClosedWeekday] = useState(settings?.closedWeekday   ?? 1)
@@ -181,6 +184,16 @@ export default function SchedulePage() {
   const [boatCapacity,  setBoatCapacity]  = useState(settings?.boatCapacity    ?? 40)
   const [closedDates,   setClosedDates]   = useState<string[]>(settings?.closedDates ?? [])
   const [pickingDate,   setPickingDate]   = useState(false)
+  const [newHour,       setNewHour]       = useState('')
+  const [newMinute,     setNewMinute]     = useState('')
+  const [newTimeError,  setNewTimeError]  = useState<string | null>(null)
+
+  const slotMeta = (time: string) => {
+    const h = parseInt(time.split(':')[0], 10)
+    const label = h < 11 ? 'Mañana' : h < 14 ? 'Mediodía' : h < 18 ? 'Tarde' : 'Atardecer'
+    const icon  = h < 11 ? '🌅'     : h < 14 ? '🌞'       : h < 18 ? '🌤️'    : '🌇'
+    return { label, icon }
+  }
 
   useEffect(() => {
     if (!settings) return
@@ -190,14 +203,38 @@ export default function SchedulePage() {
     setClosedDates(settings.closedDates)
   }, [settings])
 
-  const toggleSlot = (time: string) => {
-    setActiveSlots(prev => {
-      if (prev.includes(time)) {
-        if (prev.length <= 1) return prev
-        return prev.filter(t => t !== time)
-      }
-      return [...prev, time].sort()
-    })
+  const handleHourChange = (val: string) => {
+    const digits = val.replace(/\D/g, '').slice(0, 2)
+    setNewHour(digits)
+    setNewTimeError(null)
+    if (digits.length === 2 || (digits.length === 1 && parseInt(digits, 10) > 2)) {
+      document.getElementById('admin-slot-min')?.focus()
+    }
+  }
+
+  const handleMinuteChange = (val: string) => {
+    const digits = val.replace(/\D/g, '').slice(0, 2)
+    setNewMinute(digits)
+    setNewTimeError(null)
+  }
+
+  const addSlot = () => {
+    const h = parseInt(newHour, 10)
+    const m = parseInt(newMinute, 10)
+    if (newHour === '' || newMinute === '') { setNewTimeError('Ingresa hora y minutos'); return }
+    if (isNaN(h) || h < 0 || h > 23) { setNewTimeError('Hora inválida (0–23)'); return }
+    if (isNaN(m) || m < 0 || m > 59) { setNewTimeError('Minutos inválidos (0–59)'); return }
+    const time = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+    if (activeSlots.includes(time)) { setNewTimeError('Este horario ya está en la lista'); return }
+    setActiveSlots(prev => [...prev, time].sort())
+    setNewHour('')
+    setNewMinute('')
+    setNewTimeError(null)
+  }
+
+  const removeSlot = (time: string) => {
+    if (activeSlots.length <= 1) return
+    setActiveSlots(prev => prev.filter(t => t !== time))
   }
 
   const addClosedDate = (iso: string) => {
@@ -215,6 +252,24 @@ export default function SchedulePage() {
     setTimeout(() => setSaved(false), 2500)
   }
 
+  // Enviar botón de guardar al header
+  useEffect(() => {
+    setSlot(
+      <div className="flex items-center gap-4">
+        {saved && (
+          <span className="text-sm text-green-600 font-semibold flex items-center gap-1.5">
+            <Check className="w-4 h-4" /> Guardado
+          </span>
+        )}
+        <Button variant="accent" size="lg" onClick={handleSave} isLoading={saving}>
+          <Save className="w-5 h-5" />
+          Guardar
+        </Button>
+      </div>
+    )
+    return () => setSlot(null)
+  }, [saving, saved, setSlot])
+
   if (isLoading) return (
     <div className="flex items-center justify-center py-20" style={{ color: 'var(--text-muted)' }}>
       Cargando configuración…
@@ -222,179 +277,74 @@ export default function SchedulePage() {
   )
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      {/* Encabezado */}
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          Configura los días y horarios en que opera el barco.
-        </p>
-        <div className="flex items-center gap-3 shrink-0">
-          {saved && (
-            <span className="text-sm text-green-600 font-medium flex items-center gap-1.5">
-              <Check className="w-4 h-4" /> Guardado
-            </span>
-          )}
-          <Button variant="accent" size="sm" onClick={handleSave} isLoading={saving}>
-            <Save className="w-4 h-4" />
-            Guardar cambios
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-6">
+      {/* ── Encabezado ── */}
+      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+        Configura los días y horarios en que opera el barco.
+      </p>
 
-      {/* ── Día de cierre semanal ── */}
-      <Section
-        icon={CalendarOff}
-        title="Día de cierre semanal"
-        description="El barco no opera este día cada semana."
-      >
-        <div className="bp-weekday-grid">
-          {WEEKDAYS.map(({ value, label }) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setClosedWeekday(value)}
-              className={clsx('bp-weekday-btn', closedWeekday === value && 'closed')}
-            >
-              {label.slice(0, 3)}
-            </button>
-          ))}
-        </div>
-        <p className="text-xs mt-3" style={{ color: 'var(--text-muted)' }}>
-          Día seleccionado: <strong style={{ color: 'var(--text-body)' }}>{WEEKDAYS.find(d => d.value === closedWeekday)?.label}</strong>
-        </p>
-      </Section>
-
-      {/* ── Fechas específicas cerradas ── */}
-      <Section
-        icon={CalendarOff}
-        title="Días específicos cerrados"
-        description="Cierra fechas puntuales además del día semanal: feriados, mantenimiento, mal clima, etc."
-      >
-        {closedDates.length === 0 ? (
-          <p className="text-sm mb-3" style={{ color: 'var(--text-muted)' }}>Sin fechas adicionales cerradas.</p>
-        ) : (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {closedDates.map((iso) => (
-              <div
-                key={iso}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pirate-50 border border-pirate-200 text-sm"
+      {/* ── Fila 1: Día de cierre + Capacidad (2 columnas) ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Section
+          icon={CalendarOff}
+          title="Día de cierre semanal"
+          description="El barco no opera este día cada semana."
+          className="h-full"
+        >
+          <div className="bp-weekday-grid">
+            {WEEKDAYS.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setClosedWeekday(value)}
+                className={clsx('bp-weekday-btn', closedWeekday === value && 'closed')}
               >
-                <CalendarOff className="w-3.5 h-3.5 text-pirate-500 shrink-0" />
-                <span className="font-medium text-pirate-700 capitalize">
-                  {format(parse(iso, 'yyyy-MM-dd', new Date()), "EEE d 'de' MMM yyyy", { locale: es })}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => removeClosedDate(iso)}
-                  className="ml-1 text-pirate-400 hover:text-pirate-700 transition-colors"
-                  aria-label="Quitar fecha"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
+                {label.slice(0, 3)}
+              </button>
             ))}
           </div>
-        )}
+          <p className="text-xs mt-3" style={{ color: 'var(--text-muted)' }}>
+            Día seleccionado:{' '}
+            <strong style={{ color: 'var(--text-body)' }}>
+              {WEEKDAYS.find(d => d.value === closedWeekday)?.label}
+            </strong>
+          </p>
+        </Section>
 
-        <Button variant="outline" size="sm" onClick={() => setPickingDate(true)}>
-          <Plus className="w-4 h-4" />
-          Agregar fecha cerrada
-        </Button>
-
-        <CalendarPicker
-          value={null}
-          onChange={addClosedDate}
-          isOpen={pickingDate}
-          onClose={() => setPickingDate(false)}
-          adminMode
-        />
-      </Section>
-
-      {/* ── Horarios activos ── */}
-      <Section
-        icon={Clock}
-        title="Horarios activos"
-        description="Desactiva los slots que no se ofrezcan esta temporada. Debe quedar al menos uno activo."
-      >
-        <div className="space-y-2">
-          {TIME_SLOTS.map((slot) => {
-            const isActive = activeSlots.includes(slot.time)
-            return (
-              <label
-                key={slot.time}
-                className={clsx('bp-slot-row', isActive ? 'active' : 'inactive')}
+        <Section
+          icon={Ship}
+          title="Capacidad del barco"
+          description="Número máximo de personas por salida."
+          className="h-full"
+        >
+          <div className="flex items-center gap-5 mb-5">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setBoatCapacity(c => Math.max(1, c - 1))}
+                className="w-10 h-10 rounded-lg border-2 flex items-center justify-center transition-colors hover:border-[var(--accent)]"
+                style={{ borderColor: 'var(--border)', color: 'var(--text-body)' }}
               >
-                <div className="flex items-center gap-3 flex-1">
-                  <span className="text-xl shrink-0">{slot.icon}</span>
-                  <div>
-                    <p className="font-semibold text-sm" style={{ color: 'var(--text-body)' }}>{slot.label}</p>
-                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{slot.description}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="font-mono text-sm font-bold" style={{ color: 'var(--text-title)' }}>{slot.time}</span>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={isActive}
-                    onClick={() => toggleSlot(slot.time)}
-                    className={clsx(
-                      'relative inline-flex items-center w-11 h-6 rounded-full transition-colors',
-                      isActive ? 'bg-gold-400' : 'bg-navy-100 border border-navy-200',
-                    )}
-                  >
-                    <span className={clsx(
-                      'inline-block w-4 h-4 rounded-full bg-white shadow transition-transform',
-                      isActive ? 'translate-x-6' : 'translate-x-1',
-                    )} />
-                  </button>
-                </div>
-              </label>
-            )
-          })}
-        </div>
-        <p className="text-xs mt-3" style={{ color: 'var(--text-muted)' }}>
-          {activeSlots.length} de {TIME_SLOTS.length} horarios activos.
-        </p>
-      </Section>
-
-      {/* ── Capacidad del barco ── */}
-      <Section
-        icon={Ship}
-        title="Capacidad del barco"
-        description="Número máximo de personas por salida. Afecta la disponibilidad en tiempo real."
-      >
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setBoatCapacity(c => Math.max(1, c - 1))}
-              className="w-10 h-10 rounded-lg border flex items-center justify-center transition-colors hover:border-[var(--accent)]"
-              style={{ borderColor: 'var(--border)', color: 'var(--text-body)' }}
-            >
-              <Minus size={16} />
-            </button>
-            <span
-              className="w-16 text-center text-2xl font-bold font-display tabular-nums"
-              style={{ color: 'var(--text-title)' }}
-            >
-              {boatCapacity}
-            </span>
-            <button
-              type="button"
-              onClick={() => setBoatCapacity(c => Math.min(200, c + 1))}
-              className="w-10 h-10 rounded-lg border flex items-center justify-center transition-colors hover:border-[var(--accent)]"
-              style={{ borderColor: 'var(--border)', color: 'var(--text-body)' }}
-            >
-              <Plus size={16} />
-            </button>
+                <Minus size={16} />
+              </button>
+              <span
+                className="w-16 text-center text-3xl font-black font-display tabular-nums"
+                style={{ color: 'var(--text-title)' }}
+              >
+                {boatCapacity}
+              </span>
+              <button
+                type="button"
+                onClick={() => setBoatCapacity(c => Math.min(200, c + 1))}
+                className="w-10 h-10 rounded-lg border-2 flex items-center justify-center transition-colors hover:border-[var(--accent)]"
+                style={{ borderColor: 'var(--border)', color: 'var(--text-body)' }}
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>personas<br />por salida</span>
           </div>
-          <span className="text-sm" style={{ color: 'var(--text-muted)' }}>personas por salida</span>
-        </div>
-
-        {/* Progress bar */}
-        <div className="mt-4">
-          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-surface-alt)' }}>
+          <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-surface-alt)' }}>
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{
@@ -403,27 +353,175 @@ export default function SchedulePage() {
               }}
             />
           </div>
-          <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
-            {boatCapacity} de 200 personas máx. ({Math.round((boatCapacity / 200) * 100)}%)
+          <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
+            {boatCapacity} de 200 máx. · {Math.round((boatCapacity / 200) * 100)}% de capacidad
           </p>
+        </Section>
+      </div>
+
+      {/* ── Fila 2: Horarios activos (ancho completo) ── */}
+      <Section
+        icon={Clock}
+        title="Horarios activos"
+        description="Agrega y elimina los horarios en que opera el barco. Debe quedar al menos uno."
+      >
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3 mb-5">
+          {[...activeSlots].sort().map((time) => {
+            const meta = slotMeta(time)
+            return (
+              <div
+                key={time}
+                className="group relative flex flex-col items-center text-center gap-1 py-5 px-3 rounded-xl border-2 transition-all duration-150"
+                style={{ background: 'var(--bg-surface-alt)', borderColor: 'var(--border)' }}
+                onMouseEnter={e => { if (activeSlots.length > 1) (e.currentTarget as HTMLElement).style.borderColor = 'rgba(220,38,38,0.35)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)' }}
+              >
+                <span className="text-2xl mb-1 select-none">{meta.icon}</span>
+                <span className="font-mono font-black text-xl tracking-tight" style={{ color: 'var(--text-title)' }}>
+                  {time}
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-widest mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                  {meta.label}
+                </span>
+                {activeSlots.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeSlot(time)}
+                    className="absolute -top-2.5 -right-2.5 w-6 h-6 rounded-full bg-pirate-500 hover:bg-pirate-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                    aria-label="Eliminar horario"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            )
+          })}
         </div>
+
+        {/* Panel agregar */}
+        <div className="rounded-xl border-2 border-dashed p-4" style={{ borderColor: 'var(--border)' }}>
+          <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
+            Nuevo horario
+          </p>
+          <div className="flex items-center gap-3 flex-wrap">
+            <div
+              className={clsx(
+                'flex items-center rounded-xl border-2 overflow-hidden transition-colors',
+                newTimeError ? 'border-pirate-400' : 'border-[var(--border)] focus-within:border-[var(--accent)]',
+              )}
+              style={{ background: 'var(--bg-surface-alt)' }}
+            >
+              <input
+                id="admin-slot-hour"
+                type="text"
+                inputMode="numeric"
+                placeholder="HH"
+                maxLength={2}
+                value={newHour}
+                onChange={e => handleHourChange(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addSlot()}
+                className="w-14 text-center font-mono font-black text-xl py-2.5 outline-none bg-transparent placeholder:font-normal placeholder:text-base"
+                style={{ color: newHour ? 'var(--text-title)' : 'var(--text-subtle)' }}
+              />
+              <span className="font-mono font-black text-xl select-none -mt-0.5 px-0.5" style={{ color: 'var(--text-muted)' }}>:</span>
+              <input
+                id="admin-slot-min"
+                type="text"
+                inputMode="numeric"
+                placeholder="MM"
+                maxLength={2}
+                value={newMinute}
+                onChange={e => handleMinuteChange(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addSlot()}
+                className="w-14 text-center font-mono font-black text-xl py-2.5 outline-none bg-transparent placeholder:font-normal placeholder:text-base"
+                style={{ color: newMinute ? 'var(--text-title)' : 'var(--text-subtle)' }}
+              />
+            </div>
+            <Button variant="accent" size="sm" onClick={addSlot}>
+              <Plus className="w-4 h-4" />
+              Agregar
+            </Button>
+            {newTimeError && <span className="text-xs font-medium text-pirate-600">{newTimeError}</span>}
+          </div>
+        </div>
+
+        <p className="text-[11px] mt-3" style={{ color: 'var(--text-subtle)' }}>
+          {activeSlots.length} horario{activeSlots.length !== 1 ? 's' : ''} configurado{activeSlots.length !== 1 ? 's' : ''} · Pasa el cursor sobre una tarjeta para eliminarla.
+        </p>
       </Section>
 
-      {/* ── Pronóstico de clima ── */}
-      <Section
-        icon={CloudLightning}
-        title="Pronóstico de clima — próximos 14 días"
-        description={`Días con viento > ${UMBRAL_VIENTO} km/h u olas > ${UMBRAL_OLAS} m se consideran no favorables para zarpar.`}
+      {/* ── Nota explicativa ── */}
+      <div
+        className="px-6 py-3 rounded-xl"
+        style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}
       >
-        <ClimaDesfavorable
-          closedDates={closedDates}
-          onToggle={(iso) =>
-            setClosedDates(prev =>
-              prev.includes(iso) ? prev.filter(d => d !== iso) : [...prev, iso].sort()
-            )
-          }
-        />
-      </Section>
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          Los cambios se aplican de inmediato al presionar el botón <strong>Guardar</strong> en la parte superior.
+        </p>
+      </div>
+
+      {/* ── Fila 3: Fechas específicas + Pronóstico (2 columnas en pantallas grandes) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Section
+          icon={CalendarOff}
+          title="Días específicos cerrados"
+          description="Feriados, mantenimiento, mal clima u otras fechas puntuales."
+          className="h-full"
+        >
+          {closedDates.length === 0 ? (
+            <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>Sin fechas adicionales cerradas.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {closedDates.map((iso) => (
+                <div
+                  key={iso}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pirate-50 border border-pirate-200 text-sm"
+                >
+                  <CalendarOff className="w-3.5 h-3.5 text-pirate-500 shrink-0" />
+                  <span className="font-medium text-pirate-700 capitalize">
+                    {format(parse(iso, 'yyyy-MM-dd', new Date()), "EEE d 'de' MMM yyyy", { locale: es })}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeClosedDate(iso)}
+                    className="ml-1 text-pirate-400 hover:text-pirate-700 transition-colors"
+                    aria-label="Quitar fecha"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <Button variant="outline" size="sm" onClick={() => setPickingDate(true)}>
+            <Plus className="w-4 h-4" />
+            Agregar fecha cerrada
+          </Button>
+          <CalendarPicker
+            value={null}
+            onChange={addClosedDate}
+            isOpen={pickingDate}
+            onClose={() => setPickingDate(false)}
+            adminMode
+          />
+        </Section>
+
+        <Section
+          icon={CloudLightning}
+          title="Pronóstico — próximos 14 días"
+          description={`Viento > ${UMBRAL_VIENTO} km/h u olas > ${UMBRAL_OLAS} m se consideran desfavorables.`}
+          className="h-full"
+        >
+          <ClimaDesfavorable
+            closedDates={closedDates}
+            onToggle={(iso) =>
+              setClosedDates(prev =>
+                prev.includes(iso) ? prev.filter(d => d !== iso) : [...prev, iso].sort()
+              )
+            }
+          />
+        </Section>
+      </div>
     </div>
   )
 }

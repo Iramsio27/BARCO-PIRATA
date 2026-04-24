@@ -355,12 +355,12 @@ html[data-admin-animations="off"] .admin-scope * {
 html[data-admin-theme="dark"] {
   --bg-app:         #060E1C;
   --bg-surface:     #0D1F3C;
-  --bg-surface-alt: #162847;
-  --border:         rgba(255,255,255,0.12);
+  --bg-surface-alt: #152440;
+  --border:         rgba(255,255,255,0.16);
   --text-title:     #ffffff;
-  --text-body:      #CBD5E1;
-  --text-muted:     #8BA3C0;
-  --text-subtle:    #4A5568;
+  --text-body:      #D8E8F4;
+  --text-muted:     #A0B8CE;
+  --text-subtle:    #6A8099;
   --shadow-card:    0 2px 16px rgba(0,0,0,0.35);
   --shadow-card-lg: 0 8px 32px rgba(0,0,0,0.5);
 }
@@ -610,5 +610,53 @@ html[data-admin-theme="dark"] .bp-kpi-card:not(.bp-kpi-card--accent) { backgroun
 html[data-admin-theme="dark"] .bp-slot-row        { background: var(--bg-surface); border-color: var(--border); }
 html[data-admin-theme="dark"] .bp-forecast-row    { background: var(--bg-surface); border-color: var(--border); }
 html[data-admin-theme="dark"] .bp-weekday-btn     { background: var(--bg-surface); border-color: var(--border); color: var(--text-body); }
-html[data-admin-theme="dark"] .bp-weekday-btn.closed { background: rgba(220,38,38,0.18) !important; border-color: #F87171 !important; color: #F87171 !important; }
+html[data-admin-theme="dark"] .bp-weekday-btn.closed { background: rgba(220,38,38,0.14) !important; border-color: rgba(248,113,113,0.55) !important; color: #FCA5A5 !important; }
 html[data-admin-theme="dark"] .bp-option-tile     { background: var(--bg-surface); border-color: var(--border); color: var(--text-body); }
+
+/* ── Dark mode: pirate-* color overrides ────────────────────────────────── */
+html[data-admin-theme="dark"] .admin-scope [class~="bg-pirate-200"]             { background-color: rgba(220,38,38,0.18) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="bg-pirate-100"]             { background-color: rgba(220,38,38,0.10) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="bg-pirate-50"]              { background-color: rgba(220,38,38,0.07) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="text-pirate-800"]           { color: #FCA5A5 !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="text-pirate-700"]           { color: #FCA5A5 !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="text-pirate-600"]           { color: #F87171 !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="text-pirate-500"]           { color: #F87171 !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="text-pirate-400"]           { color: #FDA4AF !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="border-pirate-300"]         { border-color: rgba(248,113,113,0.38) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="border-pirate-200"]         { border-color: rgba(248,113,113,0.22) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="hover:bg-pirate-50"]:hover  { background-color: rgba(220,38,38,0.12) !important; }
+
+/* ── Dark mode: green-* color overrides ─────────────────────────────────── */
+html[data-admin-theme="dark"] .admin-scope [class~="bg-green-100"]              { background-color: rgba(34,197,94,0.12) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="bg-green-50"]               { background-color: rgba(34,197,94,0.06) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="text-green-700"]            { color: #86EFAC !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="text-green-600"]            { color: #4ADE80 !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="border-green-400"]          { border-color: rgba(34,197,94,0.40) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="border-green-200"]          { border-color: rgba(34,197,94,0.22) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="hover:bg-green-50"]:hover   { background-color: rgba(34,197,94,0.08) !important; }
+
+/* ── Dark mode: weekday hover más suave ─────────────────────────────────── */
+html[data-admin-theme="dark"] .bp-weekday-btn:hover { border-color: rgba(248,113,113,0.50); color: #FCA5A5; }
+
+/* ── Dark mode: toggle switch inactivo ──────────────────────────────────── */
+html[data-admin-theme="dark"] .admin-scope button[role="switch"]:not([aria-checked="true"]) {
+  background-color: rgba(255,255,255,0.12) !important;
+  border-color: rgba(255,255,255,0.22) !important;
+}
+
+/* ── Dark mode: legibilidad de filas de tabla ───────────────────────────── */
+html[data-admin-theme="dark"] .admin-scope table tbody tr:nth-child(even) {
+  background-color: rgba(255,255,255,0.03);
+}
+html[data-admin-theme="dark"] .admin-scope table tbody tr {
+  border-top-color: rgba(255,255,255,0.09) !important;
+}
+
+/* ── Dark mode: gold-* color overrides (badges pagada/pendiente) ─────────── */
+html[data-admin-theme="dark"] .admin-scope [class~="bg-gold-100"]       { background-color: rgba(240,180,41,0.15) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="bg-gold-50"]        { background-color: rgba(240,180,41,0.08) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="text-gold-900"]     { color: #F0B429 !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="text-gold-800"]     { color: #F7C948 !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="border-gold-300"]   { border-color: rgba(240,180,41,0.38) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="border-gold-200"]   { border-color: rgba(240,180,41,0.22) !important; }
+html[data-admin-theme="dark"] .admin-scope [class~="border-navy-300"]   { border-color: rgba(255,255,255,0.22) !important; }

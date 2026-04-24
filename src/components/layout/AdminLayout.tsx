@@ -3,6 +3,7 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { LayoutDashboard, CalendarCheck, BarChart3, Settings, Clock, LogOut, Menu } from 'lucide-react'
 import { useAuth } from '@app/providers'
 import { COMPANY } from '@constants/index'
+import { AdminHeaderSlotProvider, useAdminHeaderSlot } from '@lib/AdminHeaderSlot'
 
 const navItems = [
   { to: '/admin',               icon: LayoutDashboard, label: 'Dashboard',     end: true  },
@@ -21,10 +22,19 @@ const PAGE_TITLES: Record<string, string> = {
 }
 
 export function AdminLayout() {
+  return (
+    <AdminHeaderSlotProvider>
+      <AdminLayoutInner />
+    </AdminHeaderSlotProvider>
+  )
+}
+
+function AdminLayoutInner() {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { slot } = useAdminHeaderSlot()
 
   const handleSignOut = async () => {
     await signOut()
@@ -109,23 +119,26 @@ export function AdminLayout() {
       <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
         {/* Header */}
         <header
-          className="h-16 flex items-center gap-4 px-6 lg:px-8 sticky top-0 z-30 border-b shrink-0"
+          className="h-16 flex items-center justify-between gap-4 px-6 lg:px-8 sticky top-0 z-30 border-b shrink-0"
           style={{ background: 'var(--bg-surface)', borderColor: 'var(--border)' }}
         >
-          <button
-            type="button"
-            className="lg:hidden p-2 rounded-lg transition-colors"
-            style={{ color: 'var(--text-muted)' }}
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Menu size={20} />
-          </button>
-          <h1
-            className="font-display font-bold text-lg tracking-wide"
-            style={{ color: 'var(--text-title)' }}
-          >
-            {pageTitle}
-          </h1>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              className="lg:hidden p-2 rounded-lg transition-colors"
+              style={{ color: 'var(--text-muted)' }}
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu size={20} />
+            </button>
+            <h1
+              className="font-display font-bold text-lg tracking-wide"
+              style={{ color: 'var(--text-title)' }}
+            >
+              {pageTitle}
+            </h1>
+          </div>
+          {slot && <div className="flex items-center gap-4 shrink-0">{slot}</div>}
         </header>
 
         {/* Content */}
