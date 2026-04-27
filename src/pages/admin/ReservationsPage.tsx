@@ -82,11 +82,11 @@ export default function ReservationsPage() {
         <button
           type="button"
           onClick={() => setCalOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-colors shadow-sm shrink-0"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-colors shadow-sm max-w-full"
           style={{ borderColor: 'var(--border)', background: 'var(--bg-surface)', color: 'var(--text-body)' }}
         >
-          <CalendarDays className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
-          <span className="capitalize">
+          <CalendarDays className="w-4 h-4 shrink-0" style={{ color: 'var(--text-muted)' }} />
+          <span className="capitalize truncate">
             {format(parse(selectedDate, 'yyyy-MM-dd', new Date()), "d 'de' MMMM yyyy", { locale: es })}
           </span>
         </button>
@@ -154,13 +154,24 @@ export default function ReservationsPage() {
             <table className="w-full text-sm">
               <thead style={{ background: 'var(--bg-surface-alt)' }}>
                 <tr>
-                  {['Nombre', 'Hora', 'Personas', 'Paquete', 'Subtotal', 'Desc.', 'Total', 'Estado', 'Pago', 'Acción'].map((h) => (
+                  {[
+                    { label: 'Nombre',   cls: '' },
+                    { label: 'Hora',     cls: 'hidden sm:table-cell' },
+                    { label: 'Personas', cls: 'hidden sm:table-cell' },
+                    { label: 'Paquete',  cls: 'hidden md:table-cell' },
+                    { label: 'Subtotal', cls: 'hidden md:table-cell' },
+                    { label: 'Desc.',    cls: 'hidden lg:table-cell' },
+                    { label: 'Total',    cls: '' },
+                    { label: 'Estado',   cls: '' },
+                    { label: 'Pago',     cls: 'hidden lg:table-cell' },
+                    { label: 'Acción',   cls: '' },
+                  ].map(({ label, cls }) => (
                     <th
-                      key={h}
-                      className="px-4 py-3 text-left font-bold text-[11px] uppercase tracking-wider whitespace-nowrap"
+                      key={label}
+                      className={`px-4 py-3 text-left font-bold text-[11px] uppercase tracking-wider whitespace-nowrap ${cls}`}
                       style={{ color: 'var(--text-muted)' }}
                     >
-                      {h}
+                      {label}
                     </th>
                   ))}
                 </tr>
@@ -177,16 +188,16 @@ export default function ReservationsPage() {
                       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                     >
                       <td className="px-4 py-4 font-semibold" style={{ color: 'var(--text-title)' }}>{r.contactName}</td>
-                      <td className="px-4 py-4 font-mono text-xs font-bold" style={{ color: 'var(--text-body)' }}>{r.time}</td>
-                      <td className="px-4 py-4 text-center" style={{ color: 'var(--text-body)' }}>{r.numberOfPeople}</td>
-                      <td className="px-4 py-4" style={{ color: 'var(--text-body)' }}>{pkg?.label ?? r.packageId.replace(/_/g, ' ')}</td>
-                      <td className="px-4 py-4 font-semibold" style={{ color: 'var(--accent)' }}>{formatCurrency(r.subtotal)}</td>
-                      <td className="px-4 py-4 font-semibold" style={{ color: r.discount > 0 ? '#F87171' : 'var(--text-muted)' }}>
+                      <td className="hidden sm:table-cell px-4 py-4 font-mono text-xs font-bold" style={{ color: 'var(--text-body)' }}>{r.time}</td>
+                      <td className="hidden sm:table-cell px-4 py-4 text-center" style={{ color: 'var(--text-body)' }}>{r.numberOfPeople}</td>
+                      <td className="hidden md:table-cell px-4 py-4" style={{ color: 'var(--text-body)' }}>{pkg?.label ?? r.packageId.replace(/_/g, ' ')}</td>
+                      <td className="hidden md:table-cell px-4 py-4 font-semibold" style={{ color: 'var(--accent)' }}>{formatCurrency(r.subtotal)}</td>
+                      <td className="hidden lg:table-cell px-4 py-4 font-semibold" style={{ color: r.discount > 0 ? '#F87171' : 'var(--text-muted)' }}>
                         {r.discount > 0 ? `-${formatCurrency(r.discount)}` : '—'}
                       </td>
                       <td className="px-4 py-4 font-bold" style={{ color: 'var(--text-title)' }}>{formatCurrency(r.total)}</td>
                       <td className="px-4 py-4"><StatusBadge status={r.status} /></td>
-                      <td className="px-4 py-4 capitalize" style={{ color: 'var(--text-muted)' }}>{r.paymentMethod ?? '—'}</td>
+                      <td className="hidden lg:table-cell px-4 py-4 capitalize" style={{ color: 'var(--text-muted)' }}>{r.paymentMethod ?? '—'}</td>
                       <td className="px-4 py-4">
                         <Link
                           to={`/admin/venta/${r.id}`}

@@ -111,17 +111,15 @@ export default function ReportsPage() {
   return (
     <div className="space-y-6">
       {/* Encabezado */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            Analiza el desempeño de reservaciones, ocupación e ingresos.
-          </p>
-        </div>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <p className="text-sm min-w-0" style={{ color: 'var(--text-muted)' }}>
+          Analiza el desempeño de reservaciones, ocupación e ingresos.
+        </p>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col gap-2 w-full lg:w-auto">
           <PeriodPicker value={period} onChange={setPeriod} />
           {report && (
-            <>
+            <div className="grid grid-cols-2 gap-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -138,7 +136,7 @@ export default function ReportsPage() {
               >
                 <FileText className="w-4 h-4" /> PDF
               </Button>
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -158,9 +156,9 @@ export default function ReportsPage() {
       {report && !isLoading && (
         <>
           {/* Banda de período activo */}
-          <div className="flex items-center gap-2 text-sm admin-text-muted">
-            <CalendarRange className="w-4 h-4 text-gold-500" />
-            <span>
+          <div className="flex items-start gap-2 text-sm admin-text-muted flex-wrap">
+            <CalendarRange className="w-4 h-4 text-gold-500 shrink-0 mt-0.5" />
+            <span className="min-w-0 break-words">
               Periodo analizado:&nbsp;
               <span className="font-semibold admin-text-body">
                 {formatDate(report.startDate)} → {formatDate(report.endDate)}
@@ -213,7 +211,7 @@ export default function ReportsPage() {
 
           {/* Gráfica principal — Ingresos por período */}
           <section
-            className="rounded-xl p-5"
+            className="rounded-xl p-4 sm:p-5"
             style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}
           >
             <header className="flex items-center justify-between mb-4">
@@ -235,7 +233,7 @@ export default function ReportsPage() {
           {/* Dos columnas: personas + paquetes */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <section
-              className="rounded-xl p-5"
+              className="rounded-xl p-4 sm:p-5"
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}
             >
               <header className="flex items-center gap-2 mb-4">
@@ -250,7 +248,7 @@ export default function ReportsPage() {
             </section>
 
             <section
-              className="rounded-xl p-5"
+              className="rounded-xl p-4 sm:p-5"
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}
             >
               <header className="flex items-center gap-2 mb-4">
@@ -273,7 +271,7 @@ export default function ReportsPage() {
           {/* Pago + detalle de paquetes */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <section
-              className="rounded-xl p-5"
+              className="rounded-xl p-4 sm:p-5"
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}
             >
               <header className="flex items-center gap-2 mb-4">
@@ -293,7 +291,7 @@ export default function ReportsPage() {
             </section>
 
             <section
-              className="rounded-xl p-5"
+              className="rounded-xl p-4 sm:p-5"
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}
             >
               <header className="flex items-center gap-2 mb-4">

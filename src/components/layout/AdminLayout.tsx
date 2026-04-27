@@ -45,7 +45,7 @@ function AdminLayoutInner() {
   const initials = (user?.email ?? 'AD').slice(0, 2).toUpperCase()
 
   return (
-    <div className="admin-scope min-h-screen flex" style={{ background: 'var(--bg-app)' }}>
+    <div className="admin-scope min-h-screen flex overflow-x-hidden" style={{ background: 'var(--bg-app)' }}>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -116,7 +116,7 @@ function AdminLayoutInner() {
       </aside>
 
       {/* Main area */}
-      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+      <div className="flex-1 min-w-0 lg:ml-64 flex flex-col min-h-screen">
         {/* Header */}
         <header
           className="h-16 flex items-center justify-between gap-4 px-6 lg:px-8 sticky top-0 z-30 border-b shrink-0"

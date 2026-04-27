@@ -41,7 +41,7 @@ export default function SalePage() {
         <ArrowLeft className="w-4 h-4" /> Volver
       </button>
 
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto px-1">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-display font-bold text-navy-900">Comprobante de Venta</h1>
           {isPagada && (
@@ -118,7 +118,7 @@ export default function SalePage() {
             <p className="text-navy-600 text-sm mb-4">
               Confirma el pago en efectivo una vez que el cliente haya liquidado el monto total.
             </p>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button variant="accent" onClick={handleConfirmCash} isLoading={isPending} className="flex-1">
                 <Banknote className="w-4 h-4" /> Confirmar Pago en Efectivo
               </Button>
