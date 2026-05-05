@@ -77,6 +77,147 @@
       "capacity": "Ups, mientras llenabas el formulario otra persona reservó ese horario y ya no hay cupo suficiente. Elige otro horario o reduce el número de personas.",
       "invalidSlot": "El horario elegido no está disponible. Selecciona uno de los 5 horarios del día.",
       "generic": "Error al crear la reservación"
+    },
+    "backHome": "← Volver al inicio",
+    "bookTour": "Reservar paseo",
+    "heroTitle": "Reserva tu Aventura",
+    "location": "Puerto Peñasco · Sonora · México",
+    "steps": {
+      "tour": "Paseo",
+      "datetime": "Fecha y hora",
+      "crew": "Tripulación",
+      "contact": "Datos y pago"
+    },
+    "card1": {
+      "title": "Elige tu paseo",
+      "subtitle": "3 experiencias disponibles",
+      "perPerson": "MXN / persona"
+    },
+    "card2": {
+      "title": "Fecha y horario",
+      "subtitle": "Hasta 90 días de anticipación",
+      "dateLabel": "Fecha del paseo",
+      "timeLabel": "Horario de salida"
+    },
+    "legend": {
+      "available": "Disponible",
+      "fewLeft": "Pocos lugares",
+      "closed": "Cerrado"
+    },
+    "slot": {
+      "loading": "Consultando...",
+      "full": "Sin cupo",
+      "past": "Horario pasado",
+      "onlyN": "Solo {{count}} lugar",
+      "onlyN_plural": "Solo {{count}} lugares",
+      "places": "{{count}} lugares",
+      "last": "Últimos"
+    },
+    "conditions": {
+      "favorable": "Condiciones favorables para zarpar",
+      "adverse": "Condiciones adversas — consultar antes de reservar",
+      "temp": "Temperatura",
+      "wind": "Viento",
+      "waves": "Olas",
+      "direction": "Dirección"
+    },
+    "card3": { "title": "Tripulación" },
+    "passengers": {
+      "adultsLabel": "Adultos",
+      "adultsDesc": "13 años en adelante",
+      "childrenLabel": "Niños",
+      "childrenDesc": "3 a 12 años",
+      "babiesLabel": "Bebés",
+      "babiesDesc": "0 a 2 años",
+      "babiesFree": "Gratis · sin asiento",
+      "adultsPrice": "${{price}} MXN c/u",
+      "childrenPrice": "${{price}} MXN c/u (50%)",
+      "person": "persona",
+      "people": "personas",
+      "adult": "adulto",
+      "adults": "adultos",
+      "child": "niño",
+      "children": "niños",
+      "baby": "bebé",
+      "babies": "bebés"
+    },
+    "extras": "Extras opcionales",
+    "card4": { "title": "Datos y contacto" },
+    "contact": {
+      "name": "Nombre completo *",
+      "namePlaceholder": "Tu nombre completo",
+      "phone": "Teléfono *",
+      "phonePlaceholder": "+52 638 000 0000",
+      "email": "Correo electrónico *",
+      "emailPlaceholder": "tu@correo.com",
+      "notesPlaceholder2": "Alergias, celebraciones, solicitudes especiales…"
+    },
+    "info": {
+      "cancellationTitle": "Cancelación gratuita",
+      "cancellationDetail": "hasta 24 h antes del paseo. Reembolso completo sin preguntas.",
+      "arrival30": "30 minutos antes",
+      "arrivalDetail": "de zarpar al muelle Recinto Portuario."
+    },
+    "sum": {
+      "yourReservation": "Tu reserva",
+      "selectTour": "Selecciona un paseo",
+      "date": "Fecha",
+      "crew": "Tripulación",
+      "duration": "Duración",
+      "dock": "Muelle Recinto Portuario",
+      "subtotal": "Subtotal",
+      "groupDiscount": "Descuento grupal",
+      "promoCode": "Código promocional",
+      "apply": "Aplicar",
+      "total": "Total",
+      "processing": "Procesando…",
+      "bookAndPay": "Reservar y pagar",
+      "childHalf": "Niño (50%)",
+      "adultsX": "{{n}} × Adultos",
+      "childrenX": "{{n}} × Niño (50%)"
+    },
+    "trust": {
+      "secure": "Pago 100% seguro · Stripe / MercadoPago",
+      "confirmation": "Confirmación inmediata por correo",
+      "cancellation": "Cancelación gratis hasta 24 h antes"
+    },
+    "help": "¿Necesitas ayuda?",
+    "tours": {
+      "SOLO_PASEO": {
+        "tag": "Familiar",
+        "feature1": "Recorrido panorámico del litoral",
+        "feature2": "Ideal para toda la familia",
+        "feature3": "Bebidas incluidas a bordo",
+        "duration": "2 horas"
+      },
+      "SOLO_BEBIDAS": {
+        "tag": "Popular",
+        "feature1": "Atardecer en alta mar",
+        "feature2": "Barra de bebidas incluida",
+        "feature3": "Show pirata en cubierta",
+        "duration": "2.5 horas"
+      },
+      "CON_COMIDA": {
+        "tag": "Premium",
+        "feature1": "Buffet de mariscos a bordo",
+        "feature2": "Bebidas + show en vivo",
+        "feature3": "Experiencia completa",
+        "duration": "3 horas"
+      }
+    },
+    "addons": {
+      "costume": {
+        "label": "Disfraz pirata para niños",
+        "desc": "Sombrero, parche y espada de juguete"
+      },
+      "photo": {
+        "label": "Foto profesional a bordo",
+        "desc": "Recuerdo digital + impresa"
+      },
+      "champagne": {
+        "label": "Botella de champaña",
+        "desc": "Para celebraciones especiales"
+      }
     }
   },
   "datePicker": {

@@ -77,6 +77,147 @@
       "capacity": "Oops, while you were filling out the form someone else booked that time slot and there's no longer enough capacity. Choose another time or reduce the number of people.",
       "invalidSlot": "The selected time is not available. Pick one of the 5 daily time slots.",
       "generic": "Error creating the reservation"
+    },
+    "backHome": "← Back to home",
+    "bookTour": "Book tour",
+    "heroTitle": "Book Your Adventure",
+    "location": "Puerto Peñasco · Sonora · México",
+    "steps": {
+      "tour": "Tour",
+      "datetime": "Date & time",
+      "crew": "Crew",
+      "contact": "Details & pay"
+    },
+    "card1": {
+      "title": "Choose your tour",
+      "subtitle": "3 experiences available",
+      "perPerson": "MXN / person"
+    },
+    "card2": {
+      "title": "Date & time",
+      "subtitle": "Up to 90 days in advance",
+      "dateLabel": "Tour date",
+      "timeLabel": "Departure time"
+    },
+    "legend": {
+      "available": "Available",
+      "fewLeft": "Few seats",
+      "closed": "Closed"
+    },
+    "slot": {
+      "loading": "Checking...",
+      "full": "Sold out",
+      "past": "Already passed",
+      "onlyN": "Only {{count}} seat",
+      "onlyN_plural": "Only {{count}} seats",
+      "places": "{{count}} seats",
+      "last": "Last few"
+    },
+    "conditions": {
+      "favorable": "Favorable conditions to set sail",
+      "adverse": "Adverse conditions — check before booking",
+      "temp": "Temperature",
+      "wind": "Wind",
+      "waves": "Waves",
+      "direction": "Direction"
+    },
+    "card3": { "title": "Crew" },
+    "passengers": {
+      "adultsLabel": "Adults",
+      "adultsDesc": "13 years and up",
+      "childrenLabel": "Children",
+      "childrenDesc": "3 to 12 years",
+      "babiesLabel": "Babies",
+      "babiesDesc": "0 to 2 years",
+      "babiesFree": "Free · no seat",
+      "adultsPrice": "${{price}} MXN each",
+      "childrenPrice": "${{price}} MXN each (50%)",
+      "person": "person",
+      "people": "people",
+      "adult": "adult",
+      "adults": "adults",
+      "child": "child",
+      "children": "children",
+      "baby": "baby",
+      "babies": "babies"
+    },
+    "extras": "Optional extras",
+    "card4": { "title": "Details & contact" },
+    "contact": {
+      "name": "Full name *",
+      "namePlaceholder": "Your full name",
+      "phone": "Phone *",
+      "phonePlaceholder": "+52 638 000 0000",
+      "email": "Email address *",
+      "emailPlaceholder": "you@email.com",
+      "notesPlaceholder2": "Allergies, celebrations, special requests…"
+    },
+    "info": {
+      "cancellationTitle": "Free cancellation",
+      "cancellationDetail": "up to 24 h before the tour. Full refund, no questions asked.",
+      "arrival30": "30 minutes early",
+      "arrivalDetail": "before departure at the Puerto Portuario dock."
+    },
+    "sum": {
+      "yourReservation": "Your reservation",
+      "selectTour": "Select a tour",
+      "date": "Date",
+      "crew": "Crew",
+      "duration": "Duration",
+      "dock": "Puerto Portuario Dock",
+      "subtotal": "Subtotal",
+      "groupDiscount": "Group discount",
+      "promoCode": "Promo code",
+      "apply": "Apply",
+      "total": "Total",
+      "processing": "Processing…",
+      "bookAndPay": "Book & pay",
+      "childHalf": "Child (50%)",
+      "adultsX": "{{n}} × Adults",
+      "childrenX": "{{n}} × Child (50%)"
+    },
+    "trust": {
+      "secure": "100% secure payment · Stripe / MercadoPago",
+      "confirmation": "Instant email confirmation",
+      "cancellation": "Free cancellation up to 24 h before"
+    },
+    "help": "Need help?",
+    "tours": {
+      "SOLO_PASEO": {
+        "tag": "Family",
+        "feature1": "Scenic coastal tour",
+        "feature2": "Great for the whole family",
+        "feature3": "Drinks included on board",
+        "duration": "2 hours"
+      },
+      "SOLO_BEBIDAS": {
+        "tag": "Popular",
+        "feature1": "Sunset on the open sea",
+        "feature2": "Full drinks bar included",
+        "feature3": "Pirate show on deck",
+        "duration": "2.5 hours"
+      },
+      "CON_COMIDA": {
+        "tag": "Premium",
+        "feature1": "Seafood buffet on board",
+        "feature2": "Drinks + live show",
+        "feature3": "Complete experience",
+        "duration": "3 hours"
+      }
+    },
+    "addons": {
+      "costume": {
+        "label": "Pirate costume for kids",
+        "desc": "Hat, eye patch and toy sword"
+      },
+      "photo": {
+        "label": "Professional photo on board",
+        "desc": "Digital + printed keepsake"
+      },
+      "champagne": {
+        "label": "Bottle of champagne",
+        "desc": "For special celebrations"
+      }
     }
   },
   "datePicker": {

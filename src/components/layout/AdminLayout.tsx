@@ -4,6 +4,7 @@ import { LayoutDashboard, CalendarCheck, BarChart3, Settings, Clock, LogOut, Men
 import { useAuth } from '@app/providers'
 import { COMPANY } from '@constants/index'
 import { AdminHeaderSlotProvider, useAdminHeaderSlot } from '@lib/AdminHeaderSlot'
+import { RateLimitAlertBanner } from '@components/admin/RateLimitAlertBanner'
 
 const navItems = [
   { to: '/admin',               icon: LayoutDashboard, label: 'Dashboard',     end: true  },
@@ -121,6 +122,9 @@ function AdminLayoutInner() {
 
       {/* Main area */}
       <div className="flex-1 min-w-0 lg:ml-64 flex flex-col min-h-screen">
+        {/* Alertas de rate limit — aparecen encima del header cuando hay eventos */}
+        <RateLimitAlertBanner />
+
         {/* Header */}
         <header
           className="h-16 flex items-center justify-between gap-4 px-6 lg:px-8 sticky top-0 z-30 border-b shrink-0"

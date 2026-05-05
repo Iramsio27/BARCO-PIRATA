@@ -1,15 +1,17 @@
 import { Link } from 'react-router-dom'
-import { CheckCircle, Calendar, Users, Package, Phone } from 'lucide-react'
+import { CheckCircle, Calendar, Users, Package, Phone, MessageCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useReservationStore } from '@app/store/reservationStore'
 import { PACKAGES } from '@constants/index'
 import { formatDate, formatTime, formatCurrency } from '@utils/formatters'
 import { Button } from '@components/ui/Button'
 import { Card } from '@components/ui/Card'
+import { useWhatsAppRedirect } from '@features/reservations/hooks/useWhatsAppRedirect'
 
 export default function ConfirmationPage() {
   const { t } = useTranslation()
   const reservation = useReservationStore((s) => s.pendingReservation)
+  const { redirectToWhatsApp } = useWhatsAppRedirect()
 
   if (!reservation) {
     return (
@@ -71,9 +73,14 @@ export default function ConfirmationPage() {
         <Link to="/" className="flex-1">
           <Button variant="outline" className="w-full">{t('confirmation.back')}</Button>
         </Link>
-        <Link to={`/pago/${reservation.id}`} className="flex-1">
-          <Button variant="accent" className="w-full">{t('confirmation.pay')}</Button>
-        </Link>
+        <Button
+          variant="accent"
+          className="flex-1 w-full flex items-center justify-center gap-2"
+          onClick={() => redirectToWhatsApp(reservation)}
+        >
+          <MessageCircle className="w-5 h-5" />
+          {t('confirmation.whatsapp', 'Confirmar por WhatsApp')}
+        </Button>
       </div>
     </div>
   )

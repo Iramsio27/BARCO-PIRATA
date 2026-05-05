@@ -22,39 +22,7 @@ import type { PackageId } from '@constants/index'
 
 import '../../styles/reservation.css'
 
-// ─── Static tour display metadata ───────────────────────────────────────────
-const TOUR_META: Record<string, { tag: string; tagStyle: string; features: string[]; duration: string; icon: React.ReactNode }> = {
-  SOLO_PASEO: {
-    tag: 'Familiar',
-    tagStyle: 'bg-navy-100 text-navy-700',
-    features: ['Recorrido panorámico del litoral', 'Ideal para toda la familia', 'Bebidas incluidas a bordo'],
-    duration: '2 horas',
-    icon: <Sun size={20} />,
-  },
-  SOLO_BEBIDAS: {
-    tag: 'Popular',
-    tagStyle: 'bg-pirate-700 text-gold-300',
-    features: ['Atardecer en alta mar', 'Barra de bebidas incluida', 'Show pirata en cubierta'],
-    duration: '2.5 horas',
-    icon: <Waves size={20} />,
-  },
-  CON_COMIDA: {
-    tag: 'Premium',
-    tagStyle: 'bg-gold-400 text-navy-900',
-    features: ['Buffet de mariscos a bordo', 'Bebidas + show en vivo', 'Experiencia completa'],
-    duration: '3 horas',
-    icon: <Star size={20} />,
-  },
-}
-
-// ─── Addons ──────────────────────────────────────────────────────────────────
-const ADDONS = [
-  { id: 'costume',   label: 'Disfraz pirata para niños', desc: 'Sombrero, parche y espada de juguete', price: 80  },
-  { id: 'photo',     label: 'Foto profesional a bordo',  desc: 'Recuerdo digital + impresa',            price: 150 },
-  { id: 'champagne', label: 'Botella de champaña',        desc: 'Para celebraciones especiales',         price: 420 },
-] as const
-
-type AddonId = typeof ADDONS[number]['id']
+type AddonId = 'costume' | 'photo' | 'champagne'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function isDateClosed(iso: string, closedWeekday: number, closedDates: string[]): boolean {
@@ -76,6 +44,36 @@ function getNextAvailableDate(fromIso: string, closedWeekday: number, closedDate
 export default function ReservationPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+
+  const TOUR_META = useMemo(() => ({
+    SOLO_PASEO: {
+      tag: t('reservation.tours.SOLO_PASEO.tag'),
+      tagStyle: 'bg-navy-100 text-navy-700',
+      features: [t('reservation.tours.SOLO_PASEO.feature1'), t('reservation.tours.SOLO_PASEO.feature2'), t('reservation.tours.SOLO_PASEO.feature3')],
+      duration: t('reservation.tours.SOLO_PASEO.duration'),
+      icon: <Sun size={20} />,
+    },
+    SOLO_BEBIDAS: {
+      tag: t('reservation.tours.SOLO_BEBIDAS.tag'),
+      tagStyle: 'bg-pirate-700 text-gold-300',
+      features: [t('reservation.tours.SOLO_BEBIDAS.feature1'), t('reservation.tours.SOLO_BEBIDAS.feature2'), t('reservation.tours.SOLO_BEBIDAS.feature3')],
+      duration: t('reservation.tours.SOLO_BEBIDAS.duration'),
+      icon: <Waves size={20} />,
+    },
+    CON_COMIDA: {
+      tag: t('reservation.tours.CON_COMIDA.tag'),
+      tagStyle: 'bg-gold-400 text-navy-900',
+      features: [t('reservation.tours.CON_COMIDA.feature1'), t('reservation.tours.CON_COMIDA.feature2'), t('reservation.tours.CON_COMIDA.feature3')],
+      duration: t('reservation.tours.CON_COMIDA.duration'),
+      icon: <Star size={20} />,
+    },
+  }), [i18n.language])
+
+  const ADDONS = useMemo(() => [
+    { id: 'costume'   as AddonId, label: t('reservation.addons.costume.label'),   desc: t('reservation.addons.costume.desc'),   price: 80  },
+    { id: 'photo'     as AddonId, label: t('reservation.addons.photo.label'),     desc: t('reservation.addons.photo.desc'),     price: 150 },
+    { id: 'champagne' as AddonId, label: t('reservation.addons.champagne.label'), desc: t('reservation.addons.champagne.desc'), price: 420 },
+  ], [i18n.language])
   const [searchParams] = useSearchParams()
   const { mutateAsync: createReservation, isPending } = useCreateReservation()
   const setPendingReservation = useReservationStore((s) => s.setPendingReservation)
@@ -220,7 +218,7 @@ export default function ReservationPage() {
 
   // ── Visible time slots ────────────────────────────────────────────────────
   const KNOWN_SLOTS = Object.fromEntries(TIME_SLOTS.map(s => [s.time, s]))
-  const visibleSlots = [...activeTimeSlots].sort().map(t => KNOWN_SLOTS[t] ?? { time: t, label: t, icon: '🌊', description: '' })
+  const visibleSlots = [...activeTimeSlots].sort().map(ts => KNOWN_SLOTS[ts] ?? { time: ts, label: ts, icon: '🌊', description: '' })
   const todayIso = format(new Date(), 'yyyy-MM-dd')
   const nowHHMM  = format(new Date(), 'HH:mm')
 
@@ -232,12 +230,11 @@ export default function ReservationPage() {
   const condDir    = condData?.marina?.direccionOlasGrados ?? null
   const condFav    = condData ? (condViento === null || condViento <= 40) && (condOlas === null || condOlas <= 2) : true
 
-  // ── Steps config ──────────────────────────────────────────────────────────
   const steps = [
-    { n: 1, label: 'Paseo' },
-    { n: 2, label: 'Fecha y hora' },
-    { n: 3, label: 'Tripulación' },
-    { n: 4, label: 'Datos y pago' },
+    { n: 1, label: t('reservation.steps.tour') },
+    { n: 2, label: t('reservation.steps.datetime') },
+    { n: 3, label: t('reservation.steps.crew') },
+    { n: 4, label: t('reservation.steps.contact') },
   ]
 
   return (
@@ -246,17 +243,17 @@ export default function ReservationPage() {
       <section className="rv-hero">
         <div className="relative z-10 max-w-screen-xl mx-auto">
           <div className="flex items-center gap-2 text-sm mb-4" style={{ color: 'rgba(243,234,208,.6)' }}>
-            <Link to="/" className="text-gold-300 hover:underline">← Volver al inicio</Link>
+            <Link to="/" className="text-gold-300 hover:underline">{t('reservation.backHome')}</Link>
             <span style={{ opacity: .4 }}>/</span>
-            <span>Reservar paseo</span>
+            <span>{t('reservation.bookTour')}</span>
           </div>
           <h1 className="font-pirata font-normal text-gold-300 leading-none m-0"
               style={{ fontSize: 'clamp(38px,5vw,62px)', letterSpacing: '.01em' }}>
-            Reserva tu Aventura
+            {t('reservation.heroTitle')}
           </h1>
           <p className="mt-3 font-display font-semibold uppercase tracking-widest text-sm"
              style={{ color: 'rgba(243,234,208,.8)', letterSpacing: '.25em' }}>
-            Puerto Peñasco · Sonora · México
+            {t('reservation.location')}
           </p>
         </div>
         <svg className="rv-hero-wave" viewBox="0 0 1600 52" preserveAspectRatio="none" aria-hidden>
@@ -309,9 +306,9 @@ export default function ReservationPage() {
               <div className="flex items-center justify-between px-6 py-4 border-b border-dashed border-navy-100">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-navy-900 text-gold-300 flex items-center justify-center font-display font-bold text-sm">I</div>
-                  <h2 className="text-[17px] font-bold m-0">Elige tu paseo</h2>
+                  <h2 className="text-[17px] font-bold m-0">{t('reservation.card1.title')}</h2>
                 </div>
-                <span className="text-[13px] text-navy-400 font-medium">3 experiencias disponibles</span>
+                <span className="text-[13px] text-navy-400 font-medium">{t('reservation.card1.subtitle')}</span>
               </div>
               <div className="p-5">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -357,7 +354,7 @@ export default function ReservationPage() {
                         </ul>
                         <div className="flex items-baseline gap-1.5 pt-3 border-t border-dashed border-navy-100">
                           <span className="font-display font-bold text-[22px] text-navy-900">${pkg.pricePerPerson}</span>
-                          <span className="text-[12px] text-navy-400">MXN / persona</span>
+                          <span className="text-[12px] text-navy-400">{t('reservation.card1.perPerson')}</span>
                         </div>
                       </div>
                     )
@@ -372,9 +369,9 @@ export default function ReservationPage() {
               <div className="flex items-center justify-between px-6 py-4 border-b border-dashed border-navy-100">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-navy-900 text-gold-300 flex items-center justify-center font-display font-bold text-sm">II</div>
-                  <h2 className="text-[17px] font-bold m-0">Fecha y horario</h2>
+                  <h2 className="text-[17px] font-bold m-0">{t('reservation.card2.title')}</h2>
                 </div>
-                <span className="text-[13px] text-navy-400 font-medium">Hasta 90 días de anticipación</span>
+                <span className="text-[13px] text-navy-400 font-medium">{t('reservation.card2.subtitle')}</span>
               </div>
               <div className="p-5">
 
@@ -382,7 +379,7 @@ export default function ReservationPage() {
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex items-center gap-2 text-[13px] font-semibold text-navy-400 mr-auto">
                     <Calendar size={16} className="text-gold-600" />
-                    Fecha del paseo
+                    {t('reservation.card2.dateLabel')}
                   </div>
                   <span className="text-[13px] font-semibold text-navy-800 px-2">
                     {format(windowStart, 'MMMM yyyy', { locale: es }).replace(/^./, c => c.toUpperCase())}
@@ -405,7 +402,7 @@ export default function ReservationPage() {
                     const isSel    = watchedDate === iso
                     const isToday  = dfIsToday(d)
                     const isTom    = isTomorrow(d)
-                    const dayLabel = isToday ? 'HOY' : isTom ? 'MAÑ' : format(d, 'EEE', { locale: es }).toUpperCase().slice(0, 3)
+                    const dayLabel = isToday ? t('datePicker.today') : isTom ? t('datePicker.tomorrow').slice(0, 3) : format(d, 'EEE', { locale: es }).toUpperCase().slice(0, 3)
                     const monthLabel = format(d, 'MMM', { locale: es }).toUpperCase()
                     return (
                       <button
@@ -438,9 +435,9 @@ export default function ReservationPage() {
 
                 {/* Legend */}
                 <div className="flex gap-4 flex-wrap mt-3 text-[12px] text-navy-400">
-                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" /> Disponible</span>
-                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-gold-400 inline-block" /> Pocos lugares</span>
-                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-navy-200 inline-block" /> Cerrado</span>
+                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" /> {t('reservation.legend.available')}</span>
+                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-gold-400 inline-block" /> {t('reservation.legend.fewLeft')}</span>
+                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-navy-200 inline-block" /> {t('reservation.legend.closed')}</span>
                 </div>
                 {errors.date && <p className="error-message mt-2">{errors.date.message}</p>}
 
@@ -449,7 +446,7 @@ export default function ReservationPage() {
                   <div className="mt-5 pt-4 border-t border-dashed border-navy-100">
                     <div className="flex items-center gap-2 text-[13px] font-semibold text-navy-400 mb-3">
                       <Clock size={16} className="text-gold-600" />
-                      Horario de salida
+                      {t('reservation.card2.timeLabel')}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {visibleSlots.map(slot => {
@@ -476,13 +473,13 @@ export default function ReservationPage() {
                           >
                             {fewLeft && !isSel && (
                               <span className="absolute top-2.5 right-2.5 text-[10px] font-bold uppercase text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
-                                Últimos
+                                {t('reservation.slot.last')}
                               </span>
                             )}
                             <span className={clsx('font-display font-bold text-[20px]', isSel ? 'text-navy-900' : 'text-navy-900')}>{slot.time}</span>
                             <span className={clsx('text-[13px] font-semibold', isSel ? 'text-navy-700' : 'text-navy-600')}>{slot.label}</span>
                             <span className="text-[12px] text-navy-400">
-                              {availLoading ? 'Consultando...' : isFull ? 'Sin cupo' : isPast ? 'Horario pasado' : notEnough ? `Solo ${available} lugares` : `${available} lugares`}
+                              {availLoading ? t('reservation.slot.loading') : isFull ? t('reservation.slot.full') : isPast ? t('reservation.slot.past') : notEnough ? t('reservation.slot.onlyN', { count: available }) : t('reservation.slot.places', { count: available })}
                             </span>
                             {!availLoading && !isPast && availability && (
                               <div className="rv-avail-bar">
@@ -509,7 +506,7 @@ export default function ReservationPage() {
                     : 'bg-red-50 text-pirate-700 border-red-100'
                 )}>
                   {condFav ? <Check size={16} /> : <AlertCircle size={16} />}
-                  {condFav ? 'Condiciones favorables para zarpar' : 'Condiciones adversas — consultar antes de reservar'}
+                  {condFav ? t('reservation.conditions.favorable') : t('reservation.conditions.adverse')}
                   <span className="ml-auto font-medium text-[12px]">
                     {format(new Date(watchedDate + 'T12:00:00'), 'EEE d MMM', { locale: es })}
                     {watchedTime && ` · ${watchedTime}`}
@@ -519,25 +516,25 @@ export default function ReservationPage() {
                   {condTMax !== null && condTMin !== null && (
                     <div className="flex items-center gap-2 text-navy-700">
                       <Thermometer size={14} className="text-navy-400 flex-shrink-0" />
-                      Temperatura <b className="ml-auto text-navy-900">{condTMax}° / {condTMin}°C</b>
+                      {t('reservation.conditions.temp')} <b className="ml-auto text-navy-900">{condTMax}° / {condTMin}°C</b>
                     </div>
                   )}
                   {condViento !== null && (
                     <div className="flex items-center gap-2 text-navy-700">
                       <Wind size={14} className="text-navy-400 flex-shrink-0" />
-                      Viento <b className="ml-auto text-navy-900">{condViento} km/h</b>
+                      {t('reservation.conditions.wind')} <b className="ml-auto text-navy-900">{condViento} km/h</b>
                     </div>
                   )}
                   {condOlas !== null && (
                     <div className="flex items-center gap-2 text-navy-700">
                       <Waves size={14} className="text-navy-400 flex-shrink-0" />
-                      Olas <b className="ml-auto text-navy-900">{condOlas} m</b>
+                      {t('reservation.conditions.waves')} <b className="ml-auto text-navy-900">{condOlas} m</b>
                     </div>
                   )}
                   {condDir !== null && (
                     <div className="flex items-center gap-2 text-navy-700">
                       <Compass size={14} className="text-navy-400 flex-shrink-0" />
-                      Dirección <b className="ml-auto text-navy-900">{condDir}° (S)</b>
+                      {t('reservation.conditions.direction')} <b className="ml-auto text-navy-900">{condDir}° (S)</b>
                     </div>
                   )}
                 </div>
@@ -549,10 +546,10 @@ export default function ReservationPage() {
               <div className="flex items-center justify-between px-6 py-4 border-b border-dashed border-navy-100">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-navy-900 text-gold-300 flex items-center justify-center font-display font-bold text-sm">III</div>
-                  <h2 className="text-[17px] font-bold m-0">Tripulación</h2>
+                  <h2 className="text-[17px] font-bold m-0">{t('reservation.card3.title')}</h2>
                 </div>
                 <span className="text-[13px] text-navy-400 font-medium">
-                  {numberOfPeople} {numberOfPeople === 1 ? 'persona' : 'personas'}
+                  {numberOfPeople} {numberOfPeople === 1 ? t('reservation.passengers.person') : t('reservation.passengers.people')}
                   {pkg && ` · ${new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 }).format(peopleSubtotal)} MXN`}
                 </span>
               </div>
@@ -560,9 +557,9 @@ export default function ReservationPage() {
                 {/* Counters */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
                   {[
-                    { label: 'Adultos',  desc: '13 años en adelante', val: adults,   set: setAdults,   min: 1, maxDisabled: numberOfPeople >= BOAT_CAPACITY, priceTag: pkg ? `$${ppp} MXN c/u` : '—' },
-                    { label: 'Niños',    desc: '3 a 12 años',         val: children, set: setChildren, min: 0, maxDisabled: numberOfPeople >= BOAT_CAPACITY, priceTag: pkg ? `$${Math.round(ppp * 0.5)} MXN c/u (50%)` : '—' },
-                    { label: 'Bebés',    desc: '0 a 2 años',          val: babies,   set: setBabies,   min: 0, maxDisabled: babies >= 10,                   priceTag: 'Gratis · sin asiento' },
+                    { label: t('reservation.passengers.adultsLabel'),   desc: t('reservation.passengers.adultsDesc'),   val: adults,   set: setAdults,   min: 1, maxDisabled: numberOfPeople >= BOAT_CAPACITY, priceTag: pkg ? t('reservation.passengers.adultsPrice', { price: ppp }) : '—' },
+                    { label: t('reservation.passengers.childrenLabel'), desc: t('reservation.passengers.childrenDesc'), val: children, set: setChildren, min: 0, maxDisabled: numberOfPeople >= BOAT_CAPACITY, priceTag: pkg ? t('reservation.passengers.childrenPrice', { price: Math.round(ppp * 0.5) }) : '—' },
+                    { label: t('reservation.passengers.babiesLabel'),   desc: t('reservation.passengers.babiesDesc'),   val: babies,   set: setBabies,   min: 0, maxDisabled: babies >= 10,                   priceTag: t('reservation.passengers.babiesFree') },
                   ].map(({ label, desc, val, set, min, maxDisabled, priceTag }) => (
                     <div key={label} className="border border-navy-100 rounded-xl p-4 bg-white flex flex-col gap-1">
                       <p className="font-bold text-[14px] m-0">{label}</p>
@@ -593,7 +590,7 @@ export default function ReservationPage() {
                 {errors.numberOfPeople && <p className="error-message mb-3">{errors.numberOfPeople.message}</p>}
 
                 {/* Addons */}
-                <p className="font-bold text-[14px] tracking-wide mb-2">Extras opcionales</p>
+                <p className="font-bold text-[14px] tracking-wide mb-2">{t('reservation.extras')}</p>
                 <div className="flex flex-col gap-2">
                   {ADDONS.map(addon => {
                     const checked = selectedAddons.has(addon.id)
@@ -634,48 +631,48 @@ export default function ReservationPage() {
               <div className="flex items-center justify-between px-6 py-4 border-b border-dashed border-navy-100">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-navy-900 text-gold-300 flex items-center justify-center font-display font-bold text-sm">IV</div>
-                  <h2 className="text-[17px] font-bold m-0">Datos y contacto</h2>
+                  <h2 className="text-[17px] font-bold m-0">{t('reservation.card4.title')}</h2>
                 </div>
               </div>
               <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Name */}
                 <div className="sm:col-span-2">
-                  <label className="label flex items-center gap-1.5"><User size={14} />Nombre completo *</label>
+                  <label className="label flex items-center gap-1.5"><User size={14} />{t('reservation.contact.name')}</label>
                   <input
                     {...register('contactName')}
-                    placeholder="Tu nombre completo"
+                    placeholder={t('reservation.contact.namePlaceholder')}
                     className={clsx('input-field', errors.contactName && 'border-pirate-500')}
                   />
                   {errors.contactName && <p className="error-message">{errors.contactName.message}</p>}
                 </div>
                 {/* Phone */}
                 <div>
-                  <label className="label flex items-center gap-1.5"><Phone size={14} />Teléfono *</label>
+                  <label className="label flex items-center gap-1.5"><Phone size={14} />{t('reservation.contact.phone')}</label>
                   <input
                     {...register('contactPhone')}
-                    placeholder="+52 638 000 0000"
+                    placeholder={t('reservation.contact.phonePlaceholder')}
                     className={clsx('input-field', errors.contactPhone && 'border-pirate-500')}
                   />
                   {errors.contactPhone && <p className="error-message">{errors.contactPhone.message}</p>}
                 </div>
                 {/* Email */}
                 <div>
-                  <label className="label flex items-center gap-1.5"><Mail size={14} />Correo electrónico *</label>
+                  <label className="label flex items-center gap-1.5"><Mail size={14} />{t('reservation.contact.email')}</label>
                   <input
                     {...register('contactEmail')}
                     type="email"
-                    placeholder="tu@correo.com"
+                    placeholder={t('reservation.contact.emailPlaceholder')}
                     className={clsx('input-field', errors.contactEmail && 'border-pirate-500')}
                   />
                   {errors.contactEmail && <p className="error-message">{errors.contactEmail.message}</p>}
                 </div>
                 {/* Notes */}
                 <div className="sm:col-span-2">
-                  <label className="label flex items-center gap-1.5"><MessageSquare size={14} />Notas adicionales</label>
+                  <label className="label flex items-center gap-1.5"><MessageSquare size={14} />{t('reservation.notes')}</label>
                   <textarea
                     {...register('notes')}
                     rows={3}
-                    placeholder="Alergias, celebraciones, solicitudes especiales…"
+                    placeholder={t('reservation.contact.notesPlaceholder2')}
                     className="input-field resize-none"
                   />
                   {errors.notes && <p className="error-message">{errors.notes.message}</p>}
@@ -687,11 +684,11 @@ export default function ReservationPage() {
             <div className="border border-navy-100 rounded-2xl bg-white p-5 flex flex-col gap-3 text-[13px] text-navy-500">
               <div className="flex items-start gap-3">
                 <Shield size={16} className="text-gold-500 flex-shrink-0 mt-0.5" />
-                <span><b className="text-navy-800">Cancelación gratuita</b> hasta 24 h antes del paseo. Reembolso completo sin preguntas.</span>
+                <span><b className="text-navy-800">{t('reservation.info.cancellationTitle')}</b> {t('reservation.info.cancellationDetail')}</span>
               </div>
               <div className="flex items-start gap-3">
                 <Info size={16} className="text-gold-500 flex-shrink-0 mt-0.5" />
-                <span>Llegar <b className="text-navy-800">30 minutos antes</b> de zarpar al muelle Recinto Portuario.</span>
+                <span><b className="text-navy-800">{t('reservation.info.arrival30')}</b> {t('reservation.info.arrivalDetail')}</span>
               </div>
             </div>
 
@@ -715,9 +712,9 @@ export default function ReservationPage() {
               <div className="relative bg-gradient-to-b from-navy-900 to-navy-800 text-white px-5 py-5 overflow-hidden">
                 <div className="absolute right-0 bottom-0 w-32 h-32 pointer-events-none"
                      style={{ background: 'radial-gradient(circle, rgba(244,197,66,.15), transparent 70%)' }} />
-                <p className="text-[11px] font-bold uppercase tracking-[.2em] text-gold-300 mb-1">Tu reserva</p>
+                <p className="text-[11px] font-bold uppercase tracking-[.2em] text-gold-300 mb-1">{t('reservation.sum.yourReservation')}</p>
                 <h3 className="font-display font-bold text-[18px] text-bone m-0" style={{ color: '#f3ead0' }}>
-                  {pkg?.label ?? 'Selecciona un paseo'}
+                  {pkg?.label ?? t('reservation.sum.selectTour')}
                 </h3>
               </div>
 
@@ -726,19 +723,19 @@ export default function ReservationPage() {
                 <div className="space-y-0">
                   {[
                     {
-                      k: 'Fecha',
-                      v: watchedDate ? format(new Date(watchedDate + 'T12:00:00'), "EEE d MMMM", { locale: es }) : '—',
+                      k: t('reservation.sum.date'),
+                      v: watchedDate ? format(new Date(watchedDate + 'T12:00:00'), "EEE d MMMM", { locale: i18n.language === 'es' ? es : undefined }) : '—',
                       sub: watchedTime ? `${watchedTime} · ${pkg ? TOUR_META[watchedPkg!]?.duration : '—'}` : '—',
                     },
                     {
-                      k: 'Tripulación',
-                      v: `${numberOfPeople} ${numberOfPeople === 1 ? 'persona' : 'personas'}`,
-                      sub: `${adults} ${adults === 1 ? 'adulto' : 'adultos'}${children > 0 ? ` · ${children} ${children === 1 ? 'niño' : 'niños'}` : ''}${babies > 0 ? ` · ${babies} bebé${babies > 1 ? 's' : ''}` : ''}`,
+                      k: t('reservation.sum.crew'),
+                      v: `${numberOfPeople} ${numberOfPeople === 1 ? t('reservation.passengers.person') : t('reservation.passengers.people')}`,
+                      sub: `${adults} ${adults === 1 ? t('reservation.passengers.adult') : t('reservation.passengers.adults')}${children > 0 ? ` · ${children} ${children === 1 ? t('reservation.passengers.child') : t('reservation.passengers.children')}` : ''}${babies > 0 ? ` · ${babies} ${t('reservation.passengers.baby')}${babies > 1 ? 's' : ''}` : ''}`,
                     },
                     {
-                      k: 'Duración',
+                      k: t('reservation.sum.duration'),
                       v: pkg ? TOUR_META[watchedPkg!]?.duration ?? '—' : '—',
-                      sub: 'Muelle Recinto Portuario',
+                      sub: t('reservation.sum.dock'),
                     },
                   ].map(row => (
                     <div key={row.k} className="flex justify-between items-start gap-4 py-2.5 border-b border-dashed border-navy-100 last:border-0 text-[13.5px]">
@@ -756,13 +753,13 @@ export default function ReservationPage() {
                   <div className="mt-4 space-y-1.5 text-[13px]">
                     {adults > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-navy-400">{adults} × Adultos</span>
+                        <span className="text-navy-400">{t('reservation.sum.adultsX', { n: adults })}</span>
                         <span className="font-semibold">{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 }).format(adultsCost)}</span>
                       </div>
                     )}
                     {children > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-navy-400">{children} × Niño (50%)</span>
+                        <span className="text-navy-400">{t('reservation.sum.childrenX', { n: children })}</span>
                         <span className="font-semibold">{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 }).format(childrenCost)}</span>
                       </div>
                     )}
@@ -776,12 +773,12 @@ export default function ReservationPage() {
                       )
                     })}
                     <div className="flex justify-between">
-                      <span className="text-navy-400">Subtotal</span>
+                      <span className="text-navy-400">{t('reservation.sum.subtotal')}</span>
                       <span className="font-semibold">{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 }).format(peopleSubtotal + addonsTotal)}</span>
                     </div>
                     {hasGroupDiscount && (
                       <div className="flex justify-between text-green-700">
-                        <span>Descuento grupal</span>
+                        <span>{t('reservation.sum.groupDiscount')}</span>
                         <span className="font-semibold">−{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 }).format(discount)}</span>
                       </div>
                     )}
@@ -794,17 +791,17 @@ export default function ReservationPage() {
                     type="text"
                     value={promoCode}
                     onChange={e => setPromoCode(e.target.value)}
-                    placeholder="Código promocional"
+                    placeholder={t('reservation.sum.promoCode')}
                     className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-navy-200 text-[13px] font-sans focus:outline-none focus:border-gold-400 focus:ring-2 focus:ring-gold-200"
                   />
                   <button type="button" className="btn-ghost text-[13px] px-3 py-2 rounded-xl border border-navy-200">
-                    Aplicar
+                    {t('reservation.sum.apply')}
                   </button>
                 </div>
 
                 {/* Total */}
                 <div className="flex justify-between items-baseline pt-4 mt-3 border-t-2 border-navy-900">
-                  <span className="text-[13px] font-bold uppercase tracking-wider text-navy-400">Total</span>
+                  <span className="text-[13px] font-bold uppercase tracking-wider text-navy-400">{t('reservation.sum.total')}</span>
                   <div className="text-right">
                     <span className="font-display font-black text-[30px] text-navy-900">
                       {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 }).format(pkg ? total : 0)}
@@ -825,7 +822,7 @@ export default function ReservationPage() {
                   onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
                   onMouseLeave={e => (e.currentTarget.style.transform = '')}
                 >
-                  {isPending ? 'Procesando…' : 'Reservar y pagar'}
+                  {isPending ? t('reservation.sum.processing') : t('reservation.sum.bookAndPay')}
                   {!isPending && (
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M5 12h14M13 5l7 7-7 7"/>
@@ -837,9 +834,9 @@ export default function ReservationPage() {
               {/* Trust signals */}
               <div className="bg-navy-50 border-t border-navy-100 px-5 py-4 space-y-2 text-[12px] text-navy-500">
                 {[
-                  'Pago 100% seguro · Stripe / MercadoPago',
-                  'Confirmación inmediata por correo',
-                  'Cancelación gratis hasta 24 h antes',
+                  t('reservation.trust.secure'),
+                  t('reservation.trust.confirmation'),
+                  t('reservation.trust.cancellation'),
                 ].map(line => (
                   <div key={line} className="flex items-center gap-2">
                     <Check size={13} className="text-green-600 flex-shrink-0" />
@@ -850,7 +847,7 @@ export default function ReservationPage() {
             </div>
 
             <p className="text-center mt-3 text-[12px] text-navy-400">
-              ¿Necesitas ayuda?{' '}
+              {t('reservation.help')}{' '}
               <a href={`tel:${COMPANY.phone}`} className="text-navy-900 font-semibold underline">{COMPANY.phone}</a>
             </p>
           </aside>

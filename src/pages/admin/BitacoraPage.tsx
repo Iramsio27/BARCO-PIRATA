@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Shield, RefreshCw, Activity, X } from 'lucide-react'
+import { Shield, RefreshCw, Activity, X, ShieldAlert } from 'lucide-react'
 import { supabase } from '@lib/supabase'
 import { LoadingSpinner } from '@components/ui/LoadingSpinner'
 import { format, parseISO } from 'date-fns'
@@ -12,6 +12,8 @@ interface AuditEntry {
   action:     string
   table_name: string | null
   user_email: string | null
+  ip_address: string | null   // en eventos RATE_LIMIT contiene el número de WA
+  new_values: Record<string, unknown> | null
   created_at: string
 }
 
@@ -19,7 +21,7 @@ interface AuditEntry {
 async function fetchAuditLog(): Promise<AuditEntry[]> {
   const { data, error } = await supabase
     .from('audit_log')
-    .select('id, action, table_name, user_email, created_at')
+    .select('id, action, table_name, user_email, ip_address, new_values, created_at')
     .order('created_at', { ascending: false })
     .limit(300)
   if (error) throw new Error(error.message)
@@ -42,11 +44,12 @@ const TABLE_LABELS: Record<string, string> = {
 }
 
 const ACTION_STYLE: Record<string, { label: string; bg: string; color: string }> = {
-  LOGIN:  { label: 'Login',      bg: 'rgba(247,201,72,0.15)',  color: '#F7C948' },
-  INSERT: { label: 'Nuevo',      bg: 'rgba(74,222,128,0.15)',  color: '#4ade80' },
-  UPDATE: { label: 'Edición',    bg: 'rgba(96,165,250,0.15)',  color: '#60a5fa' },
-  CANCEL: { label: 'Cancelación',bg: 'rgba(251,146,60,0.15)', color: '#fb923c' },
-  DELETE: { label: 'Eliminar',   bg: 'rgba(248,113,113,0.15)', color: '#f87171' },
+  LOGIN:       { label: 'Login',       bg: 'rgba(247,201,72,0.15)',  color: '#F7C948' },
+  INSERT:      { label: 'Nuevo',       bg: 'rgba(74,222,128,0.15)',  color: '#4ade80' },
+  UPDATE:      { label: 'Edición',     bg: 'rgba(96,165,250,0.15)',  color: '#60a5fa' },
+  CANCEL:      { label: 'Cancelación', bg: 'rgba(251,146,60,0.15)',  color: '#fb923c' },
+  DELETE:      { label: 'Eliminar',    bg: 'rgba(248,113,113,0.15)', color: '#f87171' },
+  RATE_LIMIT:  { label: '⚠️ Rate Limit', bg: 'rgba(239,68,68,0.18)', color: '#fca5a5' },
 }
 
 function ActionBadge({ action }: { action: string }) {
@@ -107,7 +110,7 @@ export default function BitacoraPage() {
 
       {/* Tarjetas resumen */}
       {logs && logs.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {Object.entries(ACTION_STYLE).filter(([key]) => key !== 'DELETE').map(([key, s]) => (
             <div
               key={key}
@@ -257,10 +260,21 @@ export default function BitacoraPage() {
                       {TABLE_LABELS[entry.table_name ?? ''] ?? entry.table_name ?? '—'}
                     </td>
 
-                    {/* Usuario */}
+                    {/* Usuario / Origen */}
                     <td className="hidden md:table-cell px-4 py-3">
                       <div className="flex items-center gap-2">
-                        {entry.user_email ? (
+                        {entry.action === 'RATE_LIMIT' ? (
+                          // Para eventos de rate limit mostramos el número de WhatsApp
+                          <>
+                            <ShieldAlert className="w-4 h-4 shrink-0" style={{ color: '#fca5a5' }} />
+                            <span
+                              className="font-mono text-xs font-bold truncate max-w-[160px]"
+                              style={{ color: '#fca5a5' }}
+                            >
+                              +{entry.ip_address ?? '—'}
+                            </span>
+                          </>
+                        ) : entry.user_email ? (
                           <>
                             <div
                               className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0"
