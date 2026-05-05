@@ -218,7 +218,12 @@ export default function ReservationPage() {
 
   // ── Visible time slots ────────────────────────────────────────────────────
   const KNOWN_SLOTS = Object.fromEntries(TIME_SLOTS.map(s => [s.time, s]))
-  const visibleSlots = [...activeTimeSlots].sort().map(ts => KNOWN_SLOTS[ts] ?? { time: ts, label: ts, icon: '🌊', description: '' })
+  const visibleSlots = [...activeTimeSlots].sort().map(ts => {
+    if (KNOWN_SLOTS[ts]) return KNOWN_SLOTS[ts]
+    const h = parseInt(ts.split(':')[0], 10)
+    const slotKey = h < 11 ? 'morning' : h < 14 ? 'noon' : h < 18 ? 'afternoon' : 'sunset'
+    return { time: ts, slotKey, label: ts, icon: '🌊', description: '' }
+  })
   const todayIso = format(new Date(), 'yyyy-MM-dd')
   const nowHHMM  = format(new Date(), 'HH:mm')
 
@@ -313,7 +318,7 @@ export default function ReservationPage() {
               <div className="p-5">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {Object.entries(PACKAGES).map(([key, pkg]) => {
-                    const meta = TOUR_META[key]
+                    const meta = TOUR_META[key as keyof typeof TOUR_META]
                     if (!meta) return null
                     const isSel = watchedPkg === key
                     return (
@@ -342,7 +347,7 @@ export default function ReservationPage() {
                         <div className="w-11 h-11 rounded-xl bg-navy-900 text-gold-400 flex items-center justify-center mb-3">
                           {meta.icon}
                         </div>
-                        <h3 className="font-display font-bold text-[15px] tracking-tight mb-1 m-0">{pkg.label}</h3>
+                        <h3 className="font-display font-bold text-[15px] tracking-tight mb-1 m-0">{t(`packages.${pkg.id}.label`)}</h3>
                         <p className="text-[12px] text-navy-400 mb-3">{meta.duration}</p>
                         <ul className="list-none p-0 m-0 mb-3 flex flex-col gap-1.5">
                           {meta.features.map(f => (
@@ -477,7 +482,7 @@ export default function ReservationPage() {
                               </span>
                             )}
                             <span className={clsx('font-display font-bold text-[20px]', isSel ? 'text-navy-900' : 'text-navy-900')}>{slot.time}</span>
-                            <span className={clsx('text-[13px] font-semibold', isSel ? 'text-navy-700' : 'text-navy-600')}>{slot.label}</span>
+                            <span className={clsx('text-[13px] font-semibold', isSel ? 'text-navy-700' : 'text-navy-600')}>{t(`timePicker.slots.${slot.slotKey}`)}</span>
                             <span className="text-[12px] text-navy-400">
                               {availLoading ? t('reservation.slot.loading') : isFull ? t('reservation.slot.full') : isPast ? t('reservation.slot.past') : notEnough ? t('reservation.slot.onlyN', { count: available }) : t('reservation.slot.places', { count: available })}
                             </span>

@@ -28,9 +28,9 @@ const KNOWN_SLOTS = Object.fromEntries(TIME_SLOTS.map(s => [s.time, s]))
 
 function customSlotMeta(time: string) {
   const h = parseInt(time.split(':')[0], 10)
-  const label = h < 11 ? 'Mañana' : h < 14 ? 'Mediodía' : h < 18 ? 'Tarde' : 'Atardecer'
-  const icon  = h < 11 ? '🌅'     : h < 14 ? '🌞'       : h < 18 ? '🌤️'    : '🌇'
-  return { time, label, icon, description: '' }
+  const slotKey = h < 11 ? 'morning' : h < 14 ? 'noon' : h < 18 ? 'afternoon' : 'sunset'
+  const icon    = h < 11 ? '🌅'      : h < 14 ? '🌞'   : h < 18 ? '🌤️'       : '🌇'
+  return { time, slotKey, icon, label: '', description: '' }
 }
 
 /**
@@ -100,7 +100,7 @@ export function TimeSlotPicker({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {visibleSlots.map((slot) => {
-          const slotKey   = SLOT_KEYS[slot.time] ?? null
+          const slotKey   = SLOT_KEYS[slot.time] ?? slot.slotKey ?? null
           const available = availableInSlot(availability, slot.time)
           const isPast    = isToday && slot.time <= nowHHMM
           // Solo marcar como lleno si la consulta fue exitosa (no en caso de error)

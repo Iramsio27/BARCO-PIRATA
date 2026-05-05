@@ -208,15 +208,12 @@ export function HeroSection() {
       {/* ── Navigation (desktop) ── */}
       <header className="hero-nav">
         <Link to="/" className="hero-brand">
-          <div className="hero-brand-mark" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f4c542" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="10" r="5"/>
-              <circle cx="10" cy="9.5" r="1" fill="#f4c542"/>
-              <circle cx="14" cy="9.5" r="1" fill="#f4c542"/>
-              <path d="M9 18 L7 22 M15 18 L17 22 M9 18 L15 18"/>
-            </svg>
-          </div>
-          <span>BARCO PIRATA</span>
+          <img
+            src="/images/logo.png"
+            alt="Barco Pirata Perla Negra"
+            style={{ height: '78px', width: 'auto', objectFit: 'contain' }}
+            draggable={false}
+          />
         </Link>
 
         <nav className="hero-menu" aria-label="Navegación principal">
@@ -264,8 +261,8 @@ export function HeroSection() {
         <span className="hero-ribbon">Puerto Peñasco · Sonora · México</span>
 
         <h1 className="hero-title">
-          ¡Zarpa con Nosotros!
-          <span className="alt">La <span className="accent">Perla Negra</span> te espera</span>
+          {t('home.hero.title')}
+          <span className="alt">{t('header.taglinePrefix')} <span className="accent">Perla Negra</span> {t('header.taglineSuffix')}</span>
         </h1>
 
         <p className="hero-lede">{t('home.hero.subtitle')}</p>

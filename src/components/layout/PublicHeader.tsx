@@ -33,7 +33,7 @@ export function PublicHeader() {
             <img
               src="/images/logo.png"
               alt={COMPANY.shortName}
-              className="h-9 w-auto object-contain drop-shadow-[0_2px_8px_rgba(247,201,72,0.4)]"
+              className="h-14 w-auto object-contain drop-shadow-[0_2px_8px_rgba(247,201,72,0.4)]"
             />
             <span className="hidden lg:block font-display font-bold text-gold-400 text-base tracking-wider uppercase leading-none">
               {COMPANY.shortName}

@@ -51,7 +51,7 @@ export default function LoginPage() {
             <img
               src="/images/logo.png"
               alt={COMPANY.shortName}
-              className="h-24 w-auto object-contain drop-shadow-[0_4px_20px_rgba(247,201,72,0.6)]"
+              className="h-36 w-auto object-contain drop-shadow-[0_4px_20px_rgba(247,201,72,0.6)]"
             />
           </div>
           <h1 className="text-xl font-display font-bold text-gold-shimmer tracking-widest uppercase">{COMPANY.shortName}</h1>

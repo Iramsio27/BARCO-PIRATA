@@ -34,11 +34,11 @@ export const BOAT_CAPACITY = 40
 
 // ─── Horarios disponibles (slots fijos, coinciden con valid_time_slots()) ─
 export const TIME_SLOTS = [
-  { time: '09:00', label: 'Mañana',       icon: '🌅', description: 'Temprano con aire fresco'    },
-  { time: '11:00', label: 'Media mañana', icon: '☀️', description: 'Ideal para familias'          },
-  { time: '13:00', label: 'Mediodía',     icon: '🌞', description: 'Sol pleno y mejor vista'       },
-  { time: '15:00', label: 'Tarde',        icon: '🌤️', description: 'Clásico de la tarde'         },
-  { time: '17:00', label: 'Atardecer',    icon: '🌇', description: 'Puesta de sol en el mar'     },
+  { time: '09:00', slotKey: 'morning',    label: 'Mañana',       icon: '🌅', description: 'Temprano con aire fresco'    },
+  { time: '11:00', slotKey: 'midMorning', label: 'Media mañana', icon: '☀️', description: 'Ideal para familias'          },
+  { time: '13:00', slotKey: 'noon',       label: 'Mediodía',     icon: '🌞', description: 'Sol pleno y mejor vista'       },
+  { time: '15:00', slotKey: 'afternoon',  label: 'Tarde',        icon: '🌤️', description: 'Clásico de la tarde'         },
+  { time: '17:00', slotKey: 'sunset',     label: 'Atardecer',    icon: '🌇', description: 'Puesta de sol en el mar'     },
 ] as const
 
 export type TimeSlotValue = typeof TIME_SLOTS[number]['time']

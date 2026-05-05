@@ -71,7 +71,7 @@ function AdminLayoutInner() {
           <img
             src="/images/logo.png"
             alt={COMPANY.shortName}
-            className="h-8 w-auto object-contain drop-shadow-[0_2px_8px_rgba(247,201,72,0.5)]"
+            className="h-12 w-auto object-contain drop-shadow-[0_2px_8px_rgba(247,201,72,0.5)]"
           />
           <span className="font-display font-bold text-gold-400 text-xs tracking-wider uppercase leading-tight truncate">
             {COMPANY.shortName}

@@ -156,7 +156,7 @@ export default function HomePage() {
           <img
             src="/images/logo.png"
             alt="Barco Pirata"
-            className="h-20 w-auto object-contain mx-auto mb-6 drop-shadow-[0_4px_16px_rgba(247,201,72,0.4)]"
+            className="h-[120px] w-auto object-contain mx-auto mb-6 drop-shadow-[0_4px_16px_rgba(247,201,72,0.4)]"
           />
           <h2 className="text-3xl md:text-4xl font-display-deco font-bold text-white mb-4 tracking-widest uppercase">
             {t('home.finalCta.title')}

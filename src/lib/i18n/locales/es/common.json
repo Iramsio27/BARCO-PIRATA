@@ -5,7 +5,11 @@
     "weather": "Clima",
     "reserveNow": "Reservar Ahora",
     "menu": "Menú",
-    "language": "Idioma"
+    "language": "Idioma",
+    "gallery": "Galería",
+    "contact": "Contacto",
+    "taglinePrefix": "La",
+    "taglineSuffix": "te espera"
   },
   "footer": {
     "contact": "Contacto",
@@ -310,6 +314,11 @@
     "payNow": "Pagar ahora",
     "paymentError": "Error al procesar el pago",
     "viewReceipt": "Ver recibo",
+    "errorLoadingReservation": "No pudimos cargar los datos de tu reservación. Por favor intenta de nuevo.",
+    "retry": "Reintentar",
+    "reservationCancelled": "Reservación cancelada",
+    "reservationCancelledDetail": "Esta reservación fue cancelada y no puede procesarse un pago.",
+    "makeNewReservation": "Hacer nueva reservación",
     "email": {
       "title": "Correo para tu comprobante",
       "description": "Te enviaremos el recibo con el folio de tu reservación a este correo. Es obligatorio para continuar con el pago.",
@@ -374,5 +383,51 @@
   "common": {
     "required": "*",
     "loading": "Cargando…"
+  },
+  "clima": {
+    "backHome": "← Volver al inicio",
+    "title": "Condiciones Marinas",
+    "noData": "Sin datos",
+    "errorTitle": "No se pudo cargar el pronóstico",
+    "forecastLoading": "Consultando pronóstico…",
+    "extreme": {
+      "title": "Condiciones extremas — No se recomienda zarpar",
+      "windExceeded": "Viento: {{value}} km/h (límite {{limit}} km/h). ",
+      "wavesExceeded": "Altura de olas: {{value}} m (límite {{limit}} m).",
+      "warning": "Las reservaciones para este día podrían ser canceladas. Comunícate con nosotros para más información."
+    },
+    "favorable": {
+      "title": "Condiciones favorables para zarpar",
+      "subtitle": "Las condiciones previstas están dentro de los rangos seguros."
+    },
+    "detail": {
+      "title": "Detalle del día"
+    },
+    "general": {
+      "title": "Clima General",
+      "tempMaxMin": "🌡️ Temp. máx / mín",
+      "windMax": "💨 Viento máx.",
+      "windDir": "🧭 Dir. viento",
+      "precipitation": "🌧️ Precipitación"
+    },
+    "marine": {
+      "title": "Datos Marinos",
+      "waveHeight": "🌊 Altura de olas",
+      "waveDir": "🧭 Dirección olas",
+      "wavePeriod": "⏱️ Período de olas",
+      "windWaves": "💨 Olas por viento",
+      "swellHeight": "🌐 Altura swell"
+    },
+    "safety": {
+      "title": "Criterios de seguridad marina",
+      "windOk": "Viento hasta {{limit}} km/h",
+      "wavesOk": "Olas hasta {{limit}} m de altura",
+      "windBad": "Viento mayor a {{limit}} km/h",
+      "wavesBad": "Olas mayores a {{limit}} m"
+    },
+    "cta": {
+      "question": "¿Las condiciones se ven bien?",
+      "button": "Reservar para este día"
+    }
   }
 }

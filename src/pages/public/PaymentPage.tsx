@@ -57,13 +57,13 @@ export default function PaymentPage() {
   if (isLoading) return <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
   if (isError) return (
     <div className="container-app py-20 text-center">
-      <p className="text-navy-500 mb-4">No pudimos cargar los datos de tu reservación. Por favor intenta de nuevo.</p>
+      <p className="text-navy-500 mb-4">{t('payment.errorLoadingReservation')}</p>
       <button
         type="button"
         onClick={() => refetch()}
         className="px-4 py-2 rounded-lg bg-gold-400 text-navy-900 font-semibold text-sm"
       >
-        Reintentar
+        {t('payment.retry')}
       </button>
     </div>
   )
@@ -76,10 +76,10 @@ export default function PaymentPage() {
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-100 border-4 border-red-200 mb-4">
           <span className="text-4xl">⚠️</span>
         </div>
-        <h2 className="text-2xl font-display font-bold text-navy-900 mb-2">Reservación cancelada</h2>
-        <p className="text-navy-500 mb-6">Esta reservación fue cancelada y no puede procesarse un pago.</p>
+        <h2 className="text-2xl font-display font-bold text-navy-900 mb-2">{t('payment.reservationCancelled')}</h2>
+        <p className="text-navy-500 mb-6">{t('payment.reservationCancelledDetail')}</p>
         <a href="/reservar" className="inline-block px-6 py-3 rounded-xl bg-gold-400 text-navy-900 font-bold text-sm">
-          Hacer nueva reservación
+          {t('payment.makeNewReservation')}
         </a>
       </div>
     )

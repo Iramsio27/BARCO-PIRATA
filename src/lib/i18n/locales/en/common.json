@@ -5,7 +5,11 @@
     "weather": "Weather",
     "reserveNow": "Book Now",
     "menu": "Menu",
-    "language": "Language"
+    "language": "Language",
+    "gallery": "Gallery",
+    "contact": "Contact",
+    "taglinePrefix": "The",
+    "taglineSuffix": "awaits"
   },
   "footer": {
     "contact": "Contact",
@@ -310,6 +314,11 @@
     "payNow": "Pay now",
     "paymentError": "Error processing payment",
     "viewReceipt": "View receipt",
+    "errorLoadingReservation": "We couldn't load your reservation data. Please try again.",
+    "retry": "Retry",
+    "reservationCancelled": "Reservation cancelled",
+    "reservationCancelledDetail": "This reservation was cancelled and payment cannot be processed.",
+    "makeNewReservation": "Make a new reservation",
     "email": {
       "title": "Email for your receipt",
       "description": "We'll send the receipt with your reservation folio to this address. It's required to continue with payment.",
@@ -374,5 +383,51 @@
   "common": {
     "required": "*",
     "loading": "Loading…"
+  },
+  "clima": {
+    "backHome": "← Back to home",
+    "title": "Marine Conditions",
+    "noData": "No data",
+    "errorTitle": "Could not load forecast",
+    "forecastLoading": "Loading forecast…",
+    "extreme": {
+      "title": "Extreme conditions — Sailing not recommended",
+      "windExceeded": "Wind: {{value}} km/h (limit {{limit}} km/h). ",
+      "wavesExceeded": "Wave height: {{value}} m (limit {{limit}} m).",
+      "warning": "Reservations for this day may be cancelled. Contact us for more information."
+    },
+    "favorable": {
+      "title": "Favorable conditions for sailing",
+      "subtitle": "Forecast conditions are within safe ranges."
+    },
+    "detail": {
+      "title": "Day details"
+    },
+    "general": {
+      "title": "General Weather",
+      "tempMaxMin": "🌡️ Max / min temp",
+      "windMax": "💨 Max wind",
+      "windDir": "🧭 Wind dir.",
+      "precipitation": "🌧️ Precipitation"
+    },
+    "marine": {
+      "title": "Marine Data",
+      "waveHeight": "🌊 Wave height",
+      "waveDir": "🧭 Wave direction",
+      "wavePeriod": "⏱️ Wave period",
+      "windWaves": "💨 Wind waves",
+      "swellHeight": "🌐 Swell height"
+    },
+    "safety": {
+      "title": "Marine safety criteria",
+      "windOk": "Wind up to {{limit}} km/h",
+      "wavesOk": "Waves up to {{limit}} m high",
+      "windBad": "Wind above {{limit}} km/h",
+      "wavesBad": "Waves above {{limit}} m"
+    },
+    "cta": {
+      "question": "Do conditions look good?",
+      "button": "Book for this day"
+    }
   }
 }

@@ -15,7 +15,7 @@ export function PublicFooter() {
               <img
                 src="/images/logo.png"
                 alt={COMPANY.shortName}
-                className="h-12 w-auto object-contain drop-shadow-[0_2px_8px_rgba(247,201,72,0.35)]"
+                className="h-[72px] w-auto object-contain drop-shadow-[0_2px_8px_rgba(247,201,72,0.35)]"
               />
               <span className="font-display font-bold text-gold-400 text-base tracking-wider uppercase">{COMPANY.shortName}</span>
             </div>

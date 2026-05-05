@@ -24,10 +24,9 @@ export function PublicNav() {
           <img
             src="/images/logo.png"
             alt="Barco Pirata Perla Negra"
-            style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
+            style={{ height: '66px', width: 'auto', objectFit: 'contain' }}
             draggable={false}
           />
-          <span>BARCO PIRATA</span>
         </Link>
 
         {/* Menu pills — desktop */}
@@ -41,7 +40,7 @@ export function PublicNav() {
           <NavLink to="/clima" className={({ isActive }) => isActive ? 'active' : ''}>
             {t('header.weather')}
           </NavLink>
-          <a href="/#galeria">Galería</a>
+          <a href="/#galeria">{t('header.gallery')}</a>
           <a
             href="#contacto"
             onClick={(e) => {
@@ -49,7 +48,7 @@ export function PublicNav() {
               document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth' })
             }}
           >
-            Contacto
+            {t('header.contact')}
           </a>
         </nav>
 
@@ -128,7 +127,7 @@ export function PublicNav() {
               marginBottom: '4px',
             }}
           >
-            Contacto
+            {t('header.contact')}
           </a>
         </div>
       )}
