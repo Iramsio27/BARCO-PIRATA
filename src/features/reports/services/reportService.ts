@@ -41,6 +41,15 @@ export interface RangeReport {
   totalCancelled: number
   totalPeople: number
   totalRevenue: number
+  // Totales por tipo de pasajero
+  totalAdults: number
+  totalYouth: number
+  totalChildren: number
+  totalBabies: number
+  // Ingresos por tipo de pasajero (bebés siempre $0)
+  revenueAdults: number
+  revenueYouth: number
+  revenueChildren: number
   byPackage: Record<PackageId, { count: number; revenue: number }>
   byPaymentMethod: Record<string, { count: number; revenue: number }>
   /** Serie temporal agrupada según `granularity` — cada punto listo para graficar */
@@ -68,7 +77,15 @@ function rowToReservation(r: Record<string, unknown>): Reservation {
     contactEmail: (r.contact_email as string | null) ?? null,
     date: r.date as string,
     time: r.time as string,
-    numberOfPeople: r.number_of_people as number,
+    numberOfPeople: (r.number_of_people as number) ?? 0,
+    adults: (r.adults as number) ?? 0,
+    youth: (r.youth as number) ?? 0,
+    children: (r.children as number) ?? 0,
+    babies: (r.babies as number) ?? 0,
+    totalPassengers: (r.total_passengers as number) ?? 0,
+    adultsCost: (r.adults_cost as number) ?? 0,
+    youthCost: (r.youth_cost as number) ?? 0,
+    childrenCost: (r.children_cost as number) ?? 0,
     packageId: r.package_id as Reservation['packageId'],
     serviceType: r.service_type as Reservation['serviceType'],
     subtotal: r.subtotal as number,
@@ -124,12 +141,12 @@ export const reportService = {
     const report: DailyReport = {
       date,
       totalReservations: reservations.length,
-      totalPeople: reservations.reduce((s, r) => s + r.numberOfPeople, 0),
+      totalPeople: reservations.reduce((s, r) => s + r.totalPassengers, 0),
       totalRevenue: reservations.reduce((s, r) => s + r.total, 0),
       byPackage: {
         CON_COMIDA:   { count: 0, revenue: 0 },
         SOLO_BEBIDAS: { count: 0, revenue: 0 },
-        SOLO_PASEO:   { count: 0, revenue: 0 },
+        NINOS:        { count: 0, revenue: 0 },
       },
       byPaymentMethod: {},
       reservations,
@@ -174,10 +191,13 @@ export const reportService = {
     const byPackage: RangeReport['byPackage'] = {
       CON_COMIDA:   { count: 0, revenue: 0 },
       SOLO_BEBIDAS: { count: 0, revenue: 0 },
-      SOLO_PASEO:   { count: 0, revenue: 0 },
+      NINOS:        { count: 0, revenue: 0 },
     }
     const byPaymentMethod: RangeReport['byPaymentMethod'] = {}
     const bucketsMap = new Map<string, RangeReport['series'][number]>()
+
+    let totalAdults = 0, totalYouth = 0, totalChildren = 0, totalBabies = 0
+    let revenueAdults = 0, revenueYouth = 0, revenueChildren = 0
 
     for (const r of reservations) {
       const method = r.paymentMethod ?? 'sin_pago'
@@ -190,17 +210,25 @@ export const reportService = {
       byPaymentMethod[method].count++
       byPaymentMethod[method].revenue += r.total
 
+      totalAdults   += r.adults
+      totalYouth    += r.youth
+      totalChildren += r.children
+      totalBabies   += r.babies
+      revenueAdults   += r.adultsCost
+      revenueYouth    += r.youthCost
+      revenueChildren += r.childrenCost
+
       const { key, label } = bucket(r.date, granularity)
       const existing = bucketsMap.get(key)
       if (existing) {
         existing.reservations++
-        existing.people  += r.numberOfPeople
+        existing.people  += r.totalPassengers
         existing.revenue += r.total
       } else {
         bucketsMap.set(key, {
           key, label,
           reservations: 1,
-          people:  r.numberOfPeople,
+          people:  r.totalPassengers,
           revenue: r.total,
         })
       }
@@ -212,8 +240,10 @@ export const reportService = {
       startDate, endDate, granularity,
       totalReservations: reservations.length,
       totalCancelled:    cancelledReservations.length,
-      totalPeople:  reservations.reduce((s, r) => s + r.numberOfPeople, 0),
+      totalPeople:  reservations.reduce((s, r) => s + r.totalPassengers, 0),
       totalRevenue: reservations.reduce((s, r) => s + r.total, 0),
+      totalAdults, totalYouth, totalChildren, totalBabies,
+      revenueAdults, revenueYouth, revenueChildren,
       byPackage,
       byPaymentMethod,
       series,
@@ -230,9 +260,15 @@ export const reportService = {
       'Nombre': r.contactName,
       'Teléfono': r.contactPhone,
       'Hora': r.time,
-      'Personas': r.numberOfPeople,
       'Paquete': r.packageId.replace(/_/g, ' '),
-      'Tipo': r.serviceType,
+      'Adultos': r.adults,
+      'Costo Adultos': r.adultsCost,
+      'Adolescentes': r.youth,
+      'Costo Adolescentes': r.youthCost,
+      'Niños': r.children,
+      'Costo Niños': r.childrenCost,
+      'Bebés': r.babies,
+      'Total Pasajeros': r.totalPassengers,
       'Subtotal': r.subtotal,
       'Descuento': r.discount,
       'Total': r.total,
@@ -254,9 +290,15 @@ export const reportService = {
       'Hora': r.time,
       'Nombre': r.contactName,
       'Teléfono': r.contactPhone,
-      'Personas': r.numberOfPeople,
       'Paquete': r.packageId.replace(/_/g, ' '),
-      'Tipo': r.serviceType,
+      'Adultos': r.adults,
+      'Costo Adultos': r.adultsCost,
+      'Adolescentes': r.youth,
+      'Costo Adolescentes': r.youthCost,
+      'Niños': r.children,
+      'Costo Niños': r.childrenCost,
+      'Bebés': r.babies,
+      'Total Pasajeros': r.totalPassengers,
       'Subtotal': r.subtotal,
       'Descuento': r.discount,
       'Total': r.total,
@@ -344,19 +386,24 @@ export const reportService = {
 
       autoTable(doc, {
         startY: 56,
-        head: [['Hora', 'Cliente', 'Pers.', 'Paquete', 'Total', 'Estado', 'Pago']],
+        head: [['Hora', 'Cliente', 'Adults.', 'Adol.', 'Niños', 'Bebés', 'Total Pas.', 'Paquete', 'Total', 'Estado', 'Pago']],
         body: report.reservations.map((r) => [
           r.time,
           r.contactName,
-          String(r.numberOfPeople),
+          String(r.adults),
+          String(r.youth),
+          String(r.children),
+          String(r.babies),
+          String(r.totalPassengers),
           r.packageId.replace(/_/g, ' '),
           formatCurrency(r.total),
           r.status,
           r.paymentMethod ?? '—',
         ]),
-        styles:              { fontSize: 9, cellPadding: 3, textColor: C_INK, lineColor: C_LINE, lineWidth: 0.15 },
-        headStyles:          { fillColor: C_TH, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8 },
+        styles:              { fontSize: 8, cellPadding: 2.5, textColor: C_INK, lineColor: C_LINE, lineWidth: 0.15 },
+        headStyles:          { fillColor: C_TH, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 7 },
         alternateRowStyles:  { fillColor: C_ALT },
+        columnStyles:        { 2: { halign: 'right' }, 3: { halign: 'right' }, 4: { halign: 'right' }, 5: { halign: 'right' }, 6: { halign: 'right' }, 8: { halign: 'right' } },
         margin:              { left: ML, right: MR },
       })
 
@@ -502,16 +549,17 @@ export const reportService = {
 
       autoTable(doc, {
         startY: y2 + 14,
-        head: [['Fecha', 'Hora', 'Cliente', 'Pers.', 'Paquete', 'Total', 'Estado']],
+        head: [['Fecha', 'Hora', 'Cliente', 'Adults.', 'Adol.', 'Niños', 'Bebés', 'Paquete', 'Total', 'Estado', 'Pago']],
         body: report.reservations.map((r) => [
           formatDate(r.date), r.time, r.contactName,
-          String(r.numberOfPeople), r.packageId.replace(/_/g, ' '),
-          formatCurrency(r.total), r.status,
+          String(r.adults), String(r.youth), String(r.children), String(r.babies),
+          r.packageId.replace(/_/g, ' '),
+          formatCurrency(r.total), r.status, r.paymentMethod ?? '—',
         ]),
-        styles:             { fontSize: 8.5, cellPadding: 2.5, textColor: C_INK, lineColor: C_LINE, lineWidth: 0.15 },
-        headStyles:         { fillColor: C_TH, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 7.5 },
+        styles:             { fontSize: 7.5, cellPadding: 2, textColor: C_INK, lineColor: C_LINE, lineWidth: 0.15 },
+        headStyles:         { fillColor: C_TH, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 7 },
         alternateRowStyles: { fillColor: C_ALT },
-        columnStyles:       { 3: { halign: 'right' }, 5: { halign: 'right' } },
+        columnStyles:       { 3: { halign: 'right' }, 4: { halign: 'right' }, 5: { halign: 'right' }, 6: { halign: 'right' }, 8: { halign: 'right' } },
         margin:             { left: ML, right: MR },
       })
 

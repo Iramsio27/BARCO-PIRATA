@@ -26,9 +26,9 @@ export interface IncomingMessage {
 
 // ─── Nombres de paquetes ──────────────────────────────────────────────────────
 const PKG_NAMES: Record<string, { es: string; en: string }> = {
-  con_comida:   { es: '🍽️ Con Comida Incluida',    en: '🍽️ With Food Included' },
-  solo_bebidas: { es: '🍹 Solo Bebidas',            en: '🍹 Drinks Only' },
-  solo_paseo:   { es: '⛵ Solo Paseo',              en: '⛵ Tour Only' },
+  con_comida:   { es: '🍽️ Cena y Barra Libre',     en: '🍽️ Dinner & Open Bar' },
+  solo_bebidas: { es: '🍹 Cena o Barra Libre',      en: '🍹 Dinner or Open Bar' },
+  ninos:        { es: '🧒 Paquete Niños',           en: '🧒 Kids Package' },
 }
 
 // ─── Detección de idioma ──────────────────────────────────────────────────────
@@ -173,12 +173,12 @@ const T = {
       en: '👥 *Maximum capacity:* 40 people per tour.\n\nFor safety reasons we cannot exceed that number.',
     },
     faq_packages: {
-      es: '🎟️ *Paquetes disponibles:*\n\n🍽️ *Con Comida* — $450/persona\nPaseo + cena a bordo\n\n🍹 *Solo Bebidas* — $350/persona\nPaseo + barra de bebidas\n\n⛵ *Solo Paseo* — $250/persona\nRecorrido panorámico por el litoral\n\n💸 Grupos de 5+ personas: 10% de descuento automático.',
-      en: '🎟️ *Available packages:*\n\n🍽️ *With Food* — $450/person\nTour + dinner on board\n\n🍹 *Drinks Only* — $350/person\nTour + open bar\n\n⛵ *Tour Only* — $250/person\nScenic coastal tour\n\n💸 Groups of 5+ people: automatic 10% discount.',
+      es: '🎟️ *Paquetes disponibles:*\n\n🍽️ *Cena y Barra Libre* — $700/adulto\nPaseo + cena buffet + barra libre a bordo\n\n🍹 *Cena o Barra Libre* — $600/adulto\nElige entre cena o barra de bebidas\n\n🧒 *Paquete Niños* (3–11 años) — $300\nAgua, sodas y pizza a bordo\n\n💸 Grupos de 5+ personas: 10% de descuento automático.\n\n💳 *Pago:* efectivo o transferencia en el muelle.',
+      en: '🎟️ *Available packages:*\n\n🍽️ *Dinner & Open Bar* — $700/adult\nTour + buffet dinner + open bar on board\n\n🍹 *Dinner or Open Bar* — $600/adult\nChoose between dinner or open bar\n\n🧒 *Kids Package* (3–11 yrs) — $300\nWater, sodas, and pizza on board\n\n💸 Groups of 5+ people: automatic 10% discount.\n\n💳 *Payment:* cash or bank transfer at the dock.',
     },
     faq_kids: {
-      es: '👶 *Niños:* Sí pueden venir menores de edad acompañados de un adulto responsable.\n\nEl precio es el mismo por persona sin importar la edad.',
-      en: '👶 *Children:* Yes, minors are welcome accompanied by a responsible adult.\n\nThe price is the same per person regardless of age.',
+      es: '👥 *Tipos de pasajero y precios:*\n\n👨‍👩‍👧 *Adultos* (18+ años) — precio completo del paquete\n🧑 *Adolescentes* (12–17 años) — precio reducido por paquete\n🧒 *Niños* (3–11 años) — $300 (agua, sodas y pizza)\n👶 *Bebés* (menores de 3 años) — *Gratis* 🎉\n\nTodos los menores deben ir acompañados de un adulto responsable.',
+      en: '👥 *Passenger types and pricing:*\n\n👨‍👩‍👧 *Adults* (18+ yrs) — full package price\n🧑 *Teens* (12–17 yrs) — reduced price per package\n🧒 *Children* (3–11 yrs) — $300 (water, sodas & pizza)\n👶 *Babies* (under 3 yrs) — *Free* 🎉\n\nAll minors must be accompanied by a responsible adult.',
     },
     faq_weather: {
       es: '🌧️ *Mal tiempo:* Si las condiciones climáticas no son seguras para navegar, cancelamos el tour y te avisamos con anticipación para reagendar tu reservación sin costo.',

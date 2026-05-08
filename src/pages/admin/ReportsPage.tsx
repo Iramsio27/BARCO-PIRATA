@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   FileSpreadsheet, FileText, TrendingUp, Users, DollarSign,
-  CalendarRange, Package, CreditCard, BarChart3, XCircle,
+  CalendarRange, Package, BarChart3, XCircle, Baby,
 } from 'lucide-react'
 import { reportService } from '@features/reports/services/reportService'
 import { formatCurrency, formatDate } from '@utils/formatters'
@@ -16,14 +16,12 @@ import { BarChart, LineChart, DonutChart } from '@components/ui/Charts'
 const PACKAGE_COLORS: Record<string, string> = {
   CON_COMIDA:   '#F0B429',
   SOLO_BEBIDAS: '#3B82F6',
-  SOLO_PASEO:   '#DC2626',
+  NINOS:        '#10B981',
 }
 
 const PAYMENT_COLORS: Record<string, string> = {
   efectivo:      '#F0B429',
-  tarjeta:       '#3B82F6',
   transferencia: '#10B981',
-  otro:          '#8B5CF6',
 }
 
 // ════════════════════════════════════════════════════════════════════════
@@ -85,6 +83,7 @@ export default function ReportsPage() {
     return (Object.keys(report.byPackage) as PackageId[])
       .map((k) => {
         const pkg = PACKAGES[k]
+        if (!pkg) return null
         const s = report.byPackage[k]
         return {
           label: pkg.label,
@@ -92,7 +91,7 @@ export default function ReportsPage() {
           color: PACKAGE_COLORS[k] ?? '#6B7280',
         }
       })
-      .filter((d) => d.value > 0)
+      .filter((d): d is NonNullable<typeof d> => d !== null && d.value > 0)
   }, [report])
 
   const paymentDonut = useMemo(() => {
@@ -225,6 +224,37 @@ export default function ReportsPage() {
             </div>
           )}
 
+          {/* Desglose por tipo de pasajero */}
+          <section
+            className="rounded-xl p-4 sm:p-5"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}
+          >
+            <header className="flex items-center gap-2 mb-4">
+              <Baby className="w-5 h-5 text-gold-500" />
+              <h2 className="font-display font-bold" style={{ color: 'var(--text-title)' }}>Pasajeros por tipo</h2>
+            </header>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[
+                { label: 'Adultos',      count: report.totalAdults,   revenue: report.revenueAdults,   color: '#F0B429' },
+                { label: 'Adolescentes', count: report.totalYouth,    revenue: report.revenueYouth,    color: '#3B82F6' },
+                { label: 'Niños',        count: report.totalChildren, revenue: report.revenueChildren, color: '#10B981' },
+                { label: 'Bebés',        count: report.totalBabies,   revenue: 0,                      color: '#8B5CF6' },
+              ].map(({ label, count, revenue, color }) => (
+                <div
+                  key={label}
+                  className="rounded-lg p-3 text-center"
+                  style={{ background: 'var(--bg-surface-alt)', border: '1px solid var(--border)' }}
+                >
+                  <p className="text-[11px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>{label}</p>
+                  <p className="text-2xl font-bold mb-1" style={{ color }}>{count}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    {revenue > 0 ? formatCurrency(revenue) : label === 'Bebés' ? 'Gratis' : '—'}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+
           {/* Gráfica principal — Ingresos por período */}
           <section
             className="rounded-xl p-4 sm:p-5"
@@ -291,8 +321,8 @@ export default function ReportsPage() {
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}
             >
               <header className="flex items-center gap-2 mb-4">
-                <CreditCard className="w-5 h-5 text-gold-500" />
-                <h2 className="font-display font-bold" style={{ color: 'var(--text-title)' }}>Ingresos por método de pago</h2>
+                <DollarSign className="w-5 h-5 text-gold-500" />
+                <h2 className="font-display font-bold" style={{ color: 'var(--text-title)' }}>Efectivo vs Transferencia</h2>
               </header>
               {paymentDonut.length ? (
                 <DonutChart
@@ -317,6 +347,7 @@ export default function ReportsPage() {
               <div className="space-y-4">
                 {(Object.keys(report.byPackage) as PackageId[]).map((pkgId) => {
                   const pkg = PACKAGES[pkgId]
+                  if (!pkg) return null
                   const stats = report.byPackage[pkgId]
                   const pct = report.totalReservations
                     ? Math.round((stats.count / report.totalReservations) * 100)

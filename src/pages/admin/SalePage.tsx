@@ -1,40 +1,83 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Printer, CheckCircle, CreditCard, Banknote, ArrowLeft, XCircle } from 'lucide-react'
+import {
+  Printer, CheckCircle, Banknote, ArrowLeftRight,
+  ArrowLeft, XCircle, Users, Hash, Pencil,
+} from 'lucide-react'
 import { useReservation, useCancelReservation } from '@features/reservations/hooks/useReservations'
 import { useProcessPayment } from '@features/payments/hooks/usePayments'
 import { formatCurrency, formatDate, formatTime } from '@utils/formatters'
-import { PACKAGES } from '@constants/index'
-import type { PackageId } from '@constants/index'
+import { PACKAGES, CHILDREN_PRICE, COMPANY } from '@constants/index'
+import type { PackageId, PaymentMethod } from '@constants/index'
 import { Button } from '@components/ui/Button'
 import { Card } from '@components/ui/Card'
 import { StatusBadge } from '@components/ui/Badge'
 import { LoadingSpinner } from '@components/ui/LoadingSpinner'
-import { COMPANY } from '@constants/index'
-import { useState } from 'react'
 
 export default function SalePage() {
   const { reservationId } = useParams<{ reservationId: string }>()
   const navigate = useNavigate()
+
   const { data: reservation, isLoading } = useReservation(reservationId ?? '')
-  const { mutateAsync: processPayment, isPending } = useProcessPayment()
+  const { mutateAsync: processPayment, isPending }       = useProcessPayment()
   const { mutateAsync: cancelReservation, isPending: isCancelling } = useCancelReservation()
-  const [paid, setPaid] = useState(false)
+
+  const [paid, setPaid]                 = useState(false)
   const [confirmCancel, setConfirmCancel] = useState(false)
-  const [cancelError, setCancelError] = useState<string | null>(null)
+  const [cancelError, setCancelError]   = useState<string | null>(null)
+  const [method, setMethod]             = useState<PaymentMethod>('efectivo')
+  const [transRef, setTransRef]         = useState('')
+  const [transRefError, setTransRefError] = useState<string | null>(null)
 
   if (isLoading) return <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
   if (!reservation) return <div className="text-center py-20 text-navy-500">Reservación no encontrada.</div>
 
-  const pkg = PACKAGES[reservation.packageId as PackageId]
-  const isPagada    = reservation.status === 'pagada' || paid
+  const pkg        = PACKAGES[reservation.packageId as PackageId]
+  const isPagada   = reservation.status === 'pagada' || paid
   const isCancelada = reservation.status === 'cancelada'
 
-  const handleConfirmCash = async () => {
-    await processPayment({ reservationId: reservation.id, method: 'efectivo', adminConfirm: true })
+  const handleConfirm = async () => {
+    if (method === 'transferencia' && !transRef.trim()) {
+      setTransRefError('Ingresa el número de referencia de la transferencia.')
+      return
+    }
+    setTransRefError(null)
+    await processPayment({
+      reservationId: reservation.id,
+      method,
+      adminConfirm: true,
+      transferenciaReference: method === 'transferencia' ? transRef.trim() : undefined,
+    })
     setPaid(true)
   }
 
   const handlePrint = () => window.print()
+
+  // ── Desglose de pasajeros ──────────────────────────────────────────────────
+  // Los costos totales están en la reservación pero no el desglose por paquete,
+  // así que mostramos por tipo de pasajero con el costo unitario del paquete dominante.
+  const passengerRows = [
+    reservation.adults   > 0 && {
+      label: `${reservation.adults} adulto${reservation.adults !== 1 ? 's' : ''}`,
+      cost: reservation.adultsCost,
+      unitLabel: `× ${formatCurrency(reservation.adultsCost / reservation.adults)} c/u`,
+    },
+    reservation.youth    > 0 && {
+      label: `${reservation.youth} adolescente${reservation.youth !== 1 ? 's' : ''}`,
+      cost: reservation.youthCost,
+      unitLabel: `× ${formatCurrency(reservation.youthCost / reservation.youth)} c/u`,
+    },
+    reservation.children > 0 && {
+      label: `${reservation.children} niño${reservation.children !== 1 ? 's' : ''}`,
+      cost: reservation.childrenCost,
+      unitLabel: `× ${formatCurrency(CHILDREN_PRICE)} c/u`,
+    },
+    reservation.babies   > 0 && {
+      label: `${reservation.babies} bebé${reservation.babies !== 1 ? 's' : ''}`,
+      cost: 0,
+      unitLabel: 'Gratis',
+    },
+  ].filter(Boolean) as { label: string; cost: number; unitLabel: string }[]
 
   return (
     <div>
@@ -48,16 +91,24 @@ export default function SalePage() {
       <div className="max-w-2xl mx-auto px-1">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-display font-bold text-navy-900">Comprobante de Venta</h1>
-          {isPagada && (
-            <Button variant="outline" size="sm" onClick={handlePrint}>
-              <Printer className="w-4 h-4" /> Imprimir
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {!isCancelada && (
+              <Button variant="outline" size="sm" onClick={() => navigate(`/admin/editar/${reservation.id}`)}>
+                <Pencil className="w-4 h-4" /> Editar
+              </Button>
+            )}
+            {isPagada && (
+              <Button variant="outline" size="sm" onClick={handlePrint}>
+                <Printer className="w-4 h-4" /> Imprimir
+              </Button>
+            )}
+          </div>
         </div>
 
-        {/* Comprobante */}
+        {/* ── Comprobante ───────────────────────────────────────────────── */}
         <Card id="receipt" className="print:shadow-none border border-navy-100">
-          {/* Encabezado comprobante */}
+
+          {/* Encabezado */}
           <div className="text-center border-b border-navy-100 pb-5 mb-5">
             <p className="font-display font-bold text-xl text-navy-900">{COMPANY.name}</p>
             <p className="text-sm text-navy-500">{COMPANY.location}</p>
@@ -67,26 +118,31 @@ export default function SalePage() {
           {isPagada && (
             <div className="flex items-center gap-2 bg-gold-50 border border-gold-300 rounded-lg p-3 mb-5 shadow-gold">
               <CheckCircle className="w-5 h-5 text-gold-600 shrink-0" />
-              <p className="text-navy-900 font-semibold text-sm">Pago confirmado</p>
+              <div>
+                <p className="text-navy-900 font-semibold text-sm">Pago confirmado</p>
+                {reservation.paymentMethod === 'transferencia' && (
+                  <p className="text-xs text-navy-500 mt-0.5">Transferencia bancaria</p>
+                )}
+              </div>
             </div>
           )}
 
-          <div className="space-y-2 text-sm mb-6">
-            <Row label="Nombre" value={reservation.contactName} />
-            <Row label="Teléfono" value={reservation.contactPhone} />
+          {/* Datos generales */}
+          <div className="space-y-2 text-sm mb-5">
+            <Row label="Nombre"         value={reservation.contactName} />
+            <Row label="Teléfono"       value={reservation.contactPhone} />
             <Row label="Fecha del paseo" value={formatDate(reservation.date)} />
-            <Row label="Hora" value={formatTime(reservation.time)} />
-            <Row label="No. Personas" value={`${reservation.totalPassengers}`} />
-            <Row label="Paquete" value={`${pkg?.icon} ${pkg?.label}`} />
-            <Row label="Tipo de servicio" value={reservation.serviceType} />
-            <Row label="Estado" value={<StatusBadge status={reservation.status} />} />
+            <Row label="Hora"           value={formatTime(reservation.time)} />
+            <Row label="Paquete"        value={`${pkg?.icon ?? ''} ${pkg?.label ?? ''}`} />
+            <Row label="Tipo"           value={reservation.serviceType === 'grupal' ? 'Grupo' : 'Individual'} />
+            <Row label="Estado"         value={<StatusBadge status={reservation.status} />} />
             {reservation.paymentMethod && (
               <Row
                 label="Método de pago"
                 value={
                   <span className="flex items-center gap-1.5 capitalize">
-                    {reservation.paymentMethod === 'tarjeta'
-                      ? <CreditCard className="w-4 h-4" />
+                    {reservation.paymentMethod === 'transferencia'
+                      ? <ArrowLeftRight className="w-4 h-4" />
                       : <Banknote className="w-4 h-4" />}
                     {reservation.paymentMethod}
                   </span>
@@ -95,13 +151,40 @@ export default function SalePage() {
             )}
           </div>
 
+          {/* Desglose de tripulación */}
+          <div className="mb-5">
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="w-4 h-4 text-gold-600" />
+              <span className="text-xs font-bold uppercase tracking-wider text-navy-400">Tripulación</span>
+            </div>
+            <div className="rounded-xl border border-navy-100 overflow-hidden">
+              {passengerRows.map((row) => (
+                <div
+                  key={row.label}
+                  className="flex items-center justify-between px-3 py-2.5 text-sm border-b border-navy-50 last:border-0"
+                >
+                  <div>
+                    <span className="font-medium text-navy-800">{row.label}</span>
+                    <span className="ml-2 text-xs text-navy-400">{row.unitLabel}</span>
+                  </div>
+                  {row.cost === 0
+                    ? <span className="text-green-600 font-semibold text-sm">Gratis</span>
+                    : <span className="font-semibold text-navy-900">{formatCurrency(row.cost)}</span>
+                  }
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Totales */}
           <div className="rope-divider pt-4 space-y-1.5 text-sm">
             <div className="flex justify-between text-navy-600">
-              <span>Subtotal</span><span>{formatCurrency(reservation.subtotal)}</span>
+              <span>Subtotal</span>
+              <span>{formatCurrency(reservation.subtotal)}</span>
             </div>
             {reservation.discount > 0 && (
               <div className="flex justify-between text-gold-700 font-semibold">
-                <span>Descuento grupal (10%)</span>
+                <span>Descuento</span>
                 <span>-{formatCurrency(reservation.discount)}</span>
               </div>
             )}
@@ -116,38 +199,100 @@ export default function SalePage() {
           </p>
         </Card>
 
-        {/* Acción de cobro (solo si pendiente) */}
+        {/* ── Panel de cobro ────────────────────────────────────────────── */}
         {!isPagada && !isCancelada && (
           <Card className="mt-4 border border-navy-100">
-            <p className="text-navy-600 text-sm mb-4">
-              Confirma el pago en efectivo una vez que el cliente haya liquidado el monto total.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button variant="accent" onClick={handleConfirmCash} isLoading={isPending} className="flex-1">
-                <Banknote className="w-4 h-4" /> Confirmar Pago en Efectivo
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/pago/${reservation.id}`)}
-                className="flex-1"
+            <p className="text-sm font-semibold text-navy-700 mb-4">Registrar pago</p>
+
+            {/* Selector de método */}
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <button
+                type="button"
+                onClick={() => { setMethod('efectivo'); setTransRefError(null) }}
+                className={[
+                  'flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 text-sm font-semibold transition-all',
+                  method === 'efectivo'
+                    ? 'border-gold-500 bg-gold-50 text-navy-900'
+                    : 'border-navy-200 text-navy-500 hover:border-navy-300',
+                ].join(' ')}
               >
-                <CreditCard className="w-4 h-4" /> Cobrar con Tarjeta
-              </Button>
+                <Banknote className="w-4 h-4" /> Efectivo
+              </button>
+              <button
+                type="button"
+                onClick={() => { setMethod('transferencia'); setTransRefError(null) }}
+                className={[
+                  'flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 text-sm font-semibold transition-all',
+                  method === 'transferencia'
+                    ? 'border-gold-500 bg-gold-50 text-navy-900'
+                    : 'border-navy-200 text-navy-500 hover:border-navy-300',
+                ].join(' ')}
+              >
+                <ArrowLeftRight className="w-4 h-4" /> Transferencia
+              </button>
             </div>
+
+            {/* Info contextual + campo de referencia */}
+            {method === 'efectivo' && (
+              <p className="text-xs text-navy-500 mb-4 bg-navy-50 rounded-lg px-3 py-2.5">
+                Confirma al recibir el efectivo del cliente en el muelle. Se marcará la reservación como pagada.
+              </p>
+            )}
+
+            {method === 'transferencia' && (
+              <div className="mb-4">
+                <p className="text-xs text-navy-500 mb-3 bg-navy-50 rounded-lg px-3 py-2.5">
+                  Verifica el comprobante de transferencia del cliente antes de confirmar.
+                </p>
+                <label className="block text-xs font-semibold text-navy-600 mb-1.5">
+                  <Hash className="w-3.5 h-3.5 inline mr-1" />
+                  Número de referencia / folio de transferencia
+                </label>
+                <input
+                  type="text"
+                  value={transRef}
+                  onChange={(e) => { setTransRef(e.target.value); setTransRefError(null) }}
+                  placeholder="Ej. 1234567890"
+                  className={[
+                    'input-field w-full text-sm',
+                    transRefError ? 'border-red-400' : '',
+                  ].join(' ')}
+                />
+                {transRefError && (
+                  <p className="text-xs text-red-600 mt-1">{transRefError}</p>
+                )}
+              </div>
+            )}
+
+            <Button
+              variant="accent"
+              onClick={handleConfirm}
+              isLoading={isPending}
+              className="w-full"
+            >
+              {method === 'efectivo'
+                ? <><Banknote className="w-4 h-4" /> Confirmar pago en efectivo</>
+                : <><ArrowLeftRight className="w-4 h-4" /> Confirmar transferencia</>
+              }
+            </Button>
           </Card>
         )}
 
-        {/* Error de cancelación */}
+        {/* ── Error de cancelación ──────────────────────────────────────── */}
         {cancelError && (
           <Card className="mt-4 border border-red-200 bg-red-50">
             <div className="flex items-center justify-between">
               <p className="text-sm text-red-700">{cancelError}</p>
-              <button type="button" onClick={() => setCancelError(null)} className="text-red-400 hover:text-red-600 ml-3 font-bold">✕</button>
+              <button
+                type="button"
+                onClick={() => setCancelError(null)}
+                className="text-red-400 hover:text-red-600 ml-3 font-bold"
+              >✕</button>
             </div>
           </Card>
         )}
 
-        {/* Cancelar reservación */}
+        {/* ── Cancelar reservación ──────────────────────────────────────── */}
         {!isPagada && !isCancelada && (
           <Card className="mt-4 border border-red-100 bg-red-50">
             {!confirmCancel ? (
@@ -168,9 +313,7 @@ export default function SalePage() {
             ) : (
               <div className="space-y-3">
                 <p className="text-sm font-semibold text-red-700">¿Confirmas la cancelación?</p>
-                <p className="text-xs text-red-500">
-                  Se marcará como cancelada y no podrá revertirse desde aquí.
-                </p>
+                <p className="text-xs text-red-500">Se marcará como cancelada y no podrá revertirse desde aquí.</p>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"

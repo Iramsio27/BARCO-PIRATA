@@ -2,7 +2,8 @@ import { supabase } from '@lib/supabase'
 import type { Reservation, CreateReservationDto, PaginatedResponse } from '@app-types/index'
 import { sanitizeObject, sanitizePhone } from '@utils/security'
 import { calculatePrice } from '@utils/pricing'
-import type { PackageId } from '@constants/index'
+import { PACKAGES, CHILDREN_PRICE } from '@constants/index'
+import type { PackageId, PaymentMethod } from '@constants/index'
 
 /** Mapa de columnas snake_case → camelCase */
 const mapRow = (row: Record<string, unknown>): Reservation => ({
@@ -136,6 +137,108 @@ export const reservationService = {
         ...(paymentId && { payment_id: paymentId }),
       })
       .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw new Error(error.message)
+    return mapRow(data as Record<string, unknown>)
+  },
+
+  /** Actualiza fecha, hora, tripulación y paquete. Recalcula totales. */
+  async update(
+    id: string,
+    dto: {
+      date: string
+      time: string
+      packageId: PackageId
+      adults: number
+      youth: number
+      children: number
+      babies: number
+      adultsCost: number
+      youthCost: number
+      childrenCost: number
+      numberOfPeople: number
+      subtotal: number
+      total: number
+      serviceType: 'individual' | 'grupal'
+    },
+  ): Promise<Reservation> {
+    const { data, error } = await supabase
+      .from('reservations')
+      .update({
+        date:             dto.date,
+        time:             dto.time,
+        package_id:       dto.packageId,
+        adults:           dto.adults,
+        youth:            dto.youth,
+        children:         dto.children,
+        babies:           dto.babies,
+        adults_cost:      dto.adultsCost,
+        youth_cost:       dto.youthCost,
+        children_cost:    dto.childrenCost,
+        number_of_people: dto.numberOfPeople,
+        subtotal:         dto.subtotal,
+        discount:         0,
+        total:            dto.total,
+        service_type:     dto.serviceType,
+      })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw new Error(error.message)
+    return mapRow(data as Record<string, unknown>)
+  },
+
+  /** Crea una reservación desde admin (walk-in): sin rate limit, sin fecha mínima de anticipación. */
+  async adminCreate(
+    dto: CreateReservationDto & {
+      initialStatus?: Reservation['status']
+      paymentMethod?: PaymentMethod
+    },
+  ): Promise<Reservation> {
+    const clean = sanitizeObject(dto) as typeof dto
+
+    const pkg          = PACKAGES[clean.packageId as PackageId]
+    const adults       = clean.adults   ?? 0
+    const youth        = clean.youth    ?? 0
+    const children     = clean.children ?? 0
+    const babies       = clean.babies   ?? 0
+    const totalPax     = adults + youth + children + babies
+
+    const adultsCost   = clean.adultsCost   ?? adults   * pkg.adultPrice
+    const youthCost    = clean.youthCost    ?? youth    * pkg.youthPrice
+    const childrenCost = clean.childrenCost ?? children * CHILDREN_PRICE
+    const subtotal     = adultsCost + youthCost + childrenCost
+
+    const status = clean.initialStatus ?? 'pendiente'
+
+    const { data, error } = await supabase
+      .from('reservations')
+      .insert({
+        contact_name:     clean.contactName,
+        contact_phone:    sanitizePhone(clean.contactPhone),
+        contact_email:    clean.contactEmail?.trim().toLowerCase() ?? null,
+        date:             clean.date,
+        time:             clean.time,
+        number_of_people: totalPax,
+        adults,
+        youth,
+        children,
+        babies,
+        adults_cost:      adultsCost,
+        youth_cost:       youthCost,
+        children_cost:    childrenCost,
+        package_id:       clean.packageId,
+        service_type:     totalPax >= 10 ? 'grupal' : 'individual',
+        subtotal,
+        discount:         0,
+        total:            subtotal,
+        status,
+        payment_method:   status === 'pagada' ? (clean.paymentMethod ?? null) : null,
+        notes:            clean.notes ?? null,
+      })
       .select()
       .single()
 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Users, CalendarCheck, DollarSign, TrendingUp, CalendarDays } from 'lucide-react'
+import { Users, CalendarCheck, DollarSign, TrendingUp, CalendarDays, Banknote, ArrowLeftRight, Baby } from 'lucide-react'
 import { ClimaMarino } from '@components/ClimaMarino'
 import { useReservationStore } from '@app/store/reservationStore'
 import { useReservationsByDate } from '@features/reservations/hooks/useReservations'
@@ -8,7 +8,8 @@ import { StatusBadge } from '@components/ui/Badge'
 import { LoadingSpinner } from '@components/ui/LoadingSpinner'
 import { Link } from 'react-router-dom'
 import { CalendarPicker } from '@components/ui/CalendarPicker'
-import { BOAT_CAPACITY } from '@constants/index'
+import { BOAT_CAPACITY, PACKAGES } from '@constants/index'
+import type { PackageId } from '@constants/index'
 import { format, parse } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -18,14 +19,23 @@ export default function DashboardPage() {
   const { data, isLoading, isError } = useReservationsByDate(selectedDate)
 
   const reservations = data?.data ?? []
-  const totalRevenue = reservations
-    .filter((r) => r.status === 'pagada')
-    .reduce((sum, r) => sum + r.total, 0)
-  const totalPeople    = reservations.reduce((sum, r) => sum + r.totalPassengers, 0)
-  const pagadasCount   = reservations.filter(r => r.status === 'pagada').length
-  const payRate        = reservations.length
-    ? Math.round((pagadasCount / reservations.length) * 100)
-    : 0
+
+  // ── KPI derivados ──────────────────────────────────────────────────────────
+  const pagadas        = reservations.filter(r => r.status === 'pagada')
+  const totalRevenue   = pagadas.reduce((s, r) => s + r.total, 0)
+  const pagadasCount   = pagadas.length
+  const payRate        = reservations.length ? Math.round((pagadasCount / reservations.length) * 100) : 0
+
+  // Desglose de tripulación (totalPassengers incluye bebés para capacidad real)
+  const totalPassengers = reservations.reduce((s, r) => s + r.totalPassengers, 0)
+  const totalAdults     = reservations.reduce((s, r) => s + r.adults, 0)
+  const totalYouth      = reservations.reduce((s, r) => s + r.youth, 0)
+  const totalChildren   = reservations.reduce((s, r) => s + r.children, 0)
+  const totalBabies     = reservations.reduce((s, r) => s + r.babies, 0)
+
+  // Distribución por método de pago
+  const efectivoCount      = reservations.filter(r => r.paymentMethod === 'efectivo').length
+  const transferenciaCount = reservations.filter(r => r.paymentMethod === 'transferencia').length
 
   const dateLabel = format(
     parse(selectedDate, 'yyyy-MM-dd', new Date()),
@@ -35,7 +45,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Date picker row */}
+      {/* Date picker */}
       <div className="flex justify-end">
         <button
           type="button"
@@ -57,30 +67,30 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* KPI Grid */}
+      {/* ── KPI Grid ──────────────────────────────────────────────────────── */}
       <div className="bp-kpi-grid">
         <div className="bp-kpi-card visible" style={{ animationDelay: '0ms' }}>
           <div className="bp-kpi-icon"><CalendarCheck size={20} /></div>
           <div>
-            <p className="bp-kpi-label">Reservaciones hoy</p>
+            <p className="bp-kpi-label">Reservaciones</p>
             <p className="bp-kpi-value">{reservations.length}</p>
-            <p className="bp-kpi-hint">{pagadasCount} pagadas</p>
+            <p className="bp-kpi-hint">{pagadasCount} pagadas · {reservations.length - pagadasCount} pendientes</p>
           </div>
         </div>
 
         <div className="bp-kpi-card visible" style={{ animationDelay: '60ms' }}>
           <div className="bp-kpi-icon"><Users size={20} /></div>
           <div>
-            <p className="bp-kpi-label">Personas embarcadas</p>
-            <p className="bp-kpi-value">{totalPeople}</p>
-            <p className="bp-kpi-hint">Capacidad: {BOAT_CAPACITY} por salida</p>
+            <p className="bp-kpi-label">Tripulación del día</p>
+            <p className="bp-kpi-value">{totalPassengers}</p>
+            <p className="bp-kpi-hint">Cap. {BOAT_CAPACITY} por salida</p>
           </div>
         </div>
 
         <div className="bp-kpi-card bp-kpi-card--accent visible" style={{ animationDelay: '120ms' }}>
           <div className="bp-kpi-icon"><DollarSign size={20} /></div>
           <div>
-            <p className="bp-kpi-label">Ingresos del día</p>
+            <p className="bp-kpi-label">Ingresos confirmados</p>
             <p className="bp-kpi-value">{formatCurrency(totalRevenue)}</p>
             <p className="bp-kpi-hint">Solo reservas pagadas</p>
           </div>
@@ -96,18 +106,119 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Clima marino */}
+      {/* ── Desglose de tripulación + métodos de pago ─────────────────────── */}
+      {reservations.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          {/* Desglose por tipo de pasajero */}
+          <div
+            className="rounded-xl p-5"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+              <span className="text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+                Desglose de tripulación
+              </span>
+            </div>
+            <div className="space-y-3">
+              {[
+                { label: 'Adultos (18+)',       value: totalAdults,   color: 'var(--text-title)' },
+                { label: 'Adolescentes (12-17)', value: totalYouth,    color: 'var(--text-title)' },
+                { label: 'Niños (3-11)',         value: totalChildren, color: 'var(--text-title)' },
+                { label: 'Bebés (gratis)',        value: totalBabies,  color: '#16a34a' },
+              ].filter(row => row.value > 0).map(row => (
+                <div key={row.label} className="flex items-center justify-between">
+                  <span className="text-sm flex items-center gap-1.5" style={{ color: 'var(--text-body)' }}>
+                    {row.label === 'Bebés (gratis)' && <Baby className="w-3.5 h-3.5" style={{ color: '#16a34a' }} />}
+                    {row.label}
+                  </span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-24 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-surface-alt)' }}>
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${totalPassengers > 0 ? Math.round((row.value / totalPassengers) * 100) : 0}%`,
+                          background: row.label === 'Bebés (gratis)' ? '#16a34a' : 'var(--accent)',
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm font-bold w-6 text-right" style={{ color: row.color }}>{row.value}</span>
+                  </div>
+                </div>
+              ))}
+              {totalAdults === 0 && totalYouth === 0 && totalChildren === 0 && totalBabies === 0 && (
+                <p className="text-sm text-center py-2" style={{ color: 'var(--text-muted)' }}>Sin datos</p>
+              )}
+            </div>
+          </div>
+
+          {/* Distribución por método de pago */}
+          <div
+            className="rounded-xl p-5"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Banknote className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+              <span className="text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+                Método de pago
+              </span>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm flex items-center gap-2" style={{ color: 'var(--text-body)' }}>
+                  <Banknote className="w-4 h-4" style={{ color: 'var(--accent)' }} /> Efectivo
+                </span>
+                <div className="flex items-center gap-3">
+                  <div className="w-24 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-surface-alt)' }}>
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${reservations.length > 0 ? Math.round((efectivoCount / reservations.length) * 100) : 0}%`,
+                        background: 'var(--accent)',
+                      }}
+                    />
+                  </div>
+                  <span className="text-sm font-bold w-6 text-right" style={{ color: 'var(--text-title)' }}>{efectivoCount}</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm flex items-center gap-2" style={{ color: 'var(--text-body)' }}>
+                  <ArrowLeftRight className="w-4 h-4" style={{ color: 'var(--accent)' }} /> Transferencia
+                </span>
+                <div className="flex items-center gap-3">
+                  <div className="w-24 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-surface-alt)' }}>
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${reservations.length > 0 ? Math.round((transferenciaCount / reservations.length) * 100) : 0}%`,
+                        background: 'var(--accent)',
+                      }}
+                    />
+                  </div>
+                  <span className="text-sm font-bold w-6 text-right" style={{ color: 'var(--text-title)' }}>{transferenciaCount}</span>
+                </div>
+              </div>
+              {efectivoCount === 0 && transferenciaCount === 0 && (
+                <p className="text-sm text-center py-2" style={{ color: 'var(--text-muted)' }}>
+                  Sin pagos registrados
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Clima marino ─────────────────────────────────────────────────── */}
       <ClimaMarino fecha={selectedDate} />
 
-      {/* Tabla de reservaciones */}
+      {/* ── Tabla de reservaciones ────────────────────────────────────────── */}
       <div
         className="rounded-xl overflow-hidden"
         style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}
       >
         <div className="bp-table-header">
-          <span className="bp-table-title">
-            Reservaciones — {dateLabel}
-          </span>
+          <span className="bp-table-title">Reservaciones — {dateLabel}</span>
           <span className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
             {reservations.length} total
           </span>
@@ -129,13 +240,13 @@ export default function DashboardPage() {
               <thead style={{ background: 'var(--bg-surface-alt)' }}>
                 <tr>
                   {[
-                    { label: 'Nombre',   cls: '' },
-                    { label: 'Hora',     cls: 'hidden sm:table-cell' },
-                    { label: 'Personas', cls: 'hidden sm:table-cell' },
-                    { label: 'Paquete',  cls: 'hidden md:table-cell' },
-                    { label: 'Total',    cls: '' },
-                    { label: 'Estado',   cls: '' },
-                    { label: 'Acción',   cls: '' },
+                    { label: 'Nombre',      cls: '' },
+                    { label: 'Hora',        cls: 'hidden sm:table-cell' },
+                    { label: 'Tripulación', cls: 'hidden sm:table-cell' },
+                    { label: 'Paquete',     cls: 'hidden md:table-cell' },
+                    { label: 'Total',       cls: '' },
+                    { label: 'Estado',      cls: '' },
+                    { label: 'Acción',      cls: '' },
                   ].map(({ label, cls }) => (
                     <th
                       key={label}
@@ -148,31 +259,49 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {reservations.map((r) => (
-                  <tr
-                    key={r.id}
-                    className="transition-colors"
-                    style={{ borderTop: '1px solid var(--border)' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-surface-alt)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                  >
-                    <td className="px-5 py-4 font-semibold" style={{ color: 'var(--text-title)' }}>{r.contactName}</td>
-                    <td className="hidden sm:table-cell px-5 py-4" style={{ color: 'var(--text-body)' }}>{r.time}</td>
-                    <td className="hidden sm:table-cell px-5 py-4 text-center" style={{ color: 'var(--text-body)' }}>{r.totalPassengers}</td>
-                    <td className="hidden md:table-cell px-5 py-4" style={{ color: 'var(--text-body)' }}>{r.packageId.replace(/_/g, ' ')}</td>
-                    <td className="px-5 py-4 font-bold" style={{ color: 'var(--accent)' }}>{formatCurrency(r.total)}</td>
-                    <td className="px-5 py-4"><StatusBadge status={r.status} /></td>
-                    <td className="px-5 py-4">
-                      <Link
-                        to={`/admin/venta/${r.id}`}
-                        className="text-sm font-semibold transition-opacity hover:opacity-70"
-                        style={{ color: 'var(--accent)' }}
-                      >
-                        Ver
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                {reservations.map((r) => {
+                  const pkg = PACKAGES[r.packageId as PackageId]
+                  // Desglose corto de tripulación
+                  const crewParts = [
+                    r.adults   > 0 && `${r.adults}a`,
+                    r.youth    > 0 && `${r.youth}adol`,
+                    r.children > 0 && `${r.children}n`,
+                    r.babies   > 0 && `${r.babies}🍼`,
+                  ].filter(Boolean).join(' · ')
+
+                  return (
+                    <tr
+                      key={r.id}
+                      className="transition-colors"
+                      style={{ borderTop: '1px solid var(--border)' }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-surface-alt)')}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      <td className="px-5 py-4 font-semibold" style={{ color: 'var(--text-title)' }}>{r.contactName}</td>
+                      <td className="hidden sm:table-cell px-5 py-4" style={{ color: 'var(--text-body)' }}>{r.time}</td>
+                      <td className="hidden sm:table-cell px-5 py-4 text-xs" style={{ color: 'var(--text-body)' }}>
+                        <span className="font-medium">{r.totalPassengers}</span>
+                        {crewParts && (
+                          <span className="ml-1.5" style={{ color: 'var(--text-muted)' }}>({crewParts})</span>
+                        )}
+                      </td>
+                      <td className="hidden md:table-cell px-5 py-4" style={{ color: 'var(--text-body)' }}>
+                        {pkg ? `${pkg.icon} ${pkg.label}` : r.packageId}
+                      </td>
+                      <td className="px-5 py-4 font-bold" style={{ color: 'var(--accent)' }}>{formatCurrency(r.total)}</td>
+                      <td className="px-5 py-4"><StatusBadge status={r.status} /></td>
+                      <td className="px-5 py-4">
+                        <Link
+                          to={`/admin/venta/${r.id}`}
+                          className="text-sm font-semibold transition-opacity hover:opacity-70"
+                          style={{ color: 'var(--accent)' }}
+                        >
+                          Ver
+                        </Link>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

@@ -21,7 +21,9 @@ const ReportsPage        = lazy(() => import('@pages/admin/ReportsPage'))
 const AdminSettingsPage  = lazy(() => import('@pages/admin/AdminSettingsPage'))
 const SchedulePage       = lazy(() => import('@pages/admin/SchedulePage'))
 const BitacoraPage       = lazy(() => import('@pages/admin/BitacoraPage'))
-const BackupPage         = lazy(() => import('@pages/admin/BackupPage'))
+const BackupPage            = lazy(() => import('@pages/admin/BackupPage'))
+const NewReservationPage    = lazy(() => import('@pages/admin/NewReservationPage'))
+const EditReservationPage   = lazy(() => import('@pages/admin/EditReservationPage'))
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -65,6 +67,8 @@ export const router = createBrowserRouter([
       { path: '/admin',                          element: withSuspense(<DashboardPage />) },
       { path: '/admin/reservaciones',            element: withSuspense(<ReservationsPage />) },
       { path: '/admin/venta/:reservationId',     element: withSuspense(<SalePage />) },
+      { path: '/admin/nueva-reservacion',        element: withSuspense(<NewReservationPage />) },
+      { path: '/admin/editar/:reservationId',   element: withSuspense(<EditReservationPage />) },
       { path: '/admin/reportes',                 element: withSuspense(<ReportsPage />) },
       { path: '/admin/ajustes',                  element: withSuspense(<AdminSettingsPage />) },
       { path: '/admin/horarios',                 element: withSuspense(<SchedulePage />) },

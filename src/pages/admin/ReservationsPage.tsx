@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
-import { CalendarDays, Search, Download } from 'lucide-react'
+import { CalendarDays, Search, Download, Banknote, ArrowLeftRight, Plus } from 'lucide-react'
 import { useReservationStore } from '@app/store/reservationStore'
 import { useReservationsByDate, useCancelReservation } from '@features/reservations/hooks/useReservations'
 import { formatCurrency } from '@utils/formatters'
@@ -12,13 +12,15 @@ import { CalendarPicker } from '@components/ui/CalendarPicker'
 import { format, parse } from 'date-fns'
 import { es } from 'date-fns/locale'
 
-type StatusFilter = 'all' | 'pendiente' | 'pagada' | 'cancelada'
+type StatusFilter = 'all' | 'pendiente' | 'confirmada' | 'pagada' | 'cancelada'
+type PaymentFilter = 'all' | 'efectivo' | 'transferencia'
 
 export default function ReservationsPage() {
   const { selectedDate, setSelectedDate } = useReservationStore()
   const [calOpen, setCalOpen] = useState(false)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [search, setSearch] = useState('')
+  const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('all')
   const { data, isLoading, isError, error } = useReservationsByDate(selectedDate)
   const { mutateAsync: cancelReservation } = useCancelReservation()
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
@@ -28,6 +30,7 @@ export default function ReservationsPage() {
   const filtered = useMemo(() => {
     let list = reservations
     if (statusFilter !== 'all') list = list.filter(r => r.status === statusFilter)
+    if (paymentFilter !== 'all') list = list.filter(r => r.paymentMethod === paymentFilter)
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter(r =>
@@ -36,7 +39,7 @@ export default function ReservationsPage() {
       )
     }
     return list
-  }, [reservations, statusFilter, search])
+  }, [reservations, statusFilter, paymentFilter, search])
 
   // Métricas del footer
   const totalPersonas    = filtered.reduce((s, r) => s + r.totalPassengers, 0)
@@ -48,23 +51,41 @@ export default function ReservationsPage() {
     .reduce((s, r) => s + r.total, 0)
 
   const statusCounts = {
-    pendiente: reservations.filter(r => r.status === 'pendiente').length,
-    pagada:    reservations.filter(r => r.status === 'pagada').length,
-    cancelada: reservations.filter(r => r.status === 'cancelada').length,
+    pendiente:  reservations.filter(r => r.status === 'pendiente').length,
+    confirmada: reservations.filter(r => r.status === 'confirmada').length,
+    pagada:     reservations.filter(r => r.status === 'pagada').length,
+    cancelada:  reservations.filter(r => r.status === 'cancelada').length,
   }
 
   const statusChips: Array<{ key: StatusFilter; label: string }> = [
-    { key: 'all',       label: 'Todas' },
-    { key: 'pendiente', label: 'Pendiente' },
-    { key: 'pagada',    label: 'Pagada' },
-    { key: 'cancelada', label: 'Cancelada' },
+    { key: 'all',        label: 'Todas' },
+    { key: 'pendiente',  label: 'Pendiente' },
+    { key: 'confirmada', label: 'Confirmada' },
+    { key: 'pagada',     label: 'Pagada' },
+    { key: 'cancelada',  label: 'Cancelada' },
   ]
 
   const exportCSV = useCallback(() => {
-    const headers = ['Nombre', 'Teléfono', 'Hora', 'Personas', 'Paquete', 'Subtotal', 'Descuento', 'Total', 'Estado', 'Método de Pago']
+    const headers = [
+      'Nombre', 'Teléfono', 'Hora', 'Paquete',
+      'Adultos', 'Costo Adultos',
+      'Adolescentes', 'Costo Adolescentes',
+      'Niños', 'Costo Niños',
+      'Bebés',
+      'Total Pasajeros', 'Subtotal', 'Descuento', 'Total',
+      'Estado', 'Método de Pago',
+    ]
     const rows = filtered.map(r => {
       const pkg = PACKAGES[r.packageId as PackageId]
-      return [r.contactName, r.contactPhone ?? '', r.time, r.totalPassengers, pkg?.label ?? r.packageId, r.subtotal, r.discount, r.total, r.status, r.paymentMethod ?? '']
+      return [
+        r.contactName, r.contactPhone ?? '', r.time, pkg?.label ?? r.packageId,
+        r.adults, r.adultsCost,
+        r.youth, r.youthCost,
+        r.children, r.childrenCost,
+        r.babies,
+        r.totalPassengers, r.subtotal, r.discount, r.total,
+        r.status, r.paymentMethod ?? '',
+      ]
     })
     const csv = [headers, ...rows].map(row => row.map(v => `"${v}"`).join(',')).join('\n')
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' })
@@ -82,6 +103,15 @@ export default function ReservationsPage() {
     <div className="space-y-5">
       {/* Filter bar */}
       <div className="flex flex-col lg:flex-row lg:items-center gap-4 flex-wrap">
+        <Link
+          to="/admin/nueva-reservacion"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors shrink-0"
+          style={{ background: 'var(--accent)', color: '#000' }}
+        >
+          <Plus className="w-4 h-4" />
+          Nueva Reservación
+        </Link>
+
         <button
           type="button"
           onClick={() => setCalOpen(true)}
@@ -107,6 +137,26 @@ export default function ReservationsPage() {
               <span className="bp-status-chip-count">
                 {key === 'all' ? reservations.length : (statusCounts[key as keyof typeof statusCounts] ?? 0)}
               </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          {(['all', 'efectivo', 'transferencia'] as const).map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setPaymentFilter(key)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors"
+              style={{
+                borderColor: paymentFilter === key ? 'var(--accent)' : 'var(--border)',
+                background: paymentFilter === key ? 'rgba(var(--accent-rgb),0.12)' : 'var(--bg-surface)',
+                color: paymentFilter === key ? 'var(--accent)' : 'var(--text-muted)',
+              }}
+            >
+              {key === 'all' && 'Todos los pagos'}
+              {key === 'efectivo' && <><Banknote className="w-3 h-3" /> Efectivo</>}
+              {key === 'transferencia' && <><ArrowLeftRight className="w-3 h-3" /> Transferencia</>}
             </button>
           ))}
         </div>
@@ -194,6 +244,13 @@ export default function ReservationsPage() {
               <tbody>
                 {filtered.map((r) => {
                   const pkg = PACKAGES[r.packageId as PackageId]
+                  const crewParts = [
+                    r.adults   > 0 && `${r.adults} ${r.adults === 1 ? 'adulto' : 'adultos'}`,
+                    r.youth    > 0 && `${r.youth} adol.`,
+                    r.children > 0 && `${r.children} ${r.children === 1 ? 'niño' : 'niños'}`,
+                    r.babies   > 0 && `${r.babies} ${r.babies === 1 ? 'bebé' : 'bebés'}`,
+                  ].filter(Boolean).join(' • ')
+
                   return (
                     <tr
                       key={r.id}
@@ -204,15 +261,33 @@ export default function ReservationsPage() {
                     >
                       <td className="px-4 py-4 font-semibold" style={{ color: 'var(--text-title)' }}>{r.contactName}</td>
                       <td className="hidden sm:table-cell px-4 py-4 font-mono text-xs font-bold" style={{ color: 'var(--text-body)' }}>{r.time}</td>
-                      <td className="hidden sm:table-cell px-4 py-4 text-center" style={{ color: 'var(--text-body)' }}>{r.totalPassengers}</td>
-                      <td className="hidden md:table-cell px-4 py-4" style={{ color: 'var(--text-body)' }}>{pkg?.label ?? r.packageId.replace(/_/g, ' ')}</td>
+                      <td className="hidden sm:table-cell px-4 py-4 text-xs" style={{ color: 'var(--text-body)' }}>
+                        <span className="font-semibold">{r.totalPassengers}</span>
+                        {crewParts && (
+                          <span className="ml-1" style={{ color: 'var(--text-muted)' }}>({crewParts})</span>
+                        )}
+                      </td>
+                      <td className="hidden md:table-cell px-4 py-4" style={{ color: 'var(--text-body)' }}>
+                        {pkg ? `${pkg.icon} ${pkg.label}` : r.packageId.replace(/_/g, ' ')}
+                      </td>
                       <td className="hidden md:table-cell px-4 py-4 font-semibold" style={{ color: 'var(--accent)' }}>{formatCurrency(r.subtotal)}</td>
                       <td className="hidden lg:table-cell px-4 py-4 font-semibold" style={{ color: r.discount > 0 ? '#F87171' : 'var(--text-muted)' }}>
                         {r.discount > 0 ? `-${formatCurrency(r.discount)}` : '—'}
                       </td>
                       <td className="px-4 py-4 font-bold" style={{ color: 'var(--text-title)' }}>{formatCurrency(r.total)}</td>
                       <td className="px-4 py-4"><StatusBadge status={r.status} /></td>
-                      <td className="hidden lg:table-cell px-4 py-4 capitalize" style={{ color: 'var(--text-muted)' }}>{r.paymentMethod ?? '—'}</td>
+                      <td className="hidden lg:table-cell px-4 py-4">
+                        {r.paymentMethod ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs capitalize" style={{ color: 'var(--text-muted)' }}>
+                            {r.paymentMethod === 'transferencia'
+                              ? <ArrowLeftRight className="w-3.5 h-3.5" />
+                              : <Banknote className="w-3.5 h-3.5" />}
+                            {r.paymentMethod}
+                          </span>
+                        ) : (
+                          <span style={{ color: 'var(--text-muted)' }}>—</span>
+                        )}
+                      </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
                           <Link
