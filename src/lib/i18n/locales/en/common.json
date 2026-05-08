@@ -273,11 +273,15 @@
     "solo_paseo": {
       "label": "Tour Only",
       "description": "Scenic tour along the coastline"
+    },
+    "ninos": {
+      "label": "Kids Package",
+      "description": "Water, sodas & pizza on board (ages 3–11)"
     }
   },
   "confirmation": {
-    "title": "Reservation Confirmed!",
-    "subtitle": "We've received your request. An advisor will validate it and contact you to complete payment.",
+    "title": "Request Received",
+    "subtitle": "Your reservation is pending confirmation. We'll contact you via WhatsApp to confirm it and share payment details.",
     "noReservation": "No pending reservation.",
     "makeReservation": "Make a reservation",
     "detailTitle": "Reservation Details",
@@ -299,19 +303,28 @@
     "pay": "Go to Payment"
   },
   "payment": {
-    "title": "Complete Payment",
+    "title": "Payment Information",
     "totalPay": "Total to pay",
     "paid": "Already paid!",
     "paidSubtitle": "This reservation has already been processed.",
     "notFound": "Reservation not found.",
     "method": "Payment Method",
     "cash": "Cash",
-    "card": "Card",
-    "cashInfo": "Payment will be made directly with the vendor. On confirmation, the sales receipt will be generated.",
+    "transfer": "Bank Transfer",
+    "cashInfo": "Pay in cash directly at the dock when boarding. Please arrive 30 minutes before your departure time.",
     "cashConfirm": "Confirm Cash Payment",
-    "cardInfo": "Process the payment securely with your credit or debit card.",
-    "cardContinue": "Continue with Card",
-    "payNow": "Pay now",
+    "transferInfo": "Make a bank transfer before your tour and send us the receipt via WhatsApp.",
+    "transferConfirm": "Confirm Transfer",
+    "transferBankDetails": "Bank details",
+    "transferBank": "BBVA",
+    "transferAccount": "1234 5678 9012",
+    "transferClabe": "021691012345678901",
+    "transferHolder": "Barco Pirata de Puerto Peñasco",
+    "transferReference": "Transfer reference / folio number",
+    "transferReferencePlaceholder": "e.g. 1234567890",
+    "transferReferenceHint": "Enter the reference number from your bank transfer.",
+    "transferReferenceRequired": "Enter your transfer reference number.",
+    "payNow": "Confirm",
     "paymentError": "Error processing payment",
     "viewReceipt": "View receipt",
     "errorLoadingReservation": "We couldn't load your reservation data. Please try again.",
@@ -321,28 +334,10 @@
     "makeNewReservation": "Make a new reservation",
     "email": {
       "title": "Email for your receipt",
-      "description": "We'll send the receipt with your reservation folio to this address. It's required to continue with payment.",
+      "description": "We'll send your reservation summary to this address.",
       "placeholder": "you@example.com",
       "errRequired": "Enter your email to receive the receipt.",
       "errInvalid": "Enter a valid email (e.g. name@domain.com)."
-    },
-    "card_form": {
-      "number": "Card number",
-      "holder": "Cardholder name",
-      "holderPlaceholder": "Name as it appears on the card",
-      "holderShort": "Holder",
-      "expiry": "Expiry",
-      "expShort": "Exp.",
-      "cvc": "CVC",
-      "chip": "chip",
-      "payAmount": "Pay {{amount}}",
-      "processing": "Processing payment…",
-      "securityNote": "Payment processed securely · SSL-encrypted data",
-      "errNumber": "Enter a valid card number.",
-      "errHolder": "Enter the cardholder's name.",
-      "errExpiry": "Invalid expiration date.",
-      "errExpired": "The card has expired.",
-      "errCvc": "CVC must be 3 or 4 digits."
     }
   },
   "receipt": {

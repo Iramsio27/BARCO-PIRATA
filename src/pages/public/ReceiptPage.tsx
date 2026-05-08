@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom'
 import {
   CheckCircle, Calendar, Clock, Users, Package, Phone, User,
-  Banknote, CreditCard, Printer, Home, Mail,
+  Banknote, ArrowLeftRight, Printer, Home, Mail,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useReservation } from '@features/reservations/hooks/useReservations'
@@ -93,7 +93,7 @@ export default function ReceiptPage() {
             ].join(' ')}
           >
             {isPaid
-              ? <>{reservation.paymentMethod === 'tarjeta' ? <CreditCard className="w-3.5 h-3.5" /> : <Banknote className="w-3.5 h-3.5" />} {t('receipt.statusPaid')}</>
+              ? <>{reservation.paymentMethod === 'transferencia' ? <ArrowLeftRight className="w-3.5 h-3.5" /> : <Banknote className="w-3.5 h-3.5" />} {t('receipt.statusPaid')}</>
               : isCashPending
                 ? <><Banknote className="w-3.5 h-3.5" /> {t('receipt.statusCashPending')}</>
                 : <>{t('receipt.statusPending')}</>}
@@ -134,12 +134,12 @@ export default function ReceiptPage() {
           />
           {(isPaid || isCashPending) && (
             <InfoRow
-              icon={reservation.paymentMethod === 'tarjeta'
-                ? <CreditCard className="w-4 h-4" />
+              icon={reservation.paymentMethod === 'transferencia'
+                ? <ArrowLeftRight className="w-4 h-4" />
                 : <Banknote className="w-4 h-4" />}
               label={t('receipt.paymentMethod')}
-              value={reservation.paymentMethod === 'tarjeta'
-                ? t('payment.card')
+              value={reservation.paymentMethod === 'transferencia'
+                ? t('payment.transfer')
                 : t('payment.cash')}
             />
           )}

@@ -19,13 +19,15 @@ interface ImageCarouselProps {
   children?: React.ReactNode
 }
 
+// 📁 Agrega tus fotos en public/images/carrusel/ con los nombres de abajo.
+// Para añadir más, duplica una línea y cambia el nombre del archivo.
 const IMAGES = [
-  { src: '/images/carrete-1.jpeg', alt: 'Paseo en Barco Pirata 1' },
-  { src: '/images/carrete-2.jpeg', alt: 'Paseo en Barco Pirata 2' },
-  { src: '/images/carrete-3.jpeg', alt: 'Paseo en Barco Pirata 3' },
-  { src: '/images/carrete-4.jpeg', alt: 'Paseo en Barco Pirata 4' },
-  { src: '/images/carrete-5.jpeg', alt: 'Paseo en Barco Pirata 5' },
-  { src: '/images/carrete-6.jpeg', alt: 'Paseo en Barco Pirata 6' },
+  { src: '/images/carrusel/carrusel-1.jpeg', alt: 'Paseo en Barco Pirata 1' },
+  { src: '/images/carrusel/carrusel-2.jpeg', alt: 'Paseo en Barco Pirata 2' },
+  { src: '/images/carrusel/carrusel-3.jpeg', alt: 'Paseo en Barco Pirata 3' },
+  { src: '/images/carrusel/carrusel-4.jpeg', alt: 'Paseo en Barco Pirata 4' },
+  { src: '/images/carrusel/carrusel-5.jpeg', alt: 'Paseo en Barco Pirata 5' },
+  { src: '/images/carrusel/carrusel-6.jpeg', alt: 'Paseo en Barco Pirata 6' },
 ]
 
 export function ImageCarousel({

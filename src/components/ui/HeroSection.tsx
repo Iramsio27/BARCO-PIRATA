@@ -4,13 +4,15 @@ import { format } from 'date-fns'
 import { useTranslation } from 'react-i18next'
 import '../../styles/hero.css'
 
+// 📁 Agrega tus fotos en public/images/carrusel/ con los nombres de abajo.
+// Para añadir más, duplica una línea y cambia el nombre del archivo.
 const HERO_PHOTOS = [
-  { src: '/images/carrete-1.jpeg', alt: 'Barco Pirata Perla Negra' },
-  { src: '/images/carrete-2.jpeg', alt: 'Paseo en el Mar de Cortés' },
-  { src: '/images/carrete-3.jpeg', alt: 'Aventura familiar en el mar' },
-  { src: '/images/carrete-4.jpeg', alt: 'Atardecer en Puerto Peñasco' },
-  { src: '/images/carrete-5.jpeg', alt: 'La tripulación pirata' },
-  { src: '/images/carrete-6.jpeg', alt: 'Experiencia única en el mar' },
+  { src: '/images/carrusel/carrusel-1.jpeg', alt: 'Barco Pirata Perla Negra' },
+  { src: '/images/carrusel/carrusel-2.jpeg', alt: 'Paseo en el Mar de Cortés' },
+  { src: '/images/carrusel/carrusel-3.jpeg', alt: 'Aventura familiar en el mar' },
+  { src: '/images/carrusel/carrusel-4.jpeg', alt: 'Atardecer en Puerto Peñasco' },
+  { src: '/images/carrusel/carrusel-5.jpeg', alt: 'La tripulación pirata' },
+  { src: '/images/carrusel/carrusel-6.jpeg', alt: 'Experiencia única en el mar' },
 ]
 
 const SLIDE_DURATION = 5000

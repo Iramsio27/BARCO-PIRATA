@@ -43,7 +43,7 @@ export interface Database {
           method: string
           amount: number
           status: string
-          stripe_payment_intent_id: string | null
+          transferencia_reference: string | null
           receipt_url: string | null
           processed_at: string | null
           created_at: string
@@ -56,7 +56,7 @@ export interface Database {
     Functions: Record<string, never>
     Enums: {
       reservation_status: 'pendiente' | 'confirmada' | 'pagada' | 'cancelada'
-      payment_method: 'efectivo' | 'tarjeta'
+      payment_method: 'efectivo' | 'transferencia'
       payment_status: 'pendiente' | 'completado' | 'fallido' | 'reembolsado'
     }
   }

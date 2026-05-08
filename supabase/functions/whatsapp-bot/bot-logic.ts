@@ -173,8 +173,8 @@ const T = {
       en: '👥 *Maximum capacity:* 40 people per tour.\n\nFor safety reasons we cannot exceed that number.',
     },
     faq_packages: {
-      es: '🎟️ *Paquetes disponibles:*\n\n🍽️ *Con Comida* — $450/persona\nPaseo + buffet de mariscos a bordo\n\n🍹 *Solo Bebidas* — $350/persona\nPaseo + barra de bebidas\n\n⛵ *Solo Paseo* — $250/persona\nRecorrido panorámico por el litoral\n\n💸 Grupos de 5+ personas: 10% de descuento automático.',
-      en: '🎟️ *Available packages:*\n\n🍽️ *With Food* — $450/person\nTour + seafood buffet on board\n\n🍹 *Drinks Only* — $350/person\nTour + open bar\n\n⛵ *Tour Only* — $250/person\nScenic coastal tour\n\n💸 Groups of 5+ people: automatic 10% discount.',
+      es: '🎟️ *Paquetes disponibles:*\n\n🍽️ *Con Comida* — $450/persona\nPaseo + cena a bordo\n\n🍹 *Solo Bebidas* — $350/persona\nPaseo + barra de bebidas\n\n⛵ *Solo Paseo* — $250/persona\nRecorrido panorámico por el litoral\n\n💸 Grupos de 5+ personas: 10% de descuento automático.',
+      en: '🎟️ *Available packages:*\n\n🍽️ *With Food* — $450/person\nTour + dinner on board\n\n🍹 *Drinks Only* — $350/person\nTour + open bar\n\n⛵ *Tour Only* — $250/person\nScenic coastal tour\n\n💸 Groups of 5+ people: automatic 10% discount.',
     },
     faq_kids: {
       es: '👶 *Niños:* Sí pueden venir menores de edad acompañados de un adulto responsable.\n\nEl precio es el mismo por persona sin importar la edad.',

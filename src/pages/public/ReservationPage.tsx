@@ -91,6 +91,7 @@ export default function ReservationPage() {
   const [searchParams] = useSearchParams()
   const { mutateAsync: createReservation, isPending } = useCreateReservation()
   const setPendingReservation = useReservationStore((s) => s.setPendingReservation)
+  const setPkgBreakdown       = useReservationStore((s) => s.setPkgBreakdown)
   const { data: bizSettings } = useBusinessSettings()
   const [serverError, setServerError] = useState<string | null>(null)
   const qc = useQueryClient()
@@ -241,6 +242,20 @@ export default function ReservationPage() {
         childrenCost,
       })
       setPendingReservation(reservation)
+      setPkgBreakdown({
+        packages: PKG_IDS
+          .map(id => {
+            const p = PACKAGES[id]
+            const c = counts[id]
+            const total = c.adults * p.adultPrice + c.youth * p.youthPrice
+            if (total === 0 && c.adults === 0 && c.youth === 0) return null
+            return { packageId: id, label: p.label, icon: p.icon, adults: c.adults, adultPrice: p.adultPrice, youth: c.youth, youthPrice: p.youthPrice, total }
+          })
+          .filter(Boolean) as import('@app/store/reservationStore').PkgBreakdownItem[],
+        children,
+        childrenCost,
+        babies,
+      })
       navigate('/reservar/confirmacion')
     } catch (err) {
       const msg = err instanceof Error ? err.message : t('reservation.errors.generic')
@@ -387,6 +402,15 @@ export default function ReservationPage() {
                             <p className="text-[11px] text-navy-400 m-0">{desc}</p>
                           </td>
                           {PKG_IDS.map(id => {
+                            if (id === 'NINOS') {
+                              return (
+                                <td key={id} className="py-3 px-2 text-center">
+                                  <span className="inline-block text-[11px] text-navy-300 bg-navy-50 border border-navy-100 rounded-lg px-2 py-1 leading-tight select-none">
+                                    Solo niños
+                                  </span>
+                                </td>
+                              )
+                            }
                             const price = PACKAGES[id][priceKey]
                             const val   = counts[id][key]
                             const atCapacity = numberOfPeople >= BOAT_CAPACITY

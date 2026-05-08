@@ -264,7 +264,7 @@
   "packages": {
     "con_comida": {
       "label": "Con Comida Incluida",
-      "description": "Paseo + buffet de mariscos a bordo"
+      "description": "Paseo + cena a bordo"
     },
     "solo_bebidas": {
       "label": "Solo Bebidas",
@@ -273,11 +273,15 @@
     "solo_paseo": {
       "label": "Solo Paseo",
       "description": "Recorrido panorámico por el litoral"
+    },
+    "ninos": {
+      "label": "Paquete Niños",
+      "description": "Agua, sodas y pizza a bordo (3–11 años)"
     }
   },
   "confirmation": {
-    "title": "¡Reservación Confirmada!",
-    "subtitle": "Hemos recibido tu solicitud. Un asesor la validará y te contactará para completar el pago.",
+    "title": "Solicitud Recibida",
+    "subtitle": "Tu reservación está pendiente de confirmación. Te contactaremos por WhatsApp para confirmarla y darte los datos de pago.",
     "noReservation": "No hay reservación pendiente.",
     "makeReservation": "Hacer una reservación",
     "detailTitle": "Detalle de tu Reservación",
@@ -299,21 +303,30 @@
     "pay": "Ir a Pagar"
   },
   "payment": {
-    "title": "Completar Pago",
+    "title": "Información de Pago",
     "totalPay": "Total a pagar",
     "paid": "¡Ya está pagada!",
     "paidSubtitle": "Esta reservación ya fue procesada.",
     "notFound": "Reservación no encontrada.",
     "method": "Método de Pago",
     "cash": "Efectivo",
-    "card": "Tarjeta",
-    "cashInfo": "El pago se realizará directamente con el vendedor. Al confirmar, se generará el comprobante de venta.",
+    "transfer": "Transferencia",
+    "cashInfo": "Paga en efectivo directamente en el muelle al momento de abordar. Llega 30 minutos antes de tu horario.",
     "cashConfirm": "Confirmar Pago en Efectivo",
-    "cardInfo": "Procesa el pago de forma segura con tu tarjeta de crédito o débito.",
-    "cardContinue": "Continuar con Tarjeta",
-    "payNow": "Pagar ahora",
+    "transferInfo": "Realiza una transferencia bancaria antes de tu paseo y envíanos el comprobante por WhatsApp.",
+    "transferConfirm": "Confirmar Transferencia",
+    "transferBankDetails": "Datos bancarios",
+    "transferBank": "BBVA",
+    "transferAccount": "1234 5678 9012",
+    "transferClabe": "021691012345678901",
+    "transferHolder": "Barco Pirata de Puerto Peñasco",
+    "transferReference": "Número de referencia / folio de transferencia",
+    "transferReferencePlaceholder": "Ej. 1234567890",
+    "transferReferenceHint": "Captura el número de referencia de tu transferencia bancaria.",
+    "transferReferenceRequired": "Ingresa el número de referencia de tu transferencia.",
+    "payNow": "Confirmar",
     "paymentError": "Error al procesar el pago",
-    "viewReceipt": "Ver recibo",
+    "viewReceipt": "Ver comprobante",
     "errorLoadingReservation": "No pudimos cargar los datos de tu reservación. Por favor intenta de nuevo.",
     "retry": "Reintentar",
     "reservationCancelled": "Reservación cancelada",
@@ -321,28 +334,10 @@
     "makeNewReservation": "Hacer nueva reservación",
     "email": {
       "title": "Correo para tu comprobante",
-      "description": "Te enviaremos el recibo con el folio de tu reservación a este correo. Es obligatorio para continuar con el pago.",
+      "description": "Te enviaremos el resumen de tu reservación a este correo.",
       "placeholder": "tucorreo@ejemplo.com",
       "errRequired": "Ingresa tu correo para recibir el comprobante.",
       "errInvalid": "Ingresa un correo válido (ej. nombre@dominio.com)."
-    },
-    "card_form": {
-      "number": "Número de tarjeta",
-      "holder": "Titular de la tarjeta",
-      "holderPlaceholder": "Nombre como aparece en la tarjeta",
-      "holderShort": "Titular",
-      "expiry": "Vencimiento",
-      "expShort": "Vence",
-      "cvc": "CVC",
-      "chip": "chip",
-      "payAmount": "Pagar {{amount}}",
-      "processing": "Procesando pago…",
-      "securityNote": "Pago procesado de forma segura · Datos encriptados SSL",
-      "errNumber": "Ingresa un número de tarjeta válido.",
-      "errHolder": "Ingresa el nombre del titular.",
-      "errExpiry": "Fecha de vencimiento inválida.",
-      "errExpired": "La tarjeta está vencida.",
-      "errCvc": "El CVC debe tener 3 o 4 dígitos."
     }
   },
   "receipt": {

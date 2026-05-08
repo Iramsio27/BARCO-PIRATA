@@ -303,20 +303,13 @@
 }
 
 .gal-grain {
-  position: absolute; inset: 0; pointer-events: none;
-  background-image: radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
-  background-size: 3px 3px;
-  mix-blend-mode: overlay; opacity: .4;
+  display: none;
 }
 .gal-gradient {
-  position: absolute; inset: 0;
-  background: linear-gradient(180deg, transparent 35%, rgba(0,0,0,.55) 75%, rgba(0,0,0,.85) 100%);
-  pointer-events: none;
+  display: none;
 }
 .gal-meta-overlay {
-  position: absolute; left: 18px; right: 18px; bottom: 16px;
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 12px;
-  pointer-events: none;
+  display: none;
 }
 .gal-tile-title {
   margin: 0;
@@ -341,13 +334,7 @@
   backdrop-filter: blur(6px);
 }
 .gal-corner-tag {
-  position: absolute; top: 14px; left: 14px;
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 11px; border-radius: 99px;
-  background: rgba(6,18,31,.7); color: var(--gold-300);
-  font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
-  backdrop-filter: blur(8px); border: 1px solid rgba(244,197,66,.3);
-  z-index: 2;
+  display: none;
 }
 .gal-play-btn {
   position: absolute; top: 14px; right: 14px;
@@ -397,7 +384,126 @@
 }
 .gal-tile.span-big { grid-row: span 2; }
 
-/* ── MASONRY ───────────────────────────────────────────────────────── */
+/* ── SECTION BLOCK ─────────────────────────────────────────────────── */
+.gal-section-block {
+  margin-bottom: 64px;
+}
+
+/* ── SECTION CONTROLS (toggle fotos/videos) ────────────────────────── */
+.gal-section-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gal-media-toggle {
+  display: flex;
+  gap: 4px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  padding: 4px;
+}
+.gal-media-toggle button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-soft);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.gal-media-toggle button:hover { color: var(--text-g); }
+.gal-media-toggle button.active {
+  background: var(--gold-400);
+  color: var(--navy-900-g);
+  font-weight: 700;
+}
+.gal-media-toggle button.active .gal-count {
+  background: rgba(6,18,31,.2);
+  color: var(--navy-900-g);
+}
+
+/* ── PHOTO GRID (dinámico) ─────────────────────────────────────────── */
+.gal-photo-grid {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 40px);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.gal-photo-grid .gal-tile {
+  aspect-ratio: 4 / 3;
+  height: auto;
+}
+@media (max-width: 600px) {
+  .gal-photo-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+/* ── VIDEO CARD ────────────────────────────────────────────────────── */
+.gal-video-card {
+  position: relative;
+  overflow: hidden;
+}
+.gal-video-play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.25);
+  transition: background .25s;
+  pointer-events: none;
+}
+.gal-video-card:hover .gal-video-play-overlay {
+  background: rgba(0,0,0,.1);
+}
+.gal-video-play-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(244,197,66,.95);
+  color: var(--navy-900-g);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 20px rgba(244,197,66,.45);
+  transition: transform .3s;
+}
+.gal-video-card:hover .gal-video-play-btn {
+  transform: scale(1.1);
+}
+
+/* ── EMPTY STATE ───────────────────────────────────────────────────── */
+.gal-empty {
+  max-width: 400px;
+  margin: 40px auto;
+  text-align: center;
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.gal-empty p:first-child { font-size: 36px; margin-bottom: 8px; }
+.gal-empty code {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 10px;
+  background: rgba(244,197,66,.08);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--gold-300);
+  font-size: 12px;
+}
+
+/* ── MASONRY (legacy, se mantiene por si se usa en otro lugar) ─────── */
 .gal-masonry {
   max-width: 1320px;
   margin: 0 auto;

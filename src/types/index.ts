@@ -41,7 +41,7 @@ export interface Payment {
   method: PaymentMethod
   amount: number
   status: 'pendiente' | 'completado' | 'fallido' | 'reembolsado'
-  stripePaymentIntentId: string | null
+  transferenciaReference: string | null
   receiptUrl: string | null
   processedAt: string | null
   createdAt: string
@@ -87,9 +87,9 @@ export interface BusinessSettings {
 export interface ProcessPaymentDto {
   reservationId: string
   method: PaymentMethod
-  /** Solo requerido cuando method === 'tarjeta' */
-  stripePaymentMethodId?: string
-  /** Indica que el admin está confirmando la recepción física del efectivo */
+  /** Número de referencia bancaria, requerido cuando method === 'transferencia' */
+  transferenciaReference?: string
+  /** Indica que el admin está confirmando la recepción del pago */
   adminConfirm?: boolean
 }
 

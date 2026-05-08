@@ -22,9 +22,7 @@ export function useProcessPayment() {
   return useMutation({
     mutationFn: async (dto: ProcessPaymentDto) => {
       const payment = await paymentService.recordPayment(dto)
-      const nextStatus = dto.method === 'efectivo' && !dto.adminConfirm
-        ? 'confirmada'
-        : 'pagada'
+      const nextStatus = dto.adminConfirm ? 'pagada' : 'confirmada'
       await reservationService.updateStatus(dto.reservationId, nextStatus, dto.method, payment.id)
       return payment
     },
@@ -33,11 +31,5 @@ export function useProcessPayment() {
       queryClient.invalidateQueries({ queryKey: reservationKeys.byId(dto.reservationId) })
       queryClient.invalidateQueries({ queryKey: reservationKeys.all })
     },
-  })
-}
-
-export function useCreateStripeIntent() {
-  return useMutation({
-    mutationFn: (reservationId: string) => paymentService.createStripeIntent(reservationId),
   })
 }

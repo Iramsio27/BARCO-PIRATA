@@ -24,6 +24,15 @@ export const PACKAGES = {
     youthPrice:    400,  // 12-17: sodas y agua
     icon: '🍹',
   },
+  NINOS: {
+    id: 'ninos',
+    label: 'Paquete Niños',
+    description: 'Agua, sodas y pizza a bordo (3-11 años)',
+    pricePerPerson: 300,
+    adultPrice:    300,
+    youthPrice:    300,
+    icon: '🧒',
+  },
 } as const
 
 // Niños (3-11): paquete único fijo — agua, sodas y pizza
@@ -54,7 +63,7 @@ export const MAX_ADVANCE_DAYS = 90
 // ─── Tipos de pago ────────────────────────────────────────────────────────
 export const PAYMENT_METHODS = {
   EFECTIVO: 'efectivo',
-  TARJETA: 'tarjeta',
+  TRANSFERENCIA: 'transferencia',
 } as const
 
 export type PaymentMethod = typeof PAYMENT_METHODS[keyof typeof PAYMENT_METHODS]
@@ -90,8 +99,11 @@ export const COMPANY = {
   shortName: 'Barco Pirata',
   location: 'Recinto Portuario, Puerto Peñasco, Sonora',
   phone: '638 112 3686',
+  phoneWhatsApp: '526381104342',   // formato internacional sin + para wa.me (TEMPORAL: número de prueba)
   email: 'reydelmar_2004@hotmail.com',
   schedule: 'Jue – Dom: 11:00 AM – 2:00 PM y 4:00 PM – 6:00 PM',
+  facebook: 'https://www.facebook.com/PerlaNegraPenasco/about',
+  whatsapp: 'https://wa.me/526381104342',  // TEMPORAL: número de prueba
 } as const
 
 // ─── Paginación ───────────────────────────────────────────────────────────

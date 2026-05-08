@@ -1,31 +1,9 @@
 import { supabase } from '@lib/supabase'
 import type { Payment, ProcessPaymentDto } from '@app-types/index'
 
-interface CreateIntentResponse {
-  clientSecret: string
-  amount: number
-  currency: string
-}
-
 export const paymentService = {
   /**
-   * Crea un PaymentIntent en Stripe a través de la Edge Function de Supabase.
-   * El monto se calcula SERVER-SIDE leyendo la reservación de la BD,
-   * por lo que el cliente NUNCA puede falsificarlo.
-   */
-  async createStripeIntent(reservationId: string): Promise<CreateIntentResponse> {
-    const { data, error } = await supabase.functions.invoke<CreateIntentResponse>(
-      'create-payment-intent',
-      { body: { reservationId } }
-    )
-
-    if (error) throw new Error(error.message)
-    if (!data?.clientSecret) throw new Error('No se recibió clientSecret de Stripe')
-    return data
-  },
-
-  /**
-   * Registra un pago completado (efectivo o tarjeta confirmada).
+   * Registra un pago completado (efectivo o transferencia confirmada por admin).
    */
   async recordPayment(dto: ProcessPaymentDto): Promise<Payment> {
     const { data, error } = await supabase
@@ -34,8 +12,8 @@ export const paymentService = {
         reservation_id: dto.reservationId,
         method: dto.method,
         amount: 0, // Se actualiza desde el backend con el monto real
-        status: dto.method === 'efectivo' && dto.adminConfirm ? 'completado' : 'pendiente',
-        stripe_payment_intent_id: dto.stripePaymentMethodId ?? null,
+        status: dto.adminConfirm ? 'completado' : 'pendiente',
+        transferencia_reference: dto.transferenciaReference ?? null,
       })
       .select()
       .single()
@@ -52,7 +30,7 @@ export const paymentService = {
       method: row.method as Payment['method'],
       amount: (row.amount as number) ?? 0,
       status: row.status as Payment['status'],
-      stripePaymentIntentId: (row.stripe_payment_intent_id as string | null) ?? null,
+      transferenciaReference: (row.transferencia_reference as string | null) ?? null,
       receiptUrl: (row.receipt_url as string | null) ?? null,
       processedAt: (row.processed_at as string | null) ?? null,
       createdAt: row.created_at as string,
@@ -75,7 +53,7 @@ export const paymentService = {
       method: row.method as Payment['method'],
       amount: row.amount as number,
       status: row.status as Payment['status'],
-      stripePaymentIntentId: row.stripe_payment_intent_id as string | null,
+      transferenciaReference: (row.transferencia_reference as string | null) ?? null,
       receiptUrl: row.receipt_url as string | null,
       processedAt: row.processed_at as string | null,
       createdAt: row.created_at as string,

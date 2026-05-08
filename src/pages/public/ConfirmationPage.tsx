@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle, Calendar, Users, Package, Phone, MessageCircle, Download, Loader2 } from 'lucide-react'
+import { Clock, Calendar, Package, Phone, MessageCircle, Download, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useReservationStore } from '@app/store/reservationStore'
-import { PACKAGES } from '@constants/index'
+import { PACKAGES, CHILDREN_PRICE } from '@constants/index'
 import { formatDate, formatTime, formatCurrency } from '@utils/formatters'
 import { Button } from '@components/ui/Button'
 import { Card } from '@components/ui/Card'
@@ -11,7 +11,8 @@ import { useWhatsAppRedirect } from '@features/reservations/hooks/useWhatsAppRed
 
 export default function ConfirmationPage() {
   const { t } = useTranslation()
-  const reservation = useReservationStore((s) => s.pendingReservation)
+  const reservation   = useReservationStore((s) => s.pendingReservation)
+  const pkgBreakdown  = useReservationStore((s) => s.pkgBreakdown)
   const { redirectToWhatsApp } = useWhatsAppRedirect()
   const cardRef = useRef<HTMLDivElement>(null)
   const [downloading, setDownloading] = useState(false)
@@ -26,6 +27,8 @@ export default function ConfirmationPage() {
   }
 
   const pkg = PACKAGES[reservation.packageId]
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 }).format(n)
 
   const handleDownload = async () => {
     if (!cardRef.current) return
@@ -53,8 +56,8 @@ export default function ConfirmationPage() {
   return (
     <div className="container-app py-12 max-w-lg">
       <div className="text-center mb-8 animate-fade-in">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gold-100 border-4 border-gold-300 mb-4 shadow-gold">
-          <CheckCircle className="w-12 h-12 text-gold-600" />
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-50 border-4 border-amber-300 mb-4">
+          <Clock className="w-12 h-12 text-amber-500" />
         </div>
         <h1 className="text-3xl font-display font-bold text-navy-900 mb-2">
           {t('confirmation.title')}
@@ -71,27 +74,92 @@ export default function ConfirmationPage() {
           <div className="text-center mb-5 pb-4 border-b border-navy-100">
             <p className="text-[11px] font-bold uppercase tracking-[.2em] text-gold-600 mb-0.5">Barco Pirata · Puerto Peñasco</p>
             <h2 className="font-semibold text-lg text-navy-900 m-0">{t('confirmation.detailTitle')}</h2>
+            <span className="inline-flex items-center gap-1.5 mt-2 text-[11px] font-semibold uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-3 py-1">
+              <Clock className="w-3 h-3" /> Pendiente de confirmación
+            </span>
           </div>
 
           <dl className="space-y-3">
-            <InfoRow icon={<Phone className="w-4 h-4" />}    label={t('confirmation.fields.name')}    value={reservation.contactName} />
-            <InfoRow icon={<Phone className="w-4 h-4" />}    label={t('confirmation.fields.phone')}   value={reservation.contactPhone} />
-            <InfoRow icon={<Calendar className="w-4 h-4" />} label={t('confirmation.fields.date')}    value={formatDate(reservation.date)} />
-            <InfoRow icon={<Calendar className="w-4 h-4" />} label={t('confirmation.fields.time')}    value={formatTime(reservation.time)} />
-            <InfoRow icon={<Package className="w-4 h-4" />}  label={t('confirmation.fields.package')} value={`${pkg.icon} ${t(`packages.${pkg.id}.label`)}`} />
-            <InfoRow
-              icon={<Users className="w-4 h-4" />}
-              label={t('confirmation.fields.people')}
-              value={[
-                reservation.adults   > 0 ? `${reservation.adults} adulto${reservation.adults !== 1 ? 's' : ''}`         : '',
-                reservation.youth    > 0 ? `${reservation.youth} adolescente${reservation.youth !== 1 ? 's' : ''}`      : '',
-                reservation.children > 0 ? `${reservation.children} niño${reservation.children !== 1 ? 's' : ''}`       : '',
-                reservation.babies   > 0 ? `${reservation.babies} bebe${reservation.babies !== 1 ? 's' : ''}`           : '',
-              ].filter(Boolean).join(' · ')}
-            />
+            <InfoRow icon={<Phone className="w-4 h-4" />}    label={t('confirmation.fields.name')}  value={reservation.contactName} />
+            <InfoRow icon={<Phone className="w-4 h-4" />}    label={t('confirmation.fields.phone')} value={reservation.contactPhone} />
+            <InfoRow icon={<Calendar className="w-4 h-4" />} label={t('confirmation.fields.date')}  value={formatDate(reservation.date)} />
+            <InfoRow icon={<Calendar className="w-4 h-4" />} label={t('confirmation.fields.time')}  value={formatTime(reservation.time)} />
           </dl>
 
-          <div className="mt-5 pt-4 border-t border-navy-100">
+          {/* Desglose por paquete */}
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center gap-2 mb-1">
+              <Package className="w-4 h-4 text-gold-600" />
+              <span className="text-sm font-semibold text-navy-700">{t('confirmation.fields.people')}</span>
+            </div>
+
+            {pkgBreakdown ? (
+              <>
+                {pkgBreakdown.packages.map((item) => (
+                  <div key={item.packageId} className="rounded-xl border border-navy-100 overflow-hidden text-sm">
+                    <div className="flex items-center gap-2 px-3 py-2 bg-navy-50 border-b border-navy-100">
+                      <span>{item.icon}</span>
+                      <span className="font-semibold text-navy-800">{item.label}</span>
+                      <span className="ml-auto font-bold text-navy-900">{fmt(item.total)}</span>
+                    </div>
+                    <div className="px-3 py-2 space-y-1">
+                      {item.adults > 0 && (
+                        <div className="flex justify-between text-navy-500">
+                          <span>{item.adults} adulto{item.adults !== 1 ? 's' : ''}</span>
+                          <span>{fmt(item.adults * item.adultPrice)}</span>
+                        </div>
+                      )}
+                      {item.youth > 0 && (
+                        <div className="flex justify-between text-navy-500">
+                          <span>{item.youth} adolescente{item.youth !== 1 ? 's' : ''}</span>
+                          <span>{fmt(item.youth * item.youthPrice)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {pkgBreakdown.children > 0 && (
+                  <div className="rounded-xl border border-navy-100 overflow-hidden text-sm">
+                    <div className="flex items-center gap-2 px-3 py-2 bg-navy-50 border-b border-navy-100">
+                      <span>🍕</span>
+                      <span className="font-semibold text-navy-800">Niños · agua, sodas y pizza</span>
+                      <span className="ml-auto font-bold text-navy-900">{fmt(pkgBreakdown.childrenCost)}</span>
+                    </div>
+                    <div className="px-3 py-2">
+                      <div className="flex justify-between text-navy-500">
+                        <span>{pkgBreakdown.children} niño{pkgBreakdown.children !== 1 ? 's' : ''}</span>
+                        <span>{fmt(pkgBreakdown.children * CHILDREN_PRICE)}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {pkgBreakdown.babies > 0 && (
+                  <div className="flex justify-between items-center px-3 py-2 text-sm rounded-xl border border-green-100 bg-green-50">
+                    <span className="text-navy-600">🍼 {pkgBreakdown.babies} bebé{pkgBreakdown.babies !== 1 ? 's' : ''}</span>
+                    <span className="text-green-600 font-semibold">Gratis</span>
+                  </div>
+                )}
+              </>
+            ) : (
+              /* Fallback: solo totales por tipo (cuando no hay pkgBreakdown en store) */
+              <div className="rounded-xl border border-navy-100 overflow-hidden text-sm">
+                <div className="flex items-center gap-2 px-3 py-2 bg-navy-50 border-b border-navy-100">
+                  <span>{pkg.icon}</span>
+                  <span className="font-semibold text-navy-800">{t(`packages.${pkg.id}.label`)}</span>
+                </div>
+                <div className="px-3 py-2 space-y-1">
+                  {reservation.adults   > 0 && <div className="flex justify-between text-navy-500"><span>{reservation.adults} adulto{reservation.adults !== 1 ? 's' : ''}</span><span>{formatCurrency(reservation.adultsCost)}</span></div>}
+                  {reservation.youth    > 0 && <div className="flex justify-between text-navy-500"><span>{reservation.youth} adolescente{reservation.youth !== 1 ? 's' : ''}</span><span>{formatCurrency(reservation.youthCost)}</span></div>}
+                  {reservation.children > 0 && <div className="flex justify-between text-navy-500"><span>{reservation.children} niño{reservation.children !== 1 ? 's' : ''}</span><span>{formatCurrency(reservation.childrenCost)}</span></div>}
+                  {reservation.babies   > 0 && <div className="flex justify-between text-navy-500"><span>{reservation.babies} bebé{reservation.babies !== 1 ? 's' : ''}</span><span className="text-green-600 font-semibold">Gratis</span></div>}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-navy-100">
             <div className="flex justify-between font-bold text-lg">
               <span className="text-navy-900">{t('confirmation.totalPay')}</span>
               <span className="text-gold-600">{formatCurrency(reservation.total)}</span>
