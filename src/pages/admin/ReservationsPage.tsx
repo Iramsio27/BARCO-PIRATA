@@ -130,9 +130,9 @@ export default function ReservationsPage() {
   }, [filtered, selectedDate])
 
   return (
-    <div className="space-y-5">
-      {/* Filter bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center gap-4 flex-wrap">
+    <div className="space-y-3">
+      {/* Fila de acciones */}
+      <div className="flex items-center gap-3 flex-wrap">
         <Link
           to="/admin/nueva-reservacion"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors shrink-0"
@@ -145,84 +145,17 @@ export default function ReservationsPage() {
         <button
           type="button"
           onClick={() => setCalOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-colors shadow-sm max-w-full"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-colors shadow-sm shrink-0"
           style={{ borderColor: 'var(--border)', background: 'var(--bg-surface)', color: 'var(--text-body)' }}
         >
           <CalendarDays className="w-4 h-4 shrink-0" style={{ color: 'var(--text-muted)' }} />
-          <span className="capitalize truncate">
+          <span className="capitalize">
             {format(parse(selectedDate, 'yyyy-MM-dd', new Date()), "d 'de' MMMM yyyy", { locale: es })}
           </span>
         </button>
         <CalendarPicker value={selectedDate} onChange={setSelectedDate} isOpen={calOpen} onClose={() => setCalOpen(false)} adminMode />
 
-        <div className="bp-status-chips flex-1">
-          {statusChips.map(({ key, label }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setStatusFilter(key)}
-              className={`bp-status-chip${statusFilter === key ? ' active' : ''}`}
-            >
-              {label}
-              <span className="bp-status-chip-count">
-                {key === 'all' ? reservations.length : (statusCounts[key as keyof typeof statusCounts] ?? 0)}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* Filtro de manifiesto */}
-        <div className="flex items-center gap-1.5 shrink-0">
-          <ClipboardList className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--text-muted)' }} />
-          {([
-            { key: 'all' as ManifestFilter,        label: 'Todos',       icon: null,            count: reservations.length },
-            { key: 'completo' as ManifestFilter,   label: 'Completo',    icon: <CheckCircle2 className="w-3 h-3" />, count: manifestCounts.completo },
-            { key: 'incompleto' as ManifestFilter, label: 'Incompleto',  icon: <AlertTriangle className="w-3 h-3" />, count: manifestCounts.incompleto },
-          ]).map(({ key, label, icon, count }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setManifestFilter(key)}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-colors"
-              style={{
-                borderColor: manifestFilter === key ? (key === 'incompleto' ? '#d97706' : key === 'completo' ? '#16a34a' : 'var(--accent)') : 'var(--border)',
-                background:  manifestFilter === key ? (key === 'incompleto' ? 'rgba(217,119,6,0.1)' : key === 'completo' ? 'rgba(22,163,74,0.1)' : 'rgba(var(--accent-rgb),0.12)') : 'var(--bg-surface)',
-                color:       manifestFilter === key ? (key === 'incompleto' ? '#d97706' : key === 'completo' ? '#16a34a' : 'var(--accent)') : 'var(--text-muted)',
-              }}
-            >
-              {icon}
-              {label}
-              <span
-                className="ml-0.5 rounded-full px-1 text-[10px] font-bold"
-                style={{ background: 'var(--bg-surface-alt)' }}
-              >
-                {count}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          {(['all', 'efectivo', 'transferencia'] as const).map((key) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setPaymentFilter(key)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors"
-              style={{
-                borderColor: paymentFilter === key ? 'var(--accent)' : 'var(--border)',
-                background: paymentFilter === key ? 'rgba(var(--accent-rgb),0.12)' : 'var(--bg-surface)',
-                color: paymentFilter === key ? 'var(--accent)' : 'var(--text-muted)',
-              }}
-            >
-              {key === 'all' && 'Todos los pagos'}
-              {key === 'efectivo' && <><Banknote className="w-3 h-3" /> Efectivo</>}
-              {key === 'transferencia' && <><ArrowLeftRight className="w-3 h-3" /> Transferencia</>}
-            </button>
-          ))}
-        </div>
-
-        <div className="relative shrink-0">
+        <div className="relative ml-auto shrink-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
           <input
             type="text"
@@ -233,6 +166,78 @@ export default function ReservationsPage() {
             style={{ borderColor: 'var(--border)', background: 'var(--bg-surface)', color: 'var(--text-body)' }}
           />
         </div>
+      </div>
+
+      {/* Barra de filtros deslizable */}
+      <div
+        className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin"
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {/* Grupo: estado */}
+        {statusChips.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setStatusFilter(key)}
+            className={`bp-status-chip${statusFilter === key ? ' active' : ''}`}
+            style={{ flexShrink: 0 }}
+          >
+            {label}
+            <span className="bp-status-chip-count">
+              {key === 'all' ? reservations.length : (statusCounts[key as keyof typeof statusCounts] ?? 0)}
+            </span>
+          </button>
+        ))}
+
+        {/* Separador */}
+        <span className="w-px h-5 mx-1 shrink-0" style={{ background: 'var(--border)' }} />
+
+        {/* Grupo: manifiesto */}
+        {([
+          { key: 'all' as ManifestFilter,        label: 'Todos',      icon: null,                                        count: reservations.length },
+          { key: 'completo' as ManifestFilter,   label: 'Completo',   icon: <CheckCircle2 className="w-3 h-3" />,        count: manifestCounts.completo },
+          { key: 'incompleto' as ManifestFilter, label: 'Incompleto', icon: <AlertTriangle className="w-3 h-3" />,       count: manifestCounts.incompleto },
+        ]).map(({ key, label, icon, count }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setManifestFilter(key)}
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-semibold transition-colors shrink-0"
+            style={{
+              borderColor: manifestFilter === key ? (key === 'incompleto' ? '#d97706' : key === 'completo' ? '#16a34a' : 'var(--accent)') : 'var(--border)',
+              background:  manifestFilter === key ? (key === 'incompleto' ? 'rgba(217,119,6,0.1)' : key === 'completo' ? 'rgba(22,163,74,0.1)' : 'rgba(var(--accent-rgb),0.12)') : 'var(--bg-surface)',
+              color:       manifestFilter === key ? (key === 'incompleto' ? '#d97706' : key === 'completo' ? '#16a34a' : 'var(--accent)') : 'var(--text-muted)',
+            }}
+          >
+            {icon}
+            {label}
+            <span className="ml-0.5 rounded-full px-1 text-[10px] font-bold" style={{ background: 'var(--bg-surface-alt)' }}>
+              {count}
+            </span>
+          </button>
+        ))}
+
+        {/* Separador */}
+        <span className="w-px h-5 mx-1 shrink-0" style={{ background: 'var(--border)' }} />
+
+        {/* Grupo: pago */}
+        {(['all', 'efectivo', 'transferencia'] as const).map((key) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setPaymentFilter(key)}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs font-semibold transition-colors shrink-0"
+            style={{
+              borderColor: paymentFilter === key ? 'var(--accent)' : 'var(--border)',
+              background:  paymentFilter === key ? 'rgba(var(--accent-rgb),0.12)' : 'var(--bg-surface)',
+              color:       paymentFilter === key ? 'var(--accent)' : 'var(--text-muted)',
+            }}
+          >
+            {key === 'all' && 'Todos los pagos'}
+            {key === 'efectivo' && <><Banknote className="w-3 h-3" /> Efectivo</>}
+            {key === 'transferencia' && <><ArrowLeftRight className="w-3 h-3" /> Transferencia</>}
+          </button>
+        ))}
       </div>
 
       {/* Table card */}

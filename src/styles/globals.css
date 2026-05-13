@@ -541,7 +541,7 @@ html[data-admin-theme="dark"] {
   box-shadow: var(--shadow-card);
 }
 
-.bp-status-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.bp-status-chips { display: contents; }
 .bp-status-chip {
   display: flex; align-items: center; gap: 6px;
   padding: 6px 13px; border-radius: 9999px;
