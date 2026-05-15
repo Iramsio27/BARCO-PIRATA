@@ -15,7 +15,9 @@
     "contact": "Contacto",
     "schedule": "Horario",
     "tagline": "Vive la experiencia del mar en Puerto Peñasco. Paseos en barco únicos para toda la familia.",
-    "rights": "Todos los derechos reservados."
+    "rights": "Todos los derechos reservados.",
+    "callPrefix": "Llama al",
+    "callSuffix": "para mayor información"
   },
   "home": {
     "hero": {
@@ -44,6 +46,21 @@
       "subtitle": "Disfruta desde antes de llegar la experiencia que te espera",
       "cta": "¡Quiero vivir esto! Reservar ahora",
       "fallback": "Tu navegador no soporta video HTML5."
+    },
+    "reviews": {
+      "title": "Lo que dicen",
+      "accent": "nuestros pasajeros",
+      "googleMeta": "Reseñas reales de Google Maps",
+      "reviewsCount": "{{count}} reseñas",
+      "cta": "¡Quiero vivir esto! Reservar ahora",
+      "viewAll": "Ver todas en Google",
+      "placeholders": [
+        { "author": "Carlos López",   "text": "Mejor experiencia familiar de Puerto Peñasco. Los niños con sus disfraces piratas, la cena buenísima y el capitán super amable.", "time": "hace 2 semanas" },
+        { "author": "Andrea Sánchez", "text": "El show de fuego nos voló la cabeza. Vale cada peso, repetiría mañana mismo. Volveré con todos mis amigos.", "time": "hace 1 mes" },
+        { "author": "Roberto Torres", "text": "Una noche mágica en el mar. La comida, la música y el ambiente superaron todas mis expectativas.", "time": "hace 3 semanas" },
+        { "author": "María Flores",   "text": "Celebramos el cumpleaños de mi hija aquí y fue perfecto. El equipo hizo todo para que fuera especial.", "time": "hace 2 meses" },
+        { "author": "Juan Mendoza",   "text": "Increíble atardecer desde el barco. Las fotos quedaron espectaculares. ¡100% recomendado!", "time": "hace 1 semana" }
+      ]
     },
     "gallery": {
       "title": "Galería de experiencias",
@@ -433,13 +450,22 @@
     "reviewsTitle": "Lo que dice la",
     "reviewsAccent": "tripulación",
     "reviewsMeta": "reseñas",
-    "filterAll": "Todo",
-    "filterSunsets": "Atardeceres",
+    "filterAll": "Todas",
     "filterOnBoard": "A bordo",
-    "filterCrew": "Tripulación",
     "filterFamilies": "Familias",
-    "filterAerial": "Aéreas",
+    "filterCrew": "Tripulación",
+    "filterSunsets": "Atardeceres",
+    "filterAction": "Show & Acción",
+    "filterAerial": "Aéreos",
     "filterVideos": "Videos",
+    "labelPhotos": "Fotos",
+    "labelVideos": "Videos",
+    "photosCount": "{{count}} fotos",
+    "videosCount": "{{count}} videos",
+    "loadMoreBtn": "Ver más",
+    "noPhotos": "Sin fotos en esta categoría aún.",
+    "noVideos": "Sin videos en esta categoría aún.",
+    "noResults": "No hay resultados para tu búsqueda.",
     "searchPlaceholder": "Buscar…",
     "featuredLabel": "★ Destacada",
     "featuredBadge": "Atardeceres",

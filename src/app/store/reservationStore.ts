@@ -35,6 +35,10 @@ interface ReservationStore {
   /** Fecha seleccionada en el filtro del dashboard */
   selectedDate: string
   setSelectedDate: (date: string) => void
+
+  /** Indica si ya se calculó la fecha inicial (próximo paseo). Se resetea en cada recarga. */
+  dateInitialized: boolean
+  setDateInitialized: (v: boolean) => void
 }
 
 export const useReservationStore = create<ReservationStore>((set) => ({
@@ -46,4 +50,7 @@ export const useReservationStore = create<ReservationStore>((set) => ({
 
   selectedDate: localDateStr(new Date()),
   setSelectedDate: (date) => set({ selectedDate: date }),
+
+  dateInitialized: false,
+  setDateInitialized: (v) => set({ dateInitialized: v }),
 }))

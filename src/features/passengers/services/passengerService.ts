@@ -90,28 +90,42 @@ export const passengerService = {
 
   /**
    * Lista todos los pasajeros de una fecha (para ManifiestosPage).
-   * Join con reservations para obtener el horario.
+   * Usa dos queries separadas para evitar problemas de filtro en joins de PostgREST.
    */
   async listByDate(date: string): Promise<Array<Passenger & { reservationTime: string; contactName: string }>> {
+    // 1. Reservaciones activas del día
+    const { data: reservations, error: resError } = await supabase
+      .from('reservations')
+      .select('id, time, contact_name')
+      .eq('date', date)
+      .neq('status', 'cancelada')
+
+    if (resError) throw new Error(resError.message)
+    if (!reservations || reservations.length === 0) return []
+
+    const ids = (reservations as Record<string, unknown>[]).map(r => r.id as string)
+    const resMap: Record<string, { time: string; contactName: string }> = {}
+    for (const r of reservations as Record<string, unknown>[]) {
+      resMap[r.id as string] = { time: r.time as string, contactName: r.contact_name as string }
+    }
+
+    // 2. Pasajeros de esas reservaciones
     const { data, error } = await supabase
       .from('reservation_passengers')
-      .select(`
-        *,
-        reservations!inner(date, time, contact_name)
-      `)
-      .eq('reservations.date', date)
-      .order('reservations.time', { ascending: true })
-      .order('position',          { ascending: true })
+      .select('*')
+      .in('reservation_id', ids)
+      .order('position', { ascending: true })
 
     if (error) throw new Error(error.message)
 
-    return (data as Record<string, unknown>[]).map((row) => {
-      const res = row.reservations as Record<string, unknown>
-      return {
+    return ((data ?? []) as Record<string, unknown>[])
+      .map((row) => ({
         ...mapRow(row),
-        reservationTime: res.time        as string,
-        contactName:     res.contact_name as string,
-      }
-    })
+        reservationTime: resMap[row.reservation_id as string]?.time        ?? '',
+        contactName:     resMap[row.reservation_id as string]?.contactName ?? '',
+      }))
+      .sort((a, b) =>
+        a.reservationTime.localeCompare(b.reservationTime) || a.position - b.position,
+      )
   },
 }

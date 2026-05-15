@@ -2,17 +2,20 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { format } from 'date-fns'
 import { useTranslation } from 'react-i18next'
+import { Menu, X } from 'lucide-react'
 import '../../styles/hero.css'
 
 // 📁 Agrega tus fotos en public/images/carrusel/ con los nombres de abajo.
 // Para añadir más, duplica una línea y cambia el nombre del archivo.
 const HERO_PHOTOS = [
-  { src: '/images/carrusel/carrusel-1.jpeg', alt: 'Barco Pirata Perla Negra' },
-  { src: '/images/carrusel/carrusel-2.jpeg', alt: 'Paseo en el Mar de Cortés' },
-  { src: '/images/carrusel/carrusel-3.jpeg', alt: 'Aventura familiar en el mar' },
-  { src: '/images/carrusel/carrusel-4.jpeg', alt: 'Atardecer en Puerto Peñasco' },
-  { src: '/images/carrusel/carrusel-5.jpeg', alt: 'La tripulación pirata' },
-  { src: '/images/carrusel/carrusel-6.jpeg', alt: 'Experiencia única en el mar' },
+  { src: '/images/carrusel/carrusel-1.jpg', alt: 'Barco Pirata Perla Negra' },
+  { src: '/images/carrusel/carrusel-2.jpg', alt: 'Paseo en el Mar de Cortés' },
+  { src: '/images/carrusel/carrusel-3.jpg', alt: 'Aventura familiar en el mar' },
+  { src: '/images/carrusel/carrusel-4.jpg', alt: 'Atardecer en Puerto Peñasco' },
+  { src: '/images/carrusel/carrusel-5.jpg', alt: 'La tripulación pirata' },
+  { src: '/images/carrusel/carrusel-6.jpg', alt: 'Experiencia única en el mar' },
+  { src: '/images/carrusel/carrusel-7.jpg', alt: 'Show a bordo de la Perla Negra' },
+  { src: '/images/carrusel/carrusel-8.jpg', alt: 'Diversión para toda la familia' },
 ]
 
 const SLIDE_DURATION = 5000
@@ -22,6 +25,7 @@ export function HeroSection() {
   const [, forceUpdate] = useState(0)
   const [currentSlide, setCurrentSlide] = useState(-1)
   const [paused, setPaused] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const todayIso = format(new Date(), 'yyyy-MM-dd')
@@ -59,7 +63,7 @@ export function HeroSection() {
 
   return (
     <section
-      className="hero"
+      className={`hero${currentSlide >= 0 ? ' hero--photo-active' : ''}`}
       aria-label="Bienvenida Barco Pirata Perla Negra"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -82,7 +86,7 @@ export function HeroSection() {
       </div>
 
       <div className="hero-stars" />
-      <div className="hero-moon" aria-hidden="true" />
+      {currentSlide < 0 && <div className="hero-moon" aria-hidden="true" />}
 
       <div className="hero-cloud-layer" aria-hidden="true">
         <div className="hero-cloud c1" />
@@ -228,8 +232,18 @@ export function HeroSection() {
           <NavLink to="/clima" className={({ isActive }) => isActive ? 'active' : ''}>
             {t('header.weather')}
           </NavLink>
-          <a href="#galeria">Galería</a>
-          <a href="#contacto">Contacto</a>
+          <NavLink to="/galeria" className={({ isActive }) => isActive ? 'active' : ''}>
+            {t('header.gallery')}
+          </NavLink>
+          <a
+            href="#contacto"
+            onClick={(e) => {
+              e.preventDefault()
+              document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth' })
+            }}
+          >
+            {t('header.contact')}
+          </a>
         </nav>
 
         <div className="hero-nav-right">
@@ -243,11 +257,51 @@ export function HeroSection() {
           <Link to={reserveTodayHref} className="hero-reserve-btn">
             {t('header.reserveNow')}
           </Link>
+          <button
+            className="hero-hamburger"
+            onClick={() => setMenuOpen(o => !o)}
+            aria-label="Menú"
+            aria-expanded={menuOpen}
+          >
+            {menuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
         </div>
       </header>
 
+      {/* ── Mobile menu ── */}
+      {menuOpen && (
+        <div className="hero-mobile-menu">
+          {[
+            { to: '/', label: t('header.home'), end: true },
+            { to: '/reservar', label: t('header.reserve'), end: false },
+            { to: '/clima', label: t('header.weather'), end: false },
+            { to: '/galeria', label: t('header.gallery'), end: false },
+          ].map(({ to, label, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) => isActive ? 'active' : ''}
+            >
+              {label}
+            </NavLink>
+          ))}
+          <a
+            href="#contacto"
+            onClick={(e) => {
+              e.preventDefault()
+              setMenuOpen(false)
+              document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth' })
+            }}
+          >
+            {t('header.contact')}
+          </a>
+        </div>
+      )}
+
       {/* ── Hero copy ── */}
-      <div className="hero-content">
+      <div className={`hero-content${currentSlide >= 0 ? ' hero-content--hidden' : ''}`}>
         <div className="hero-crest">
           <div className="hero-smoke" aria-hidden="true">
             <span/><span/><span/><span/>
@@ -316,28 +370,29 @@ export function HeroSection() {
         </div>
       )}
 
-      {/* Scroll hint + dots — single centered group */}
-      <div className="hero-bottom-center">
-        <div className="hero-scroll-hint" aria-hidden="true">
-          <span>Explora</span>
-          <div className="hero-scroll-dot"/>
+      {/* Bottom stack: dots + trust bar, apilados sin píxeles fijos */}
+      <div className="hero-bottom-stack">
+        <div className="hero-bottom-center">
+          <div className="hero-scroll-hint" aria-hidden="true">
+            <span>Explora</span>
+            <div className="hero-scroll-dot"/>
+          </div>
+          <div className="hero-slide-dots" role="tablist" aria-label="Navegación de fotos">
+            {HERO_PHOTOS.map((photo, i) => (
+              <button
+                key={photo.src}
+                role="tab"
+                aria-selected={i === currentSlide}
+                aria-label={`Ver foto ${i + 1}: ${photo.alt}`}
+                className={`hero-slide-dot${i === currentSlide ? ' active' : ''}`}
+                onClick={() => goTo(i)}
+              />
+            ))}
+          </div>
         </div>
-        <div className="hero-slide-dots" role="tablist" aria-label="Navegación de fotos">
-          {HERO_PHOTOS.map((photo, i) => (
-            <button
-              key={photo.src}
-              role="tab"
-              aria-selected={i === currentSlide}
-              aria-label={`Ver foto ${i + 1}: ${photo.alt}`}
-              className={`hero-slide-dot${i === currentSlide ? ' active' : ''}`}
-              onClick={() => goTo(i)}
-            />
-          ))}
-        </div>
-      </div>
 
-      {/* Trust bar */}
-      <div className="hero-trust">
+        {/* Trust bar */}
+        <div className="hero-trust">
         <div className="hero-trust-inner">
           <div className="hero-trust-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -369,6 +424,7 @@ export function HeroSection() {
             </svg>
             {t('home.features.securePayment')}
           </div>
+        </div>
         </div>
       </div>
 

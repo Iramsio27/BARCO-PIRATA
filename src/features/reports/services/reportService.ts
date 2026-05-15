@@ -108,7 +108,98 @@ function pkgLabel(r: Reservation): string {
       .map(item => item.packageId.replace(/_/g, ' '))
       .join(' + ')
   }
-  return pkgLabel(r)
+  return r.packageId.replace(/_/g, ' ')
+}
+
+// Orden preferido para columnas de paquete
+const PKG_ORDER = ['CON_COMIDA', 'SOLO_BEBIDAS', 'NINOS']
+
+/**
+ * Construye filas Excel — una fila por reservación.
+ * Las columnas de pasajeros usan el nombre del paquete en el encabezado,
+ * ej. "Adultos CON COMIDA", "Adolescentes SOLO BEBIDAS", "Niños NINOS".
+ * Devuelve las filas y la lista ordenada de paquetes encontrados.
+ */
+function buildExcelRows(
+  reservations: Reservation[],
+  includeDate: boolean,
+): { rows: Record<string, unknown>[]; pkgs: string[] } {
+  // 1. Descubrir todos los paquetes presentes en los datos
+  const pkgSet = new Set<string>()
+  for (const r of reservations) {
+    if (r.packageBreakdown?.length) {
+      for (const item of r.packageBreakdown) pkgSet.add(item.packageId)
+    } else {
+      pkgSet.add(r.packageId)
+    }
+  }
+  const pkgs = [
+    ...PKG_ORDER.filter(p => pkgSet.has(p)),
+    ...[...pkgSet].filter(p => !PKG_ORDER.includes(p)),
+  ]
+
+  // 2. Construir filas
+  const rows = reservations.map(r => {
+    const row: Record<string, unknown> = {
+      ...(includeDate ? { 'Fecha': r.date } : {}),
+      'Hora':     r.time,
+      'Nombre':   r.contactName,
+      'Teléfono': r.contactPhone ?? '–',
+      'Estado':   r.status,
+      'Pago':     r.paymentMethod ?? '–',
+    }
+
+    for (const pkg of pkgs) {
+      const lbl     = pkg.replace(/_/g, ' ')
+      const isNinos = pkg === 'NINOS'
+
+      if (r.packageBreakdown?.length) {
+        const item = r.packageBreakdown.find(i => i.packageId === pkg)
+        if (isNinos) {
+          row[`Niños ${lbl}`] = item?.children ?? ''
+        } else {
+          row[`Adultos ${lbl}`]       = item?.adults || ''
+          row[`Adolescentes ${lbl}`]  = item?.youth  || ''
+        }
+      } else {
+        const match = r.packageId === pkg
+        if (isNinos) {
+          row[`Niños ${lbl}`] = match ? r.children : ''
+        } else {
+          row[`Adultos ${lbl}`]      = match ? (r.adults || '') : ''
+          row[`Adolescentes ${lbl}`] = match ? (r.youth  || '') : ''
+        }
+      }
+    }
+
+    row['Bebés']           = r.babies
+    row['Total Pasajeros'] = r.totalPassengers
+    row['Total']           = r.total
+
+    return row
+  })
+
+  return { rows, pkgs }
+}
+
+function detailColWidths(includeDate: boolean, pkgs: string[]): { wch: number }[] {
+  const cols: { wch: number }[] = [
+    ...(includeDate ? [{ wch: 12 }] : []),
+    { wch: 9  },  // Hora
+    { wch: 26 },  // Nombre
+    { wch: 16 },  // Teléfono
+    { wch: 12 },  // Estado
+    { wch: 14 },  // Pago
+  ]
+  for (const pkg of pkgs) {
+    if (pkg === 'NINOS') {
+      cols.push({ wch: 14 })  // Niños [PKG]
+    } else {
+      cols.push({ wch: 18 }, { wch: 20 })  // Adultos [PKG], Adolescentes [PKG]
+    }
+  }
+  cols.push({ wch: 7 }, { wch: 15 }, { wch: 10 })  // Bebés, Total Pasajeros, Total
+  return cols
 }
 
 /** Devuelve la "clave" y el "label" legible según la granularidad. */
@@ -288,27 +379,10 @@ export const reportService = {
   //   Exports — Excel
   // ════════════════════════════════════════════════════════════════════
   exportToExcel(report: DailyReport): void {
-    const rows = report.reservations.map((r) => ({
-      'Nombre': r.contactName,
-      'Teléfono': r.contactPhone,
-      'Hora': r.time,
-      'Paquete': pkgLabel(r),
-      'Adultos': r.adults,
-      'Costo Adultos': r.adultsCost,
-      'Adolescentes': r.youth,
-      'Costo Adolescentes': r.youthCost,
-      'Niños': r.children,
-      'Costo Niños': r.childrenCost,
-      'Bebés': r.babies,
-      'Total Pasajeros': r.totalPassengers,
-      'Subtotal': r.subtotal,
-      'Descuento': r.discount,
-      'Total': r.total,
-      'Estado': r.status,
-      'Método de Pago': r.paymentMethod ?? '–',
-    }))
-    const ws = XLSX.utils.json_to_sheet(rows)
-    const wb = XLSX.utils.book_new()
+    const { rows, pkgs } = buildExcelRows(report.reservations, false)
+    const ws   = XLSX.utils.json_to_sheet(rows)
+    ws['!cols'] = detailColWidths(false, pkgs)
+    const wb   = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Reservaciones')
     XLSX.writeFile(wb, `reservaciones_${report.date}.xlsx`)
   },
@@ -317,27 +391,10 @@ export const reportService = {
   exportRangeToExcel(report: RangeReport): void {
     const wb = XLSX.utils.book_new()
 
-    const detail = report.reservations.map((r) => ({
-      'Fecha': r.date,
-      'Hora': r.time,
-      'Nombre': r.contactName,
-      'Teléfono': r.contactPhone,
-      'Paquete': pkgLabel(r),
-      'Adultos': r.adults,
-      'Costo Adultos': r.adultsCost,
-      'Adolescentes': r.youth,
-      'Costo Adolescentes': r.youthCost,
-      'Niños': r.children,
-      'Costo Niños': r.childrenCost,
-      'Bebés': r.babies,
-      'Total Pasajeros': r.totalPassengers,
-      'Subtotal': r.subtotal,
-      'Descuento': r.discount,
-      'Total': r.total,
-      'Estado': r.status,
-      'Pago': r.paymentMethod ?? '–',
-    }))
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detail), 'Detalle')
+    const { rows: detailRows, pkgs } = buildExcelRows(report.reservations, true)
+    const wsDetail = XLSX.utils.json_to_sheet(detailRows)
+    wsDetail['!cols'] = detailColWidths(true, pkgs)
+    XLSX.utils.book_append_sheet(wb, wsDetail, 'Detalle')
 
     const series = report.series.map((p) => ({
       'Período':       p.label,
@@ -345,7 +402,9 @@ export const reportService = {
       'Personas':      p.people,
       'Ingresos':      p.revenue,
     }))
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(series), 'Serie')
+    const wsSerie = XLSX.utils.json_to_sheet(series)
+    wsSerie['!cols'] = [{ wch: 18 }, { wch: 13 }, { wch: 10 }, { wch: 12 }]
+    XLSX.utils.book_append_sheet(wb, wsSerie, 'Serie')
 
     XLSX.writeFile(wb, `reporte_${report.startDate}_a_${report.endDate}.xlsx`)
   },

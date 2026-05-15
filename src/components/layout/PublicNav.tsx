@@ -5,6 +5,15 @@ import { Menu, X } from 'lucide-react'
 import { format } from 'date-fns'
 import '../../styles/hero.css'
 
+// Icono de Facebook SVG inline (lucide no lo incluye)
+function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  )
+}
+
 export function PublicNav() {
   const { t, i18n } = useTranslation()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -15,6 +24,15 @@ export function PublicNav() {
   const toggleLanguage = () => {
     i18n.changeLanguage(i18n.language === 'es' ? 'en' : 'es')
   }
+
+  const closeMenu = () => setMenuOpen(false)
+
+  const navLinks = [
+    { to: '/', label: t('header.home'), end: true },
+    { to: '/reservar', label: t('header.reserve'), end: false },
+    { to: '/clima', label: t('header.weather'), end: false },
+    { to: '/galeria', label: t('header.gallery'), end: false },
+  ]
 
   return (
     <header>
@@ -29,20 +47,13 @@ export function PublicNav() {
           />
         </Link>
 
-        {/* Menu pills — desktop */}
-        <nav className="hero-menu" aria-label="Navegación principal" style={{ display: 'flex' }}>
-          <NavLink to="/" end className={({ isActive }) => isActive ? 'active' : ''}>
-            {t('header.home')}
-          </NavLink>
-          <NavLink to="/reservar" className={({ isActive }) => isActive ? 'active' : ''}>
-            {t('header.reserve')}
-          </NavLink>
-          <NavLink to="/clima" className={({ isActive }) => isActive ? 'active' : ''}>
-            {t('header.weather')}
-          </NavLink>
-          <NavLink to="/galeria" className={({ isActive }) => isActive ? 'active' : ''}>
-            {t('header.gallery')}
-          </NavLink>
+        {/* Pills — desktop */}
+        <nav className="hero-menu pub-menu-desktop" aria-label="Navegación principal">
+          {navLinks.map(({ to, label, end }) => (
+            <NavLink key={to} to={to} end={end} className={({ isActive }) => isActive ? 'active' : ''}>
+              {label}
+            </NavLink>
+          ))}
           <a
             href="#contacto"
             onClick={(e) => {
@@ -63,75 +74,53 @@ export function PublicNav() {
             </svg>
             {i18n.language === 'es' ? 'ES' : 'EN'}
           </button>
-          <Link to={reserveTodayHref} className="hero-reserve-btn">
+          <Link to={reserveTodayHref} className="hero-reserve-btn pub-reserve-desktop">
             {t('header.reserveNow')}
           </Link>
-          {/* Hamburger mobile */}
+          {/* Hamburger — solo mobile */}
           <button
-            className="hero-lang-btn md:hidden"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Menú"
-            style={{ display: 'none' }}
+            className="pub-hamburger"
+            onClick={() => setMenuOpen(o => !o)}
+            aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={menuOpen}
           >
-            {menuOpen ? <X size={16} /> : <Menu size={16} />}
+            {menuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
       </nav>
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div style={{
-          background: 'rgba(4,9,15,0.98)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          padding: '12px 20px',
-        }}>
-          {[
-            { to: '/', label: t('header.home'), end: true },
-            { to: '/reservar', label: t('header.reserve'), end: false },
-            { to: '/clima', label: t('header.weather'), end: false },
-            { to: '/galeria', label: t('header.gallery'), end: false },
-          ].map(({ to, label, end }) => (
+        <div className="pub-mobile-menu">
+          {navLinks.map(({ to, label, end }) => (
             <NavLink
               key={to}
               to={to}
               end={end}
-              onClick={() => setMenuOpen(false)}
-              className={({ isActive }) => isActive ? 'active' : ''}
-              style={({ isActive }) => ({
-                display: 'block',
-                padding: '10px 16px',
-                borderRadius: '8px',
-                fontSize: '14px',
-                fontWeight: 500,
-                textDecoration: 'none',
-                color: isActive ? '#06121f' : 'rgba(255,255,255,.78)',
-                background: isActive ? '#f4c542' : 'transparent',
-                marginBottom: '4px',
-              })}
+              onClick={closeMenu}
+              className={({ isActive }) => `pub-mobile-link${isActive ? ' active' : ''}`}
             >
               {label}
             </NavLink>
           ))}
           <a
             href="#contacto"
+            className="pub-mobile-link"
             onClick={(e) => {
               e.preventDefault()
-              setMenuOpen(false)
+              closeMenu()
               document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth' })
-            }}
-            style={{
-              display: 'block',
-              padding: '10px 16px',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: 500,
-              textDecoration: 'none',
-              color: 'rgba(255,255,255,.78)',
-              marginBottom: '4px',
             }}
           >
             {t('header.contact')}
           </a>
+          <Link
+            to={reserveTodayHref}
+            className="pub-mobile-cta"
+            onClick={closeMenu}
+          >
+            {t('header.reserveNow')}
+          </Link>
         </div>
       )}
     </header>

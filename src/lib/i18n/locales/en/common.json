@@ -15,7 +15,9 @@
     "contact": "Contact",
     "schedule": "Hours",
     "tagline": "Live the sea experience in Puerto Peñasco. Unique boat tours for the whole family.",
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "callPrefix": "Call us at",
+    "callSuffix": "for more information"
   },
   "home": {
     "hero": {
@@ -44,6 +46,21 @@
       "subtitle": "Enjoy the experience that awaits you before you even arrive",
       "cta": "I want to live this! Book now",
       "fallback": "Your browser does not support HTML5 video."
+    },
+    "reviews": {
+      "title": "What our",
+      "accent": "passengers say",
+      "googleMeta": "Real reviews from Google Maps",
+      "reviewsCount": "{{count}} reviews",
+      "cta": "I want to live this! Book now",
+      "viewAll": "View all on Google",
+      "placeholders": [
+        { "author": "Carlos López",   "text": "Best family experience in Puerto Peñasco. The kids loved their pirate costumes, the dinner was amazing and the captain was incredibly friendly.", "time": "2 weeks ago" },
+        { "author": "Andrea Sánchez", "text": "The fire show blew our minds. Worth every penny — we'd go back tomorrow. Coming back with all our friends!", "time": "1 month ago" },
+        { "author": "Roberto Torres", "text": "A magical night at sea. The food, the music and the atmosphere exceeded all our expectations.", "time": "3 weeks ago" },
+        { "author": "María Flores",   "text": "We celebrated my daughter's birthday here and it was perfect. The crew went above and beyond to make it special.", "time": "2 months ago" },
+        { "author": "Juan Mendoza",   "text": "Incredible sunset from the boat. The photos turned out spectacular. 100% recommended!", "time": "1 week ago" }
+      ]
     },
     "gallery": {
       "title": "Experience gallery",
@@ -434,12 +451,21 @@
     "reviewsAccent": "crew says",
     "reviewsMeta": "reviews",
     "filterAll": "All",
-    "filterSunsets": "Sunsets",
     "filterOnBoard": "On Board",
-    "filterCrew": "Crew",
     "filterFamilies": "Families",
+    "filterCrew": "Crew",
+    "filterSunsets": "Sunsets",
+    "filterAction": "Show & Action",
     "filterAerial": "Aerial",
     "filterVideos": "Videos",
+    "labelPhotos": "Photos",
+    "labelVideos": "Videos",
+    "photosCount": "{{count}} photos",
+    "videosCount": "{{count}} videos",
+    "loadMoreBtn": "Load more",
+    "noPhotos": "No photos in this category yet.",
+    "noVideos": "No videos in this category yet.",
+    "noResults": "No results for your search.",
     "searchPlaceholder": "Search…",
     "featuredLabel": "★ Featured",
     "featuredBadge": "Sunsets",

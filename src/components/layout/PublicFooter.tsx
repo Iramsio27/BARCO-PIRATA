@@ -90,11 +90,12 @@ export function PublicFooter() {
             </div>
             <div className="flex items-center gap-2 text-sm mt-3 text-navy-300">
               <Phone className="w-4 h-4 text-gold-400 shrink-0" />
-              <span>Llama al{' '}
+              <span>
+                {t('footer.callPrefix')}{' '}
                 <a href={`tel:${COMPANY.phone}`} className="text-gold-400 font-semibold hover:text-gold-300 transition-colors">
                   {COMPANY.phone}
                 </a>
-                {' '}para mayor información
+                {' '}{t('footer.callSuffix')}
               </span>
             </div>
           </div>

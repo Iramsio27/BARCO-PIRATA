@@ -420,16 +420,14 @@ export default function ReportsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead style={{ background: 'var(--bg-surface-alt)' }}>
-                    <tr>
-                      {['Fecha', 'Hora', 'Cliente', 'Teléfono', 'Personas', 'Paquete', 'Total'].map((h, i) => (
-                        <th
-                          key={h}
-                          className={`px-5 py-3 font-bold text-xs uppercase tracking-wider ${i > 2 ? 'hidden sm:table-cell' : ''} ${i > 4 ? 'text-right' : ''}`}
-                          style={{ color: 'var(--text-muted)' }}
-                        >
-                          {h}
-                        </th>
-                      ))}
+                    <tr className="text-left">
+                      <th className="px-5 py-3 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Fecha</th>
+                      <th className="px-5 py-3 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Hora</th>
+                      <th className="px-5 py-3 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Cliente</th>
+                      <th className="px-5 py-3 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Teléfono</th>
+                      <th className="px-5 py-3 font-bold text-xs uppercase tracking-wider text-right" style={{ color: 'var(--text-muted)' }}>Personas</th>
+                      <th className="px-5 py-3 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Paquete</th>
+                      <th className="px-5 py-3 font-bold text-xs uppercase tracking-wider text-right" style={{ color: 'var(--text-muted)' }}>Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -443,14 +441,10 @@ export default function ReportsPage() {
                         <td className="px-5 py-3" style={{ color: 'var(--text-body)' }}>{formatDate(r.date)}</td>
                         <td className="px-5 py-3 font-mono text-xs" style={{ color: 'var(--text-muted)' }}>{r.time}</td>
                         <td className="px-5 py-3 font-medium" style={{ color: 'var(--text-body)' }}>{r.contactName}</td>
-                        <td className="hidden sm:table-cell px-5 py-3" style={{ color: 'var(--text-muted)' }}>{r.contactPhone}</td>
-                        <td className="hidden sm:table-cell px-5 py-3 text-center" style={{ color: 'var(--text-muted)' }}>{r.totalPassengers}</td>
-                        <td className="hidden sm:table-cell px-5 py-3" style={{ color: 'var(--text-muted)' }}>
-                          {r.packageId.replace(/_/g, ' ')}
-                        </td>
-                        <td className="hidden sm:table-cell px-5 py-3 text-right line-through" style={{ color: 'var(--text-muted)' }}>
-                          {formatCurrency(r.total)}
-                        </td>
+                        <td className="px-5 py-3" style={{ color: 'var(--text-muted)' }}>{r.contactPhone}</td>
+                        <td className="px-5 py-3 text-right tabular-nums" style={{ color: 'var(--text-muted)' }}>{r.totalPassengers}</td>
+                        <td className="px-5 py-3" style={{ color: 'var(--text-muted)' }}>{r.packageId.replace(/_/g, ' ')}</td>
+                        <td className="px-5 py-3 text-right tabular-nums line-through" style={{ color: 'var(--text-muted)' }}>{formatCurrency(r.total)}</td>
                       </tr>
                     ))}
                   </tbody>

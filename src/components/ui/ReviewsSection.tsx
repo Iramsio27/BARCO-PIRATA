@@ -2,10 +2,17 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { Star, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { clsx } from 'clsx'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '@lib/supabase/client'
 import { Button } from '@components/ui/Button'
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
+
+interface PlaceholderReview {
+  author: string
+  text: string
+  time: string
+}
 
 interface Review {
   id: string
@@ -24,16 +31,6 @@ interface PlaceInfo {
 interface ReviewsSectionProps {
   reserveTodayHref: string
 }
-
-// ─── Placeholders mientras no hay datos reales ────────────────────────────────
-
-const PLACEHOLDER_REVIEWS: Review[] = [
-  { id: '1', author_name: 'Carlos López',   author_photo: null, rating: 5, text: 'Mejor experiencia familiar de Puerto Peñasco. Los niños con sus disfraces piratas, la cena buenísima y el capitán super amable.', relative_time: 'hace 2 semanas' },
-  { id: '2', author_name: 'Andrea Sánchez', author_photo: null, rating: 5, text: 'El show de fuego nos voló la cabeza. Vale cada peso, repetiría mañana mismo. Volveré con todos mis amigos.', relative_time: 'hace 1 mes' },
-  { id: '3', author_name: 'Roberto Torres', author_photo: null, rating: 5, text: 'Una noche mágica en el mar. La comida, la música y el ambiente superaron todas mis expectativas.', relative_time: 'hace 3 semanas' },
-  { id: '4', author_name: 'María Flores',   author_photo: null, rating: 5, text: 'Celebramos el cumpleaños de mi hija aquí y fue perfecto. El equipo hizo todo para que fuera especial.', relative_time: 'hace 2 meses' },
-  { id: '5', author_name: 'Juan Mendoza',   author_photo: null, rating: 5, text: 'Increíble atardecer desde el barco. Las fotos quedaron espectaculares. ¡100% recomendado!', relative_time: 'hace 1 semana' },
-]
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -73,13 +70,29 @@ function AuthorAvatar({ name, photo }: { name: string; photo: string | null }) {
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export function ReviewsSection({ reserveTodayHref }: ReviewsSectionProps) {
-  const [reviews, setReviews]     = useState<Review[]>([])
+  const { t } = useTranslation()
+  const [realReviews, setRealReviews] = useState<Review[]>([])
+  const [isPlaceholder, setIsPlaceholder] = useState(false)
   const [placeInfo, setPlaceInfo] = useState<PlaceInfo | null>(null)
   const [loading, setLoading]     = useState(true)
   const [current, setCurrent]     = useState(0)
   const [animating, setAnimating] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const INTERVAL = 5000
+
+  // Placeholders derivados del idioma activo — se actualizan solos al cambiar idioma
+  const placeholderReviews: Review[] = (
+    t('home.reviews.placeholders', { returnObjects: true }) as PlaceholderReview[]
+  ).map((p, i) => ({
+    id: String(i + 1),
+    author_name: p.author,
+    author_photo: null,
+    rating: 5,
+    text: p.text,
+    relative_time: p.time,
+  }))
+
+  const reviews = isPlaceholder ? placeholderReviews : realReviews
 
   useEffect(() => {
     async function fetchData() {
@@ -97,10 +110,15 @@ export function ReviewsSection({ reserveTodayHref }: ReviewsSectionProps) {
             .limit(1)
             .single(),
         ])
-        setReviews(reviewsRes.data && reviewsRes.data.length > 0 ? reviewsRes.data : PLACEHOLDER_REVIEWS)
+        if (reviewsRes.data && reviewsRes.data.length > 0) {
+          setRealReviews(reviewsRes.data)
+          setIsPlaceholder(false)
+        } else {
+          setIsPlaceholder(true)
+        }
         if (placeRes.data) setPlaceInfo(placeRes.data)
       } catch {
-        setReviews(PLACEHOLDER_REVIEWS)
+        setIsPlaceholder(true)
       } finally {
         setLoading(false)
       }
@@ -125,8 +143,6 @@ export function ReviewsSection({ reserveTodayHref }: ReviewsSectionProps) {
     return () => { if (timerRef.current) clearTimeout(timerRef.current) }
   }, [current, loading, next, reviews.length])
 
-  const isPlaceholder = reviews[0]?.id === '1'
-
   // Mostrar 2 tarjetas a la vez en desktop, 1 en móvil
   const visibleReviews = reviews.length > 0
     ? [reviews[current % reviews.length], reviews[(current + 1) % reviews.length]]
@@ -139,10 +155,10 @@ export function ReviewsSection({ reserveTodayHref }: ReviewsSectionProps) {
         {/* ── Encabezado ── */}
         <div className="text-center mb-10">
           <h2 className="text-3xl font-display font-bold text-white mb-2">
-            Lo que dicen{' '}
-            <span className="text-gold-400">nuestros pasajeros</span>
+            {t('home.reviews.title')}{' '}
+            <span className="text-gold-400">{t('home.reviews.accent')}</span>
           </h2>
-          <p className="text-navy-200">Reseñas reales de Google Maps</p>
+          <p className="text-navy-200">{t('home.reviews.googleMeta')}</p>
 
           {/* Rating general — solo con datos reales */}
           {placeInfo?.rating && !isPlaceholder && (
@@ -154,7 +170,7 @@ export function ReviewsSection({ reserveTodayHref }: ReviewsSectionProps) {
                 <StarRating rating={Math.round(Number(placeInfo.rating))} size="lg" />
                 {placeInfo.total_reviews && (
                   <span className="text-navy-400 text-sm">
-                    {placeInfo.total_reviews.toLocaleString('es-MX')} reseñas
+                    {t('home.reviews.reviewsCount', { count: placeInfo.total_reviews.toLocaleString() })}
                   </span>
                 )}
               </div>
@@ -284,7 +300,7 @@ export function ReviewsSection({ reserveTodayHref }: ReviewsSectionProps) {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
           <Link to={reserveTodayHref}>
             <Button variant="accent" size="lg">
-              ¡Quiero vivir esto! Reservar ahora
+              {t('home.reviews.cta')}
             </Button>
           </Link>
           {!isPlaceholder && (
@@ -294,7 +310,7 @@ export function ReviewsSection({ reserveTodayHref }: ReviewsSectionProps) {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-gold-400 hover:text-gold-300 text-sm border border-gold-400/30 hover:border-gold-400/60 rounded-full px-5 py-2.5 transition-colors duration-200"
             >
-              Ver todas en Google
+              {t('home.reviews.viewAll')}
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
           )}

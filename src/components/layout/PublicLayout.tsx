@@ -1,5 +1,4 @@
 import { Outlet, useLocation } from 'react-router-dom'
-import { PublicHeader } from './PublicHeader'
 import { PublicNav } from './PublicNav'
 import { PublicFooter } from './PublicFooter'
 
@@ -10,9 +9,9 @@ export function PublicLayout() {
   return (
     <div className="min-h-screen flex flex-col">
       {isHome ? (
-        /* Home: el hero tiene su propia nav en desktop; solo mostrar header en mobile */
+        /* Home: el hero tiene su propia nav en desktop; PublicNav solo en mobile */
         <div className="md:hidden">
-          <PublicHeader />
+          <PublicNav />
         </div>
       ) : (
         /* Resto de páginas: nav estilo hero */

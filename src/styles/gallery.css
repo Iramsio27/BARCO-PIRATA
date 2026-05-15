@@ -164,9 +164,6 @@
 
 /* ── FILTERS ───────────────────────────────────────────────────────── */
 .gal-filters-wrap {
-  position: sticky;
-  top: 64px;
-  z-index: 40;
   background: rgba(10, 20, 36, 0.88);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -444,8 +441,12 @@
 }
 @media (max-width: 600px) {
   .gal-photo-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 0 clamp(12px, 4vw, 20px);
+  }
+  .gal-photo-grid .gal-tile {
+    aspect-ratio: 4 / 3;
   }
 }
 
@@ -543,7 +544,8 @@
 /* ── STATS STRIP ───────────────────────────────────────────────────── */
 .gal-stats-strip {
   max-width: 1320px;
-  margin: 80px clamp(16px, 4vw, 40px) 60px;
+  margin: 80px auto 60px;
+  width: calc(100% - clamp(32px, 8vw, 80px));
   padding: 36px clamp(20px, 4vw, 40px);
   background: linear-gradient(135deg, rgba(244,197,66,.06) 0%, rgba(244,197,66,.02) 100%);
   border: 1px solid var(--line);

@@ -83,16 +83,7 @@ const ALL_ITEMS: MediaItem[] = [
 ]
 
 /* ── Filtros ────────────────────────────────────────────────────────── */
-interface FilterDef { key: Category; label: string }
-const FILTERS: FilterDef[] = [
-  { key: 'all',      label: 'Todas'         },
-  { key: 'onboard',  label: 'A bordo'       },
-  { key: 'families', label: 'Familias'      },
-  { key: 'crew',     label: 'Tripulación'   },
-  { key: 'sunsets',  label: 'Atardeceres'   },
-  { key: 'action',   label: 'Show & Acción' },
-  { key: 'aerial',   label: 'Aéreos'        },
-]
+const FILTER_KEYS: Category[] = ['all', 'onboard', 'families', 'crew', 'sunsets', 'action', 'aerial']
 
 /* ── SVG íconos ────────────────────────────────────────────────────── */
 const IconSearch = () => (
@@ -173,6 +164,7 @@ function MediaSection({
   videos: MediaItem[]
   onOpen: (item: MediaItem) => void
 }) {
+  const { t } = useTranslation()
   const [mediaType, setMediaType] = useState<'photos' | 'videos'>('photos')
   const [visible, setVisible] = useState(12)
 
@@ -192,18 +184,18 @@ function MediaSection({
           {hasPhotos && hasVideos && (
             <div className="gal-media-toggle">
               <button className={mediaType === 'photos' ? 'active' : ''} onClick={() => { setMediaType('photos'); setVisible(12) }}>
-                📷 Fotos <span className="gal-count">{photos.length}</span>
+                📷 {t('gallery.labelPhotos')} <span className="gal-count">{photos.length}</span>
               </button>
               <button className={mediaType === 'videos' ? 'active' : ''} onClick={() => { setMediaType('videos'); setVisible(12) }}>
-                🎬 Videos <span className="gal-count">{videos.length}</span>
+                🎬 {t('gallery.labelVideos')} <span className="gal-count">{videos.length}</span>
               </button>
             </div>
           )}
           {hasPhotos && !hasVideos && (
-            <span className="gal-meta"><b>{photos.length}</b> fotos</span>
+            <span className="gal-meta"><b>{photos.length}</b> {t('gallery.labelPhotos').toLowerCase()}</span>
           )}
           {hasVideos && !hasPhotos && (
-            <span className="gal-meta"><b>{videos.length}</b> videos</span>
+            <span className="gal-meta"><b>{videos.length}</b> {t('gallery.labelVideos').toLowerCase()}</span>
           )}
         </div>
       </div>
@@ -212,7 +204,7 @@ function MediaSection({
       {items.length === 0 ? (
         <div className="gal-empty">
           <p>{mediaType === 'photos' ? '📷' : '🎬'}</p>
-          <p>Sin {mediaType === 'photos' ? 'fotos' : 'videos'} en esta categoría aún.</p>
+          <p>{mediaType === 'photos' ? t('gallery.noPhotos') : t('gallery.noVideos')}</p>
           <code>public/images/{mediaType === 'videos' ? 'videos/' : ''}{category}/</code>
         </div>
       ) : (
@@ -228,7 +220,7 @@ function MediaSection({
       {visible < items.length && (
         <div className="gal-load-more">
           <button onClick={() => setVisible((v) => v + 12)}>
-            Ver más <IconChevronDown />
+            {t('gallery.loadMoreBtn')} <IconChevronDown />
           </button>
         </div>
       )}
@@ -255,6 +247,16 @@ function useReveal(containerRef: React.RefObject<HTMLElement>) {
    ──────────────────────────────────────────────────────────────────── */
 export default function GalleryPage() {
   const { t } = useTranslation()
+
+  const categoryLabel = (key: Category): string => ({
+    all:      t('gallery.filterAll'),
+    onboard:  t('gallery.filterOnBoard'),
+    families: t('gallery.filterFamilies'),
+    crew:     t('gallery.filterCrew'),
+    sunsets:  t('gallery.filterSunsets'),
+    action:   t('gallery.filterAction'),
+    aerial:   t('gallery.filterAerial'),
+  }[key])
 
   const [activeFilter, setActiveFilter] = useState<Category>('all')
   const [search, setSearch]             = useState('')
@@ -322,15 +324,11 @@ export default function GalleryPage() {
   /* Categorías visibles según filtro */
   const visibleCategories: { key: Exclude<Category, 'all'>; label: string }[] =
     activeFilter === 'all'
-      ? [
-          { key: 'onboard',  label: 'A bordo'       },
-          { key: 'families', label: 'Familias'       },
-          { key: 'crew',     label: 'Tripulación'    },
-          { key: 'sunsets',  label: 'Atardeceres'    },
-          { key: 'action',   label: 'Show & Acción'  },
-          { key: 'aerial',   label: '🚁 Videos Aéreos' },
-        ]
-      : [{ key: activeFilter as Exclude<Category, 'all'>, label: FILTERS.find(f => f.key === activeFilter)?.label ?? '' }]
+      ? (['onboard', 'families', 'crew', 'sunsets', 'action', 'aerial'] as const).map(key => ({
+          key,
+          label: categoryLabel(key),
+        }))
+      : [{ key: activeFilter as Exclude<Category, 'all'>, label: categoryLabel(activeFilter) }]
 
   /* ── Render ──────────────────────────────────────────────────────── */
   return (
@@ -350,20 +348,20 @@ export default function GalleryPage() {
       <div className="gal-filters-wrap">
         <div className="gal-filters">
           <div className="gal-pills">
-            {FILTERS.map((f) => (
-              <button key={f.key}
-                className={`gal-pill${activeFilter === f.key ? ' active' : ''}`}
-                onClick={() => setActiveFilter(f.key)}>
-                {f.label}
-                <span className="gal-count">{counts[f.key]}</span>
+            {FILTER_KEYS.map((key) => (
+              <button key={key}
+                className={`gal-pill${activeFilter === key ? ' active' : ''}`}
+                onClick={() => setActiveFilter(key)}>
+                {categoryLabel(key)}
+                <span className="gal-count">{counts[key]}</span>
               </button>
             ))}
           </div>
           <div className="gal-filters-right">
             <label className="gal-search">
               <IconSearch />
-              <input type="text" placeholder="Buscar…" value={search}
-                onChange={(e) => setSearch(e.target.value)} aria-label="Buscar" />
+              <input type="text" placeholder={t('gallery.searchPlaceholder')} value={search}
+                onChange={(e) => setSearch(e.target.value)} aria-label={t('gallery.searchPlaceholder')} />
             </label>
           </div>
         </div>
@@ -387,7 +385,7 @@ export default function GalleryPage() {
       {filtered.length === 0 && (
         <div className="gal-empty" style={{ margin: '80px auto' }}>
           <p style={{ fontSize: 40 }}>📷</p>
-          <p>No hay resultados para tu búsqueda.</p>
+          <p>{t('gallery.noResults')}</p>
         </div>
       )}
 
@@ -395,10 +393,10 @@ export default function GalleryPage() {
       <div className="gal-stats-strip">
         <div className="gal-stat-row">
           {[
-            { num: `${ALL_ITEMS.filter(i => i.type === 'photo').length}+`, label: 'Fotos' },
-            { num: `${ALL_ITEMS.filter(i => i.type === 'video').length}+`, label: 'Videos' },
-            { num: '4.9', label: 'Calificación' },
-            { num: '1,247', label: 'Reseñas' },
+            { num: `${ALL_ITEMS.filter(i => i.type === 'photo').length}+`, label: t('gallery.labelPhotos') },
+            { num: `${ALL_ITEMS.filter(i => i.type === 'video').length}+`, label: t('gallery.labelVideos') },
+            { num: '4.9', label: t('gallery.stats.rating') },
+            { num: '1,247', label: t('gallery.stats.reviews') },
           ].map((s) => (
             <div key={s.label}>
               <p className="gal-stat-num">{s.num}</p>

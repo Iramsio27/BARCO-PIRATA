@@ -1,11 +1,11 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import * as XLSX from 'xlsx'
 import { CalendarDays, Download, ClipboardList, CheckCircle2, AlertTriangle, Users } from 'lucide-react'
 import { usePassengersByDate } from '@features/passengers/hooks/usePassengers'
 import { useBusinessSettings } from '@features/settings/hooks/useBusinessSettings'
 import { CalendarPicker } from '@components/ui/CalendarPicker'
 import { LoadingSpinner } from '@components/ui/LoadingSpinner'
-import { format, parse } from 'date-fns'
+import { format, parse, addDays } from 'date-fns'
 import { es } from 'date-fns/locale'
 import type { PassengerType } from '@app-types/index'
 
@@ -40,7 +40,25 @@ export default function ManifiestosPage() {
   const { data: passengers, isLoading, isError } = usePassengersByDate(selectedDate)
   const { data: settings }                        = useBusinessSettings()
 
-  const timeSlots = settings?.activeTimeSlots ?? []
+  const closedWeekdays = settings?.closedWeekdays ?? [1]
+  const closedDates    = settings?.closedDates    ?? []
+  const timeSlots      = settings?.activeTimeSlots ?? []
+
+  // Al montar (una sola vez), avanzar al próximo día con paseos
+  const dateInitialized = useRef(false)
+  useEffect(() => {
+    if (dateInitialized.current || !settings) return
+    dateInitialized.current = true
+    let candidate = addDays(new Date(), 1)   // empezar desde mañana
+    for (let i = 0; i < 60; i++) {
+      const iso = format(candidate, 'yyyy-MM-dd')
+      if (!closedWeekdays.includes(candidate.getDay()) && !closedDates.includes(iso)) {
+        setSelectedDate(iso)
+        return
+      }
+      candidate = addDays(candidate, 1)
+    }
+  }, [settings]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Aplicar filtro de horario
   const filtered = useMemo(() => {
@@ -58,21 +76,34 @@ export default function ManifiestosPage() {
     percent === 100 ? '#16a34a' :
     percent === 0   ? '#f87171' : '#d97706'
 
+  const dateLabel = format(
+    parse(selectedDate, 'yyyy-MM-dd', new Date()),
+    "d 'de' MMMM yyyy",
+    { locale: es },
+  )
+
   // Export Excel
   const handleExport = useCallback(() => {
     if (filtered.length === 0) return
 
-    const rows = filtered.map((p, i) => ({
-      '#':       i + 1,
-      'Nombre':  p.fullName ?? '',
-      'Edad':    p.age ?? '',
-      'Tipo':    TYPE_LABEL[p.passengerType],
-      'Horario': p.reservationTime,
-    }))
+    const titulo = `Manifiesto de Pasajeros — ${dateLabel}${timeFilter !== 'all' ? ` · ${timeFilter}` : ''}`
+    const dataRows = filtered.map((p, i) => [
+      i + 1,
+      p.fullName ?? '',
+      p.age ?? '',
+      TYPE_LABEL[p.passengerType],
+      p.reservationTime,
+    ])
 
-    const ws = XLSX.utils.json_to_sheet(rows)
+    const wsData = [
+      [titulo],
+      [],
+      ['#', 'Nombre', 'Edad', 'Tipo', 'Horario'],
+      ...dataRows,
+    ]
 
-    // Ancho de columnas
+    const ws = XLSX.utils.aoa_to_sheet(wsData)
+
     ws['!cols'] = [
       { wch: 5  },
       { wch: 32 },
@@ -82,16 +113,9 @@ export default function ManifiestosPage() {
     ]
 
     const wb = XLSX.utils.book_new()
-    const sheetName = `Manifiesto ${selectedDate}`
-    XLSX.utils.book_append_sheet(wb, ws, sheetName)
+    XLSX.utils.book_append_sheet(wb, ws, 'Manifiesto')
     XLSX.writeFile(wb, `manifiesto_${selectedDate}${timeFilter !== 'all' ? `_${timeFilter.replace(':', '')}` : ''}.xlsx`)
-  }, [filtered, selectedDate, timeFilter])
-
-  const dateLabel = format(
-    parse(selectedDate, 'yyyy-MM-dd', new Date()),
-    "d 'de' MMMM yyyy",
-    { locale: es },
-  )
+  }, [filtered, selectedDate, timeFilter, dateLabel])
 
   return (
     <div className="space-y-5">
@@ -115,6 +139,9 @@ export default function ManifiestosPage() {
           isOpen={calOpen}
           onClose={() => setCalOpen(false)}
           adminMode
+          enforceClosedDays
+          closedWeekdays={closedWeekdays}
+          closedDates={closedDates}
         />
 
         {/* Horario */}

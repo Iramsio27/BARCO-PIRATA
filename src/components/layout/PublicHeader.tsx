@@ -18,6 +18,7 @@ export function PublicHeader() {
     { to: '/',         label: t('header.home') },
     { to: '/reservar', label: t('header.reserve') },
     { to: '/clima',    label: t('header.weather') },
+    { to: '/galeria',  label: t('header.gallery') },
   ]
 
   return (

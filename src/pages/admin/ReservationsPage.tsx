@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { CalendarDays, Search, Download, Banknote, ArrowLeftRight, Plus, AlertTriangle, CheckCircle2, ClipboardList } from 'lucide-react'
 import { useReservationStore } from '@app/store/reservationStore'
 import { useReservationsByDate, useCancelReservation } from '@features/reservations/hooks/useReservations'
@@ -10,15 +10,36 @@ import { Link } from 'react-router-dom'
 import { PACKAGES } from '@constants/index'
 import type { PackageId } from '@constants/index'
 import { CalendarPicker } from '@components/ui/CalendarPicker'
-import { format, parse } from 'date-fns'
+import { format, parse, addDays } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { useBusinessSettings } from '@features/settings/hooks/useBusinessSettings'
 
 type StatusFilter = 'all' | 'pendiente' | 'confirmada' | 'pagada' | 'cancelada'
 type PaymentFilter = 'all' | 'efectivo' | 'transferencia'
 type ManifestFilter = 'all' | 'completo' | 'incompleto'
 
 export default function ReservationsPage() {
-  const { selectedDate, setSelectedDate } = useReservationStore()
+  const { selectedDate, setSelectedDate, dateInitialized, setDateInitialized } = useReservationStore()
+  const { data: settings } = useBusinessSettings()
+  const closedWeekdays = settings?.closedWeekdays ?? [1]
+  const closedDates    = settings?.closedDates    ?? []
+
+  // Una sola vez por sesión (el flag vive en el store, persiste entre navegaciones
+  // pero se resetea en cada recarga de página).
+  useEffect(() => {
+    if (dateInitialized || !settings) return
+    setDateInitialized(true)
+    let candidate = addDays(new Date(), 1)   // empezar desde mañana
+    for (let i = 0; i < 60; i++) {
+      const iso = format(candidate, 'yyyy-MM-dd')
+      if (!closedWeekdays.includes(candidate.getDay()) && !closedDates.includes(iso)) {
+        setSelectedDate(iso)
+        return
+      }
+      candidate = addDays(candidate, 1)
+    }
+  }, [dateInitialized, settings]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const [calOpen, setCalOpen] = useState(false)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [search, setSearch] = useState('')
@@ -153,7 +174,16 @@ export default function ReservationsPage() {
             {format(parse(selectedDate, 'yyyy-MM-dd', new Date()), "d 'de' MMMM yyyy", { locale: es })}
           </span>
         </button>
-        <CalendarPicker value={selectedDate} onChange={setSelectedDate} isOpen={calOpen} onClose={() => setCalOpen(false)} adminMode />
+        <CalendarPicker
+          value={selectedDate}
+          onChange={setSelectedDate}
+          isOpen={calOpen}
+          onClose={() => setCalOpen(false)}
+          adminMode
+          enforceClosedDays
+          closedWeekdays={closedWeekdays}
+          closedDates={closedDates}
+        />
 
         <div className="relative ml-auto shrink-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
