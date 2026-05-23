@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Package, Tag, Plus, Pencil, Trash2, Save, Check, X, ToggleLeft, ToggleRight } from 'lucide-react'
 import { PACKAGES } from '@constants/index'
 import type { PackageOverrideData, PromotionItem } from '@app-types/index'
@@ -88,11 +88,12 @@ function PriceInput({ label, value, onChange }: { label: string; value: number; 
 // ─── Sub: modal / form de edición de paquete ─────────────────────────────────
 
 function PkgForm({
-  initial, onSave, onCancel,
+  initial, onSave, onCancel, confirmLabel,
 }: {
   initial: EditingPkg
   onSave:  (pkg: EditingPkg) => void
   onCancel: () => void
+  confirmLabel: string
 }) {
   const [pkg, setPkg] = useState<EditingPkg>(initial)
   const set = <K extends keyof EditingPkg>(k: K, v: EditingPkg[K]) => setPkg(p => ({ ...p, [k]: v }))
@@ -139,7 +140,7 @@ function PkgForm({
 
       <div className="flex gap-2 pt-1">
         <Button variant="accent" size="sm" onClick={() => valid && onSave(pkg)} disabled={!valid}>
-          <Check className="w-3.5 h-3.5" /> Guardar
+          <Check className="w-3.5 h-3.5" /> {confirmLabel}
         </Button>
         <Button variant="outline" size="sm" onClick={onCancel}>
           <X className="w-3.5 h-3.5" /> Cancelar
@@ -287,11 +288,12 @@ function PromoRow({
 // ─── Sub: form de promoción ───────────────────────────────────────────────────
 
 function PromoForm({
-  initial, onSave, onCancel,
+  initial, onSave, onCancel, confirmLabel,
 }: {
   initial:  PromotionItem
   onSave:   (p: PromotionItem) => void
   onCancel: () => void
+  confirmLabel: string
 }) {
   const [p, setP] = useState<PromotionItem>(initial)
   const set = <K extends keyof PromotionItem>(k: K, v: PromotionItem[K]) => setP(prev => ({ ...prev, [k]: v }))
@@ -369,7 +371,7 @@ function PromoForm({
 
       <div className="flex gap-2 pt-1">
         <Button variant="accent" size="sm" onClick={() => valid && onSave(p)} disabled={!valid}>
-          <Check className="w-3.5 h-3.5" /> Guardar
+          <Check className="w-3.5 h-3.5" /> {confirmLabel}
         </Button>
         <Button variant="outline" size="sm" onClick={onCancel}>
           <X className="w-3.5 h-3.5" /> Cancelar
@@ -382,11 +384,13 @@ function PromoForm({
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function PaquetesPage() {
-  const { data: settings, isLoading } = useBusinessSettings()
+  const { data: settings, isLoading, isPlaceholderData } = useBusinessSettings()
   const { mutateAsync: save, isPending: saving } = useUpdateBusinessSettings()
   const { setSlot } = useAdminHeaderSlot()
   const [saved,     setSaved]     = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<Tab>('paquetes')
+  const initializedRef = useRef(false)
 
   // Estado local de paquetes y promos
   const [overrides,   setOverrides]   = useState<Record<string, PackageOverrideData>>({})
@@ -396,25 +400,38 @@ export default function PaquetesPage() {
   const [editingPromo, setEditingPromo] = useState<PromotionItem | null>(null)
   const [addingPromo,  setAddingPromo]  = useState(false)
 
+  // Inicializa el estado local solo una vez con datos reales del servidor.
+  // No re-sincroniza después (evita perder cambios locales por re-fetches o foco de ventana).
   useEffect(() => {
-    if (!settings) return
+    if (!settings || isPlaceholderData || initializedRef.current) return
     setOverrides(settings.packageOverrides)
     setPromotions(settings.promotions)
-  }, [settings])
+    initializedRef.current = true
+  }, [settings, isPlaceholderData])
 
   const effectivePkgs = buildEffectivePkgs(overrides)
 
   // ── Guardar ────────────────────────────────────────────────────────────────
 
   const handleSave = useCallback(async () => {
-    await save({ packageOverrides: overrides, promotions })
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2500)
+    setSaveError(null)
+    try {
+      await save({ packageOverrides: overrides, promotions })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Error al guardar')
+    }
   }, [save, overrides, promotions])
 
   useEffect(() => {
     setSlot(
       <div className="flex items-center gap-4">
+        {saveError && (
+          <span className="text-sm text-red-500 font-semibold max-w-xs truncate" title={saveError}>
+            ✕ {saveError}
+          </span>
+        )}
         {saved && (
           <span className="text-sm text-green-600 font-semibold flex items-center gap-1.5">
             <Check className="w-4 h-4" /> Guardado
@@ -426,7 +443,7 @@ export default function PaquetesPage() {
       </div>
     )
     return () => setSlot(null)
-  }, [saving, saved, setSlot, handleSave])
+  }, [saving, saved, saveError, setSlot, handleSave])
 
   // ── Handlers paquetes ──────────────────────────────────────────────────────
 
@@ -439,7 +456,8 @@ export default function PaquetesPage() {
 
   const addPkg = (pkg: EditingPkg) => {
     const key = `CUSTOM_${uuid().slice(0, 8).toUpperCase()}`
-    setOverrides(prev => ({ ...prev, [key]: { ...pkg, isCustom: true } }))
+    const { key: _omitKey, ...data } = pkg
+    setOverrides(prev => ({ ...prev, [key]: { ...data, isCustom: true } }))
     setAddingPkg(false)
   }
 
@@ -520,6 +538,7 @@ export default function PaquetesPage() {
                       initial={editingPkg}
                       onSave={savePkg}
                       onCancel={() => setEditingPkg(null)}
+                      confirmLabel="Aplicar cambios"
                     />
                   </div>
                 )
@@ -530,7 +549,7 @@ export default function PaquetesPage() {
                   pkgKey={key}
                   data={data}
                   isDefault={key in PACKAGES}
-                  onEdit={() => setEditingPkg({ key, ...data })}
+                  onEdit={() => setEditingPkg({ ...data, key })}
                   onToggle={() => togglePkg(key)}
                   onDelete={() => deletePkg(key)}
                 />
@@ -543,6 +562,7 @@ export default function PaquetesPage() {
               initial={EMPTY_PKG()}
               onSave={p => addPkg(p)}
               onCancel={() => setAddingPkg(false)}
+              confirmLabel="Agregar a la lista"
             />
           ) : (
             <button
@@ -582,6 +602,7 @@ export default function PaquetesPage() {
                   initial={editingPromo}
                   onSave={savePromo}
                   onCancel={() => setEditingPromo(null)}
+                  confirmLabel="Aplicar cambios"
                 />
               )
             }
@@ -601,6 +622,7 @@ export default function PaquetesPage() {
               initial={EMPTY_PROMO()}
               onSave={savePromo}
               onCancel={() => setAddingPromo(false)}
+              confirmLabel="Agregar a la lista"
             />
           ) : (
             <button

@@ -62,9 +62,17 @@ export function PublicFooter() {
           <div>
             <h3 className="text-white font-semibold mb-3">{t('footer.contact')}</h3>
             <ul className="space-y-2 text-sm">
-              <li className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-gold-400 mt-0.5 shrink-0" />
-                {COMPANY.location}
+              <li>
+                <a
+                  href={COMPANY.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-2 hover:text-gold-400 transition-colors"
+                  aria-label="Ver ubicación en Google Maps"
+                >
+                  <MapPin className="w-4 h-4 text-gold-400 mt-0.5 shrink-0" />
+                  <span>{COMPANY.location}</span>
+                </a>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-gold-400 shrink-0" />

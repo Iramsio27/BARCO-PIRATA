@@ -118,7 +118,8 @@ export const ROUTES = {
 export const COMPANY = {
   name: 'Barco Pirata de Puerto Peñasco',
   shortName: 'Barco Pirata',
-  location: 'Recinto Portuario, Puerto Peñasco, Sonora',
+  location: 'Av. Plutarco Elías Calles 89, Recinto Portuario, 83553 Puerto Peñasco, Sonora',
+  mapsUrl: 'https://maps.app.goo.gl/KRA8f276TRqnzrmYA',
   phone: '638 112 3686',
   phoneWhatsApp: '526381123686',   // formato internacional sin + para wa.me
   email: 'reydelmar_2004@hotmail.com',
